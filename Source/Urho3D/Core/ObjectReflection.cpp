@@ -274,7 +274,7 @@ void ObjectReflectionRegistry::ErrorReflectionNotFound(StringHash typeNameHash) 
 
 void ObjectReflectionRegistry::ErrorDuplicateReflection(StringHash typeNameHash) const
 {
-    URHO3D_ASSERTLOG(0, "Object {} is reflectied multiple times.", typeNameHash.ToDebugString());
+    URHO3D_ASSERTLOG(0, "Object {} is reflected multiple times.", typeNameHash.ToDebugString());
 }
 
 void ObjectReflectionRegistry::AddReflectionToCurrentCategory(ObjectReflection* reflection)
