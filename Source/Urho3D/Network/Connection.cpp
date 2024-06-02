@@ -42,6 +42,8 @@
 #include "../Scene/Scene.h"
 #include "../Scene/SceneEvents.h"
 
+#include "LZ4/lz4.h"
+
 #ifdef SendMessage
 #undef SendMessage
 #endif
@@ -78,7 +80,9 @@ Connection::Connection(Context* context, NetworkConnection* connection)
         connection->onMessage_ = [this](ea::string_view msg)
         {
             MutexLock lock(packetQueueLock_);
-            incomingPackets_.emplace_back(VectorBuffer(msg.data(), msg.size()));
+            char decompressed[1024] = {0};
+            unsigned decompressedSize = LZ4_decompress_safe(msg.data(), decompressed, msg.size(), 1024);
+            incomingPackets_.emplace_back(VectorBuffer(decompressed, decompressedSize));
         };
     }
 }
@@ -264,9 +268,11 @@ void Connection::SendBuffer(PacketTypeFlags type, VectorBuffer& buffer)
 
     if (transportConnection_)
     {
+        char compressed[1024] = {0};
+        unsigned compressedSize = LZ4_compress((const char*)buffer.GetData(), compressed, buffer.GetSize());
         packetCounterOutgoing_.AddSample(1);
-        bytesCounterOutgoing_.AddSample(buffer.GetSize());
-        transportConnection_->SendMessage({(const char*)buffer.GetData(), buffer.GetSize()}, type);
+        bytesCounterOutgoing_.AddSample(compressedSize);
+        transportConnection_->SendMessage({(const char*)compressed, compressedSize}, type);
     }
     buffer.Clear();
 }
