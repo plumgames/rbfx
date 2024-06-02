@@ -183,7 +183,7 @@ void KinematicCharacter::FixedUpdate(float timeStep)
 
 void KinematicCharacter::FixedPostUpdate(float timeStep)
 {
-    if (movingData_[0] == movingData_[1])
+    //if (movingData_[0] == movingData_[1])
     {
         // TODO: Implement riding on platforms
 #if 0
