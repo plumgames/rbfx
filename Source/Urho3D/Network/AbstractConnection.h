@@ -70,6 +70,7 @@ public:
     {
         SendMessageInternal(messageId, data, numBytes, packetType);
 
+        /*
         Log::GetLogger().Write(GetMessageLogLevel(messageId), "{}: Message #{} ({} bytes) sent{}{}{}{}",
             ToString(),
             static_cast<unsigned>(messageId),
@@ -78,6 +79,7 @@ public:
             (packetType & PacketType::Ordered) ? ", ordered" : "",
             debugInfo.empty() ? "" : ": ",
             debugInfo);
+            */
     }
 
     void SendMessage(NetworkMessageId messageId, const unsigned char* data = nullptr, unsigned numBytes = 0, PacketTypeFlags packetType = PacketType::ReliableOrdered, ea::string_view debugInfo = {})
@@ -122,19 +124,23 @@ public:
 
     void OnMessageReceived(NetworkMessageId messageId, MemoryBuffer& messageData) const
     {
+        /*
         Log::GetLogger().Write(GetMessageLogLevel(messageId), "{}: Message #{} received: {} bytes",
             ToString(),
             static_cast<unsigned>(messageId),
             messageData.GetSize());
+            */
     }
 
     template <class T>
     void OnMessageReceived(NetworkMessageId messageId, const T& message) const
     {
+        /*
         Log::GetLogger().Write(GetMessageLogLevel(messageId), "{}: Message #{} received: {}",
             ToString(),
             static_cast<unsigned>(messageId),
             message.ToString());
+            */
     }
 
     LogLevel GetMessageLogLevel(NetworkMessageId messageId) const

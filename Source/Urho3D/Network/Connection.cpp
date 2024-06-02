@@ -318,10 +318,12 @@ bool Connection::ProcessMessage(MemoryBuffer& buffer)
         MemoryBuffer msg(buffer.GetData() + buffer.GetPosition(), packetSize);
         buffer.Seek(buffer.GetPosition() + packetSize);
 
+        /*
         Log::GetLogger().Write(GetMessageLogLevel((NetworkMessageId)msgID), "{}: Message #{} ({} bytes) received",
             ToString(),
             static_cast<unsigned>(msgID),
             packetSize);
+            */
 
         switch (msgID)
         {
