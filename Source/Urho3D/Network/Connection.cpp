@@ -80,9 +80,7 @@ Connection::Connection(Context* context, NetworkConnection* connection)
         connection->onMessage_ = [this](ea::string_view msg)
         {
             MutexLock lock(packetQueueLock_);
-            char decompressed[1024] = {0};
-            unsigned decompressedSize = LZ4_decompress_safe(msg.data(), decompressed, msg.size(), 1024);
-            incomingPackets_.emplace_back(VectorBuffer(decompressed, decompressedSize));
+            incomingPackets_.emplace_back(VectorBuffer(msg.data(), msg.size()));
         };
     }
 }
@@ -108,6 +106,10 @@ void Connection::RegisterObject(Context* context)
 
 void Connection::SendMessageInternal(NetworkMessageId messageId, const unsigned char* data, unsigned numBytes, PacketTypeFlags packetType)
 {
+    char compressed[1024] = {0};
+    numBytes = LZ4_compress((const char*)data, compressed, numBytes);
+    data = (const unsigned char*)compressed;
+
     URHO3D_ASSERT(messageId <= MSG_MAX);
     URHO3D_ASSERT(numBytes <= packedMessageLimit_);
     URHO3D_ASSERT((data == nullptr && numBytes == 0) || (data != nullptr && numBytes > 0));
@@ -268,11 +270,9 @@ void Connection::SendBuffer(PacketTypeFlags type, VectorBuffer& buffer)
 
     if (transportConnection_)
     {
-        char compressed[1024] = {0};
-        unsigned compressedSize = LZ4_compress((const char*)buffer.GetData(), compressed, buffer.GetSize());
         packetCounterOutgoing_.AddSample(1);
-        bytesCounterOutgoing_.AddSample(compressedSize);
-        transportConnection_->SendMessage({(const char*)compressed, compressedSize}, type);
+        bytesCounterOutgoing_.AddSample(buffer.GetSize());
+        transportConnection_->SendMessage({(const char*)buffer.GetData(), buffer.GetSize()}, type);
     }
     buffer.Clear();
 }
@@ -320,8 +320,15 @@ bool Connection::ProcessMessage(MemoryBuffer& buffer)
     while (!buffer.IsEof())
     {
         msgID = buffer.ReadUShort();
+
+        // DECOMPRESS
+        char decompressed[2048] = {0};
         unsigned int packetSize = buffer.ReadUShort();
-        MemoryBuffer msg(buffer.GetData() + buffer.GetPosition(), packetSize);
+        int decompressedSize = LZ4_decompress_safe(
+            (const char*)buffer.GetData() + buffer.GetPosition(), decompressed, packetSize, 2048);
+        URHO3D_ASSERT(decompressedSize > 0);
+        
+        MemoryBuffer msg(decompressed, decompressedSize);
         buffer.Seek(buffer.GetPosition() + packetSize);
 
         /*

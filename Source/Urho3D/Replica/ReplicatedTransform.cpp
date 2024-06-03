@@ -199,13 +199,13 @@ void ReplicatedTransform::WriteUnreliableDelta(NetworkFrame frame, Serializer& d
     if (synchronizePosition_)
     {
         dest.WriteVector3(server_.position_);
-        dest.WriteVector3(server_.velocity_);
+        dest.WritePackedVector3(server_.velocity_, 10);
     }
 
     if (synchronizeRotation_ == ReplicatedRotationMode::XYZ)
     {
-        dest.WriteQuaternion(server_.rotation_);
-        dest.WriteVector3(server_.angularVelocity_);
+        dest.WritePackedQuaternion(server_.rotation_);
+        dest.WritePackedVector3(server_.angularVelocity_, 10);
     }
 }
 
@@ -214,15 +214,15 @@ void ReplicatedTransform::ReadUnreliableDelta(NetworkFrame frame, Deserializer& 
     if (synchronizePosition_)
     {
         const Vector3 position = src.ReadVector3();
-        const Vector3 velocity = src.ReadVector3();
+        const Vector3 velocity = src.ReadPackedVector3(10);
 
         positionTrace_.Set(frame, {position, velocity});
     }
 
     if (synchronizeRotation_ == ReplicatedRotationMode::XYZ)
     {
-        const Quaternion rotation = src.ReadQuaternion();
-        const Vector3 angularVelocity = src.ReadVector3();
+        const Quaternion rotation = src.ReadPackedQuaternion();
+        const Vector3 angularVelocity = src.ReadPackedVector3(10);
 
         rotationTrace_.Set(frame, {rotation, angularVelocity});
     }
