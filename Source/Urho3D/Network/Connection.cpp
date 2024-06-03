@@ -106,9 +106,17 @@ void Connection::RegisterObject(Context* context)
 
 void Connection::SendMessageInternal(NetworkMessageId messageId, const unsigned char* data, unsigned numBytes, PacketTypeFlags packetType)
 {
-    char compressed[MAX_PACKET_SIZE] = {0};
-    numBytes = LZ4_compress((const char*)data, compressed, numBytes);
-    data = (const unsigned char*)compressed;
+    bytesCounterOutgoingUncompressed_.AddSample(numBytes);
+
+    const unsigned minCompressionThreshold = 32;
+    bool isCompressed = numBytes > minCompressionThreshold;
+
+    if (isCompressed)
+    {
+        char compressed[MAX_PACKET_SIZE] = {0};
+        numBytes = LZ4_compress((const char*)data, compressed, numBytes);
+        data = (const unsigned char*)compressed;
+    }
 
     URHO3D_ASSERT(messageId <= MSG_MAX);
     URHO3D_ASSERT(numBytes <= packedMessageLimit_);
@@ -118,6 +126,8 @@ void Connection::SendMessageInternal(NetworkMessageId messageId, const unsigned 
 
     if (buffer.GetSize() + numBytes >= packedMessageLimit_)
         SendBuffer(packetType);
+
+    buffer.WriteVLE(isCompressed);
 
     buffer.WriteUShort(messageId);
     buffer.WriteUShort(numBytes);
@@ -317,18 +327,31 @@ bool Connection::ProcessMessage(MemoryBuffer& buffer)
         return false;
     }
 
+    int compressDiff = 0;
     while (!buffer.IsEof())
     {
+        bool isCompressed = buffer.ReadVLE() > 0;
         msgID = buffer.ReadUShort();
 
-        // DECOMPRESS
-        char decompressed[4096] = {0};
         unsigned int packetSize = buffer.ReadUShort();
-        int decompressedSize = LZ4_decompress_safe(
-            (const char*)buffer.GetData() + buffer.GetPosition(), decompressed, packetSize, 4096);
-        URHO3D_ASSERT(decompressedSize > 0);
+        unsigned int msgpacketSize = packetSize;
+        char* buff = (char*)buffer.GetData() + buffer.GetPosition();
+
+        char decompressed[4096] = {0};
+        if (isCompressed)
+        {
+            // DECOMPRESS
+            float decompressedSize = LZ4_decompress_safe(
+                (const char*)buffer.GetData() + buffer.GetPosition(), decompressed, packetSize, 4096);
+            URHO3D_ASSERT(decompressedSize > 0);
+            buff = decompressed;
+            msgpacketSize = decompressedSize;
+        }
+
+        auto diff = fabs((int)packetSize - (int)msgpacketSize);
+        compressDiff += diff;
         
-        MemoryBuffer msg(decompressed, decompressedSize);
+        MemoryBuffer msg(buff, msgpacketSize);
         buffer.Seek(buffer.GetPosition() + packetSize);
 
         /*
@@ -386,6 +409,9 @@ bool Connection::ProcessMessage(MemoryBuffer& buffer)
             break;
         }
     }
+
+    bytesCounterIncomingUncompressed_.AddSample(buffer.GetSize() + compressDiff);
+
     return true;
 }
 
@@ -685,6 +711,16 @@ unsigned long long Connection::GetBytesInPerSec() const
 unsigned long long Connection::GetBytesOutPerSec() const
 {
     return static_cast<int>(bytesCounterOutgoing_.GetLast());
+}
+
+float Connection::GetBytesOutUncompressedPerSec() const
+{
+    return static_cast<int>(bytesCounterOutgoingUncompressed_.GetLast());
+}
+
+float Connection::GetBytesInUncompressedPerSec() const
+{
+    return static_cast<int>(bytesCounterIncomingUncompressed_.GetLast());
 }
 
 int Connection::GetPacketsInPerSec() const

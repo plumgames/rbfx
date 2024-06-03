@@ -193,6 +193,9 @@ public:
     /// @property
     unsigned long long GetBytesOutPerSec() const;
 
+    float GetBytesOutUncompressedPerSec() const;
+    float GetBytesInUncompressedPerSec() const;
+
     /// Return packets received per second.
     /// @property
     int GetPacketsInPerSec() const;
@@ -260,6 +263,8 @@ private:
     mutable TimedCounter packetCounterOutgoing_{10, 1000};
     mutable TimedCounter bytesCounterIncoming_{10, 1000};
     mutable TimedCounter bytesCounterOutgoing_{10, 1000};
+    mutable TimedCounter bytesCounterOutgoingUncompressed_{10, 1000};
+    mutable TimedCounter bytesCounterIncomingUncompressed_{10, 1000};
     /// Statistics timer.
     Timer statsTimer_;
     /// Outgoing packet buffer which can contain multiple messages.
