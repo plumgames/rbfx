@@ -198,7 +198,7 @@ void ReplicatedTransform::WriteUnreliableDelta(NetworkFrame frame, Serializer& d
 {
     if (synchronizePosition_)
     {
-        dest.WriteVector3(server_.position_);
+        dest.WritePackedVector3(server_.position_, 20);
         dest.WritePackedVector3(server_.velocity_, 10);
     }
 
@@ -213,7 +213,7 @@ void ReplicatedTransform::ReadUnreliableDelta(NetworkFrame frame, Deserializer& 
 {
     if (synchronizePosition_)
     {
-        const Vector3 position = src.ReadVector3();
+        const Vector3 position = src.ReadPackedVector3(20);
         const Vector3 velocity = src.ReadPackedVector3(10);
 
         positionTrace_.Set(frame, {position, velocity});

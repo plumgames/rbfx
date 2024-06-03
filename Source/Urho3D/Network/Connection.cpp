@@ -106,7 +106,7 @@ void Connection::RegisterObject(Context* context)
 
 void Connection::SendMessageInternal(NetworkMessageId messageId, const unsigned char* data, unsigned numBytes, PacketTypeFlags packetType)
 {
-    char compressed[1024] = {0};
+    char compressed[MAX_PACKET_SIZE] = {0};
     numBytes = LZ4_compress((const char*)data, compressed, numBytes);
     data = (const unsigned char*)compressed;
 
@@ -322,10 +322,10 @@ bool Connection::ProcessMessage(MemoryBuffer& buffer)
         msgID = buffer.ReadUShort();
 
         // DECOMPRESS
-        char decompressed[2048] = {0};
+        char decompressed[4096] = {0};
         unsigned int packetSize = buffer.ReadUShort();
         int decompressedSize = LZ4_decompress_safe(
-            (const char*)buffer.GetData() + buffer.GetPosition(), decompressed, packetSize, 2048);
+            (const char*)buffer.GetData() + buffer.GetPosition(), decompressed, packetSize, 4096);
         URHO3D_ASSERT(decompressedSize > 0);
         
         MemoryBuffer msg(decompressed, decompressedSize);
