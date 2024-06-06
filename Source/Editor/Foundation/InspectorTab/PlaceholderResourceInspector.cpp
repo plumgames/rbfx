@@ -22,6 +22,8 @@
 
 #include "../../Foundation/InspectorTab/PlaceholderResourceInspector.h"
 
+#include <Urho3D/Core/ProcessUtils.h>
+
 #include <IconFontCppHeaders/IconsFontAwesome6.h>
 
 namespace Urho3D
@@ -87,6 +89,14 @@ void PlaceholderResourceInspector::InspectResources(const ea::vector<ResourceFil
                 {
                     singleResourcePreview_ = ea::string_view(data.data(), size);
                 }
+            }
+        }
+
+        if (!desc.isDirectory_)
+        {
+            if (ui::IsMouseDoubleClicked(MOUSEB_LEFT))
+            {
+                OpenURL(desc.fileName_);
             }
         }
     }
