@@ -36,6 +36,8 @@
 #include "../Network/Network.h"
 #include "../Network/NetworkEvents.h"
 #include "../Network/Protocol.h"
+#include "../Network/Transport/App/AppConnection.h"
+#include "../Network/Transport/App/AppServer.h"
 #include "../Network/Transport/DataChannel/DataChannelConnection.h"
 #include "../Network/Transport/DataChannel/DataChannelServer.h"
 #include "../Replica/BehaviorNetworkObject.h"
@@ -68,6 +70,8 @@ Network::Network(Context* context)
     SubscribeToEvent(E_RENDERUPDATE, URHO3D_HANDLER(Network, HandleRenderUpdate));
     SubscribeToEvent(E_APPLICATIONSTOPPED, URHO3D_HANDLER(Network, HandleApplicationExit));
 
+    transportAppServerCreateFunc_ = [](Context* context) { return MakeShared<AppServer>(context); };
+    transportAppConnectionCreateFunc_ = [](Context* context) { return MakeShared<AppConnection>(context); };
     transportDataChannelServerCreateFunc_ = [](Context* context) { return MakeShared<DataChannelServer>(context); };
     transportDataChannelConnectionCreateFunc_ = [](Context* context) { return MakeShared<DataChannelConnection>(context); };
 
@@ -396,7 +400,13 @@ SharedPtr<HttpRequest> Network::MakeHttpRequest(const ea::string& url, const ea:
 
 void Network::SetTransportDefault()
 {
-    SetTransportWebRTC();
+    SetTransportApp();
+}
+
+void Network::SetTransportApp()
+{
+    transportServerCreateFunc_ = transportAppServerCreateFunc_;
+    transportConnectionCreateFunc_ = transportAppConnectionCreateFunc_;
 }
 
 void Network::SetTransportWebRTC()
@@ -590,6 +600,8 @@ void RegisterNetworkLibrary(Context* context)
 #endif
 
     Connection::RegisterObject(context);
+    AppConnection::RegisterObject(context);
+    AppServer::RegisterObject(context);
     DataChannelConnection::RegisterObject(context);
     DataChannelServer::RegisterObject(context);
 }

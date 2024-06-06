@@ -105,6 +105,8 @@ public:
 
     /// Use the default transport (WebRTC)
     void SetTransportDefault();
+    /// Use the app transport
+    void SetTransportApp();
     /// Use the WebRTC transport
     void SetTransportWebRTC();
     /// Use a user defined transport
@@ -190,6 +192,9 @@ private:
 
     ea::function<SharedPtr<NetworkServer>(Context*)> transportServerCreateFunc_;
     ea::function<SharedPtr<NetworkConnection>(Context*)> transportConnectionCreateFunc_;
+
+    ea::function<SharedPtr<NetworkServer>(Context*)> transportAppServerCreateFunc_;
+    ea::function<SharedPtr<NetworkConnection>(Context*)> transportAppConnectionCreateFunc_;
 
     ea::function<SharedPtr<NetworkServer>(Context*)> transportDataChannelServerCreateFunc_;
     ea::function<SharedPtr<NetworkConnection>(Context*)> transportDataChannelConnectionCreateFunc_;
