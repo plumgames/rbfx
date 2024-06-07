@@ -38,8 +38,10 @@
 #include "../Network/Protocol.h"
 #include "../Network/Transport/App/AppConnection.h"
 #include "../Network/Transport/App/AppServer.h"
+#if URHO3D_DATACHANNEL
 #include "../Network/Transport/DataChannel/DataChannelConnection.h"
 #include "../Network/Transport/DataChannel/DataChannelServer.h"
+#endif
 #include "../Replica/BehaviorNetworkObject.h"
 #include "../Replica/FilteredByDistance.h"
 #include "../Replica/NetworkObject.h"
@@ -72,8 +74,11 @@ Network::Network(Context* context)
 
     transportAppServerCreateFunc_ = [](Context* context) { return MakeShared<AppServer>(context); };
     transportAppConnectionCreateFunc_ = [](Context* context) { return MakeShared<AppConnection>(context); };
+
+#if URHO3D_DATACHANNEL
     transportDataChannelServerCreateFunc_ = [](Context* context) { return MakeShared<DataChannelServer>(context); };
     transportDataChannelConnectionCreateFunc_ = [](Context* context) { return MakeShared<DataChannelConnection>(context); };
+#endif
 
     SetTransportDefault();
 }
@@ -409,11 +414,13 @@ void Network::SetTransportApp()
     transportConnectionCreateFunc_ = transportAppConnectionCreateFunc_;
 }
 
+#if URHO3D_DATACHANNEL
 void Network::SetTransportWebRTC()
 {
     transportServerCreateFunc_ = transportDataChannelServerCreateFunc_;
     transportConnectionCreateFunc_ = transportDataChannelConnectionCreateFunc_;
 }
+#endif
 
 void Network::SetTransportCustom(ea::function<SharedPtr<NetworkServer>(Context*)> createServerFunc,
     ea::function<SharedPtr<NetworkConnection>(Context*)> createConnectionFunc)
@@ -602,8 +609,10 @@ void RegisterNetworkLibrary(Context* context)
     Connection::RegisterObject(context);
     AppConnection::RegisterObject(context);
     AppServer::RegisterObject(context);
+#if URHO3D_DATACHANNEL
     DataChannelConnection::RegisterObject(context);
     DataChannelServer::RegisterObject(context);
+#endif
 }
 
 }

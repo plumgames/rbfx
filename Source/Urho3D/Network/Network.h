@@ -107,8 +107,10 @@ public:
     void SetTransportDefault();
     /// Use the app transport
     void SetTransportApp();
+#if URHO3D_DATACHANNEL
     /// Use the WebRTC transport
     void SetTransportWebRTC();
+#endif
     /// Use a user defined transport
     void SetTransportCustom(ea::function<SharedPtr<NetworkServer>(Context*)> createServerFunc,
         ea::function<SharedPtr<NetworkConnection>(Context*)> createConnectionFunc);
@@ -196,8 +198,10 @@ private:
     ea::function<SharedPtr<NetworkServer>(Context*)> transportAppServerCreateFunc_;
     ea::function<SharedPtr<NetworkConnection>(Context*)> transportAppConnectionCreateFunc_;
 
+#if URHO3D_DATACHANNEL
     ea::function<SharedPtr<NetworkServer>(Context*)> transportDataChannelServerCreateFunc_;
     ea::function<SharedPtr<NetworkConnection>(Context*)> transportDataChannelConnectionCreateFunc_;
+#endif
 };
 
 /// Register Network library objects.

@@ -1,3 +1,4 @@
+#if URHO3D_DATACHANNEL
 //
 // Copyright (c) 2017-2022 the rbfx project.
 //
@@ -96,3 +97,4 @@ void DataChannelServer::SetTLSCertificate(ea::string_view certificatePemFile, ea
 }
 
 }   // namespace Urho3D
+#endif
