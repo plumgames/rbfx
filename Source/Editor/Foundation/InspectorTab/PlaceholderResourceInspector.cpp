@@ -39,7 +39,8 @@ const std::initializer_list<ea::string_view> SINGLE_RESOURCE_PREVIEW_EXTENSIONS 
     ".rcss",
     ".rml",
     ".css",
-    ".html"
+    ".html",
+    ".inputmap"
 };
 
 void Foundation_PlaceholderResourceInspector(Context* context, InspectorTab* inspectorTab)
