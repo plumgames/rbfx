@@ -123,6 +123,8 @@ public:
     unsigned GetPing() const override;
     /// @}
 
+    unsigned GetIndex() { return index_; }
+    void SetIndex(unsigned index) { index_ = index; }
     /// Send a remote event.
     void SendRemoteEvent(StringHash eventType, bool inOrder, const VariantMap& eventData = Variant::emptyVariantMap);
     /// Assign scene. On the server, this will cause the client to load it.
@@ -315,6 +317,7 @@ private:
     ea::vector<char> compressedPacketBuffer_;
     ea::vector<char> decompressedPacketBuffer_;
     unsigned compressedBytesOut_;
+    unsigned index_{};
 };
 
 }

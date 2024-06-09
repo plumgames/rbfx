@@ -49,9 +49,9 @@ public:
     ~Network() override;
 
     /// Connect to a server using UDP protocol. Return true if connection process successfully started.
-    bool Connect(const URL& url, Scene* scene, const VariantMap& identity = Variant::emptyVariantMap);
+    bool Connect(const URL& url, Scene* scene, const VariantMap& identity = Variant::emptyVariantMap, unsigned connectionIndex = 0);
     /// Disconnect the connection to the server. If wait time is non-zero, will block while waiting for disconnect to finish.
-    void Disconnect(int waitMSec = 0);
+    void Disconnect(int waitMSec = 0, unsigned connectionIndex = 0);
     /// Start a server on a port using UDP protocol. Return true if successful.
     bool StartServer(const URL& url, unsigned int maxConnections = 128);
     /// Stop the server.
@@ -120,7 +120,7 @@ public:
 
     /// Return the connection to the server. Null if not connected.
     /// @property
-    Connection* GetServerConnection() const;
+    Connection* GetServerConnection(unsigned connectionIndex = 0) const;
     /// Return all client connections.
     /// @property
     ea::vector<SharedPtr<Connection>> GetClientConnections() const;
@@ -170,7 +170,7 @@ private:
     /// @}
 
     /// Client's server connection.
-    SharedPtr<Connection> connectionToServer_;
+    ea::map<unsigned, SharedPtr<Connection>> connectionsToServer_;
     /// Server's client connections.
     ea::unordered_map<WeakPtr<NetworkConnection>, SharedPtr<Connection>> clientConnections_;
     /// Allowed remote events.
