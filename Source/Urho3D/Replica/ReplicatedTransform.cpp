@@ -298,6 +298,13 @@ bool ReplicatedTransform::PrepareUnreliableFeedback(NetworkFrame frame)
 
 void ReplicatedTransform::ReadUnreliableFeedback(NetworkFrame feedbackFrame, Deserializer& src)
 {
+    if (feedbackFrame < server_.feedbackFrame_)
+    {
+        return;
+    }
+
+    server_.feedbackFrame_ = feedbackFrame;
+
     const Vector3 position = packPosition_ ? src.ReadPackedVector3(packPositionMaxAbsValue_) : src.ReadVector3();
     const Quaternion rotation = packRotation_ ? src.ReadPackedQuaternion() : src.ReadQuaternion();
 

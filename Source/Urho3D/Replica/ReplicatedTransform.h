@@ -174,6 +174,8 @@ private:
         bool movedDuringFrame_{};
         Vector3 latestSentPosition_;
         Quaternion latestSentRotation_;
+
+        NetworkFrame feedbackFrame_;
     } server_;
 
     struct ClientData
