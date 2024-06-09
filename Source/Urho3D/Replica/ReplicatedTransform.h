@@ -26,6 +26,7 @@
 
 #include "../Replica/BehaviorNetworkObject.h"
 #include "../Replica/NetworkValue.h"
+#include "../Replica/Extrapolator.h"
 
 namespace Urho3D
 {
@@ -128,6 +129,7 @@ public:
 
 private:
     void InitializeCommon();
+    void OnServerFrameBegin();
     void OnServerFrameEnd(NetworkFrame frame);
 
     /// Attributes independent on the client and the server.
@@ -176,6 +178,8 @@ private:
         Quaternion latestSentRotation_;
 
         NetworkFrame feedbackFrame_;
+        Quaternion feedbackRotation_;
+        Extrapolator<3, float> feedbackExtrapolator_;
     } server_;
 
     struct ClientData

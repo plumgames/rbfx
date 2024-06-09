@@ -271,8 +271,11 @@ bool Network::StartServer(const URL& url, unsigned int maxConnections)
 
 void Network::StopServer()
 {
-    for (auto& pair : clientConnections_)
+    auto copy = clientConnections_;
+    for (auto& pair : copy)
+    {
         pair.second->Disconnect();
+    }
     clientConnections_.clear();
 
     if (!IsServerRunning())
