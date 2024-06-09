@@ -68,7 +68,7 @@ public:
     static constexpr float DefaultPackPositionMaxAbsValue = 1000;
 
     static constexpr NetworkCallbackFlags CallbackMask =
-        NetworkCallbackMask::UpdateTransformOnServer | NetworkCallbackMask::UnreliableDelta | NetworkCallbackMask::InterpolateState;
+        NetworkCallbackMask::UpdateTransformOnServer | NetworkCallbackMask::UnreliableDelta | NetworkCallbackMask::InterpolateState | NetworkCallbackMask::UnreliableFeedback;
 
     explicit ReplicatedTransform(Context* context);
     ~ReplicatedTransform() override;
@@ -121,6 +121,10 @@ public:
     ea::optional<RotationAndVelocity> GetTemporalRotation(NetworkFrame frame) const;
     ea::optional<NetworkFrame> GetLatestFrame() const;
     /// @}
+
+    bool PrepareUnreliableFeedback(NetworkFrame frame) override;
+    void WriteUnreliableFeedback(NetworkFrame frame, Serializer& dest) override;
+    void ReadUnreliableFeedback(NetworkFrame feedbackFrame, Deserializer& src) override;
 
 private:
     void InitializeCommon();

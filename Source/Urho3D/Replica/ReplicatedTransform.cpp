@@ -291,4 +291,50 @@ ea::optional<NetworkFrame> ReplicatedTransform::GetLatestFrame() const
     return positionTrace_.IsInitialized() ? ea::make_optional(positionTrace_.GetLastFrame()) : ea::nullopt;
 }
 
+bool ReplicatedTransform::PrepareUnreliableFeedback(NetworkFrame frame)
+{
+    return GetNetworkObject()->IsOwnedByThisClient();
+}
+
+void ReplicatedTransform::ReadUnreliableFeedback(NetworkFrame feedbackFrame, Deserializer& src)
+{
+    const Vector3 position = packPosition_ ? src.ReadPackedVector3(packPositionMaxAbsValue_) : src.ReadVector3();
+    const Quaternion rotation = packRotation_ ? src.ReadPackedQuaternion() : src.ReadQuaternion();
+
+    // TODO: Extrapolate
+    node_->SetWorldPosition(position);
+    node_->SetWorldRotation(rotation);
+}
+
+void ReplicatedTransform::WriteUnreliableFeedback(NetworkFrame frame, Serializer& dest)
+{
+    if (synchronizePosition_)
+    {
+        const auto pos = node_->GetPosition();
+
+        if (packPosition_)
+        {
+            dest.WritePackedVector3(pos, packPositionMaxAbsValue_);
+        }
+        else
+        {
+            dest.WriteVector3(pos);
+        }
+    }
+
+    if (synchronizeRotation_ == ReplicatedRotationMode::XYZ)
+    {
+        const auto rot = node_->GetRotation();
+
+        if (packRotation_)
+        {
+            dest.WritePackedQuaternion(rot);
+        }
+        else
+        {
+            dest.WriteQuaternion(rot);
+        }
+    }
+}
+
 }
