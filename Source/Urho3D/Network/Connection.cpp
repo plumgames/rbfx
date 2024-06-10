@@ -355,11 +355,12 @@ bool Connection::ProcessMessage(MemoryBuffer& buffer)
 
         MemoryBuffer msg(packetBuffer, packetSize);
         buffer.Seek(buffer.GetPosition() + packetSizeOriginal);
-
+        /*
         Log::GetLogger().Write(GetMessageLogLevel((NetworkMessageId)msgID), "{}: Message #{} ({} bytes) received",
             ToString(),
             static_cast<unsigned>(msgID),
             packetSize);
+            */
 
         switch (msgID)
         {
