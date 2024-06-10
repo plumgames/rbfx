@@ -76,7 +76,7 @@ URHO3D_NETWORK_SETTING(ConnectionId, unsigned, 0);
 /// @{
 
 /// Maximum allowed delay between server time and replica time. Client must extrapolate if its delay is bigger.
-URHO3D_NETWORK_SETTING(InterpolationLimit, float, 0.25f);
+URHO3D_NETWORK_SETTING(InterpolationLimit, float, 0);
 /// Maximum number of input frames tracked by the client.
 URHO3D_NETWORK_SETTING(MaxInputFrames, unsigned, 256);
 /// Maximum number of input frames sent to server including relevant frame.

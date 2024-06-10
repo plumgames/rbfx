@@ -26,7 +26,6 @@
 
 #include "../Replica/BehaviorNetworkObject.h"
 #include "../Replica/NetworkValue.h"
-#include "../Replica/Extrapolator.h"
 
 namespace Urho3D
 {
@@ -123,10 +122,6 @@ public:
     ea::optional<NetworkFrame> GetLatestFrame() const;
     /// @}
 
-    bool PrepareUnreliableFeedback(NetworkFrame frame) override;
-    void WriteUnreliableFeedback(NetworkFrame frame, Serializer& dest) override;
-    void ReadUnreliableFeedback(NetworkFrame feedbackFrame, Deserializer& src) override;
-
 private:
     void InitializeCommon();
     void OnServerFrameBegin();
@@ -176,10 +171,6 @@ private:
         bool movedDuringFrame_{};
         Vector3 latestSentPosition_;
         Quaternion latestSentRotation_;
-
-        NetworkFrame feedbackFrame_;
-        Quaternion feedbackRotation_;
-        Extrapolator<3, float> feedbackExtrapolator_;
     } server_;
 
     struct ClientData

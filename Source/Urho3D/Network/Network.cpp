@@ -418,6 +418,7 @@ SharedPtr<HttpRequest> Network::MakeHttpRequest(const ea::string& url, const ea:
 void Network::SetTransportDefault()
 {
     SetTransportApp();
+    //SetTransportWebRTC();
 }
 
 void Network::SetTransportApp()

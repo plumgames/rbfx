@@ -27,8 +27,6 @@
 #include "../Replica/ReplicatedTransform.h"
 #include "../Replica/NetworkSettingsConsts.h"
 
-#include "../Physics/RigidBody.h"
-
 namespace Urho3D
 {
 
@@ -89,8 +87,6 @@ void ReplicatedTransform::InitializeOnServer()
     server_.latestSentPosition_ = server_.previousPosition_;
     server_.latestSentRotation_ = server_.previousRotation_;
 
-    SubscribeToEvent(E_BEGINSERVERNETWORKFRAME, [this](VariantMap&) { OnServerFrameBegin(); });
-
     SubscribeToEvent(E_ENDSERVERNETWORKFRAME,
         [this](VariantMap& eventData)
     {
@@ -140,17 +136,6 @@ void ReplicatedTransform::InitializeCommon()
 
     positionTrace_.Resize(traceDuration);
     rotationTrace_.Resize(traceDuration);
-}
-
-void ReplicatedTransform::OnServerFrameBegin()
-{
-    float pos[3] = {};
-    double currTime = Time::GetSystemTime() / 1000.0;
-    if (server_.feedbackExtrapolator_.ReadPosition(currTime, pos))
-    {
-        node_->SetWorldPosition(Vector3(pos[0], pos[1], pos[2]));
-        node_->SetWorldRotation(server_.feedbackRotation_);
-    }
 }
 
 void ReplicatedTransform::OnServerFrameEnd(NetworkFrame frame)
@@ -304,90 +289,6 @@ ea::optional<RotationAndVelocity> ReplicatedTransform::GetTemporalRotation(Netwo
 ea::optional<NetworkFrame> ReplicatedTransform::GetLatestFrame() const
 {
     return positionTrace_.IsInitialized() ? ea::make_optional(positionTrace_.GetLastFrame()) : ea::nullopt;
-}
-
-bool ReplicatedTransform::PrepareUnreliableFeedback(NetworkFrame frame)
-{
-    return GetNetworkObject()->IsOwnedByThisClient();
-}
-
-void ReplicatedTransform::ReadUnreliableFeedback(NetworkFrame feedbackFrame, Deserializer& src)
-{
-    if (feedbackFrame < server_.feedbackFrame_)
-    {
-        return;
-    }
-
-    server_.feedbackFrame_ = feedbackFrame;
-
-    const auto sentAt = src.ReadUInt();
-
-    const Vector3 position = packPosition_ ? src.ReadPackedVector3(packPositionMaxAbsValue_) : src.ReadVector3();
-    const Vector3 velocity = packVelocity_ ? src.ReadPackedVector3(packVelocityMaxAbsValue_) : src.ReadVector3();
-    const Quaternion rotation = packRotation_ ? src.ReadPackedQuaternion() : src.ReadQuaternion();
-
-    double packetTime = sentAt / 1000.0;
-    double currTime = Time::GetSystemTime() / 1000.0;
-    float pos[3] = {};
-    pos[0] = position.x_;
-    pos[1] = position.y_;
-    pos[2] = position.z_;
-    float vel[3] = {};
-    vel[0] = velocity.x_;
-    vel[1] = velocity.y_;
-    vel[2] = velocity.z_;
-    server_.feedbackExtrapolator_.AddSample(packetTime, currTime, pos, vel);
-    server_.feedbackRotation_ = rotation;
-}
-
-void ReplicatedTransform::WriteUnreliableFeedback(NetworkFrame frame, Serializer& dest)
-{
-    auto* connection = GetNetworkObject()->GetReplicationManager()->GetClientReplica()->GetConnection();
-    const auto localTime = connection->GetLocalTime();
-    const auto sentAt = connection->LocalToRemoteTime(localTime);
-    dest.WriteUInt(sentAt);
-
-    if (synchronizePosition_)
-    {
-        const auto pos = node_->GetPosition();
-
-        if (packPosition_)
-        {
-            dest.WritePackedVector3(pos, packPositionMaxAbsValue_);
-        }
-        else
-        {
-            dest.WriteVector3(pos);
-        }
-
-        auto rb = GetComponent<RigidBody>();
-        URHO3D_ASSERT(rb);
-
-        const auto vel = rb->GetLinearVelocity();
-
-        if (packVelocity_)
-        {
-            dest.WritePackedVector3(vel, packVelocityMaxAbsValue_);
-        }
-        else
-        {
-            dest.WriteVector3(vel);
-        }
-    }
-
-    if (synchronizeRotation_ == ReplicatedRotationMode::XYZ)
-    {
-        const auto rot = node_->GetRotation();
-
-        if (packRotation_)
-        {
-            dest.WritePackedQuaternion(rot);
-        }
-        else
-        {
-            dest.WriteQuaternion(rot);
-        }
-    }
 }
 
 }
