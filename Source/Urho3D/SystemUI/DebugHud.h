@@ -86,6 +86,8 @@ private:
     /// Render debug hud on to entire viewport.
     void OnRenderDebugUI(StringHash, VariantMap&);
 
+    void RenderNetworkUI(float left_offset);
+
     /// Hashmap containing application specific stats.
     ea::map<ea::string, ea::string> appStats_{};
     /// Current shown-element mode.
@@ -95,6 +97,22 @@ private:
     /// Calculated fps
     unsigned fps_ = 0;
     unsigned numChangedAnimations_[2]{};
+
+    unsigned serverPacketsIn = 0;
+    unsigned serverPacketsOut = 0;
+    unsigned serverBytesIn = 0;
+    unsigned serverBytesOut = 0;
+    unsigned serverBytesInWithoutCompression = 0;
+    unsigned serverBytesOutWithoutCompression = 0;
+
+    unsigned clientPacketsIn = 0;
+    unsigned clientPacketsOut = 0;
+    unsigned clientBytesIn = 0;
+    unsigned clientBytesOut = 0;
+    unsigned clientBytesWithoutCompression = 0;
+    unsigned clientBytesOutWithoutCompression = 0;
+
+    Timer packetCounterTimer_;
 };
 
 }

@@ -133,6 +133,8 @@ public:
     /// @property
     IntVector3 GetCoordinateSystem() const { return coordinateSystem_; }
 
+    WeakPtr<RigidBody> GetHullBody() const { return hullBody_; }
+
     /// (0, 1, 2) coordinate system (default).
     static const IntVector3 RIGHT_UP_FORWARD;
     /// (0, 2, 1) coordinate system.

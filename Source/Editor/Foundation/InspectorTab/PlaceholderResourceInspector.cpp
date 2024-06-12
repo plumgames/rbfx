@@ -35,7 +35,6 @@ const std::initializer_list<ea::string_view> SINGLE_RESOURCE_PREVIEW_EXTENSIONS 
     ".glsl",
     ".xml",
     ".json",
-    ".prefab",
     ".rcss",
     ".rml",
     ".css",

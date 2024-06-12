@@ -33,6 +33,7 @@
 #include "../Graphics/GraphicsEvents.h"
 #include "../Graphics/Renderer.h"
 #include "../IO/Log.h"
+#include "../Network/Network.h"
 #include "../RenderAPI/RenderDevice.h"
 #include "../SystemUI/SystemUI.h"
 #include "../UI/UI.h"
@@ -126,6 +127,100 @@ void DebugHud::ClearAppStats()
     appStats_.clear();
 }
 
+void SampleConnection(const Connection* connection, unsigned& packetsIn, unsigned& packetsOut, unsigned& bytesIn,
+    unsigned& bytesOut, unsigned& bytesInWithoutCompression, unsigned& bytesOutWithoutCompression)
+{
+    packetsIn += connection->GetPacketsInPerSec();
+    packetsOut += connection->GetPacketsOutPerSec();
+    bytesIn += connection->GetBytesInPerSec();
+    bytesOut += connection->GetBytesOutPerSec();
+    bytesInWithoutCompression += connection->GetBytesInWithoutCompressionPerSec();
+    bytesOutWithoutCompression += connection->GetBytesOutWithoutCompressionPerSec();
+}
+
+void DebugHud::RenderNetworkUI(float left_offset)
+{
+    const auto* network = GetSubsystem<Network>();
+    auto* connectionToServer = network->GetServerConnection();
+    const auto connectionsToClients = network->GetClientConnections();
+    unsigned serverConnectionCount = connectionsToClients.size();
+
+    if (serverConnectionCount > 0)
+    {
+        ui::Text("[Server]");
+        ui::SetCursorPosX(left_offset);
+        ui::Text("PacketsIn %d (%dpc)", serverPacketsIn, serverPacketsIn / serverConnectionCount);
+        ui::SetCursorPosX(left_offset);
+        ui::Text("PacketsOut %d (%dpc)", serverPacketsOut, serverPacketsOut / serverConnectionCount);
+        ui::SetCursorPosX(left_offset);
+        ui::Text("BytesIn %d (%dpp)", serverBytesIn, serverBytesIn / (serverPacketsIn ? serverPacketsIn : 1));
+        ui::SetCursorPosX(left_offset);
+        ui::Text("BytesInWOC %d (%dpp)", serverBytesInWithoutCompression,
+            serverBytesInWithoutCompression / (serverPacketsIn ? serverPacketsIn : 1));
+        ui::SetCursorPosX(left_offset);
+        ui::Text("BytesOut %d (%dpp)", serverBytesOut, serverBytesOut / (serverPacketsOut ? serverPacketsOut : 1));
+        ui::SetCursorPosX(left_offset);
+        ui::Text("BytesOutWOC %d (%dpp)", serverBytesOutWithoutCompression,
+            serverBytesOutWithoutCompression / (serverPacketsOut ? serverPacketsOut : 1));
+        ui::SetCursorPosX(left_offset);
+    }
+
+    if (connectionToServer)
+    {
+        ui::Text("[Client]");
+        ui::SetCursorPosX(left_offset);
+        ui::Text("PacketsIn %d", clientPacketsIn);
+        ui::SetCursorPosX(left_offset);
+        ui::Text("PacketsOut %d", clientPacketsOut);
+        ui::SetCursorPosX(left_offset);
+        ui::Text("BytesIn %d", clientBytesIn);
+        ui::SetCursorPosX(left_offset);
+        ui::Text("BytesInWOC %d", clientBytesWithoutCompression);
+        ui::SetCursorPosX(left_offset);
+        ui::Text("BytesOut %d", clientBytesOut);
+        ui::SetCursorPosX(left_offset);
+        ui::Text("BytesOutWOC %d", clientBytesOutWithoutCompression);
+        ui::SetCursorPosX(left_offset);
+    }
+
+    if (packetCounterTimer_.GetMSec(false) < 1000)
+    {
+        return;
+    }
+
+    serverPacketsIn = 0;
+    serverPacketsOut = 0;
+    serverBytesIn = 0;
+    serverBytesOut = 0;
+    serverBytesOutWithoutCompression = 0;
+    serverBytesInWithoutCompression = 0;
+
+    clientPacketsIn = 0;
+    clientPacketsOut = 0;
+    clientBytesIn = 0;
+    clientBytesOut = 0;
+    clientBytesWithoutCompression = 0;
+    clientBytesOutWithoutCompression = 0;
+
+    packetCounterTimer_.Reset();
+
+    if (connectionToServer)
+    {
+        SampleConnection(connectionToServer, clientPacketsIn, clientPacketsOut, clientBytesIn, clientBytesOut,
+            clientBytesWithoutCompression, clientBytesOutWithoutCompression);
+    }
+
+    if (serverConnectionCount > 0)
+    {
+        for (unsigned i = 0; i < serverConnectionCount; ++i)
+        {
+            auto conn = connectionsToClients[i];
+            SampleConnection(conn, serverPacketsIn, serverPacketsOut, serverBytesIn, serverBytesOut,
+                serverBytesInWithoutCompression, serverBytesOutWithoutCompression);
+        }
+    }
+}
+
 void DebugHud::RenderUI(DebugHudModeFlags mode)
 {
     if (mode == DEBUGHUD_SHOW_NONE)
@@ -134,6 +229,8 @@ void DebugHud::RenderUI(DebugHudModeFlags mode)
     auto renderer = GetSubsystem<Renderer>();
     auto graphics = GetSubsystem<Graphics>();
     auto renderDevice = GetSubsystem<RenderDevice>();
+
+    ui::PushStyleColor(ImGuiCol_Text, ImVec4(0, 0, 0, 1.00f));
 
     if (mode & DEBUGHUD_SHOW_STATS)
     {
@@ -169,7 +266,8 @@ void DebugHud::RenderUI(DebugHudModeFlags mode)
         ui::SetCursorPosX(left_offset);
         ui::Text("Animations %u(%u)", stats.animations_, numChangedAnimations_[0]);
         ui::SetCursorPosX(left_offset);
-
+        RenderNetworkUI(left_offset);
+        
         for (auto i = appStats_.begin(); i != appStats_.end(); ++i)
         {
             ui::Text("%s %s", i->first.c_str(), i->second.c_str());
@@ -188,6 +286,8 @@ void DebugHud::RenderUI(DebugHudModeFlags mode)
             qualityTexts[renderer->GetTextureQuality()],
             filterModeTexts[renderer->GetTextureFilterMode()]);
     }
+
+    ui::PopStyleColor();
 }
 
 void DebugHud::OnRenderDebugUI(StringHash, VariantMap&)
