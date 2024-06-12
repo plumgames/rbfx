@@ -153,34 +153,35 @@ void DebugHud::RenderNetworkUI(float left_offset)
         ui::SetCursorPosX(left_offset);
         ui::Text("PacketsOut %d (%dpc)", serverPacketsOut, serverPacketsOut / serverConnectionCount);
         ui::SetCursorPosX(left_offset);
-        ui::Text("BytesIn %d (%dpp)", serverBytesIn, serverBytesIn / (serverPacketsIn ? serverPacketsIn : 1));
+        ui::Text("BytesIn %d (%dpp)", serverBytesIn, serverBytesIn / Max(serverPacketsIn, 1));
         ui::SetCursorPosX(left_offset);
-        ui::Text("BytesInWOC %d (%dpp)", serverBytesInWithoutCompression,
-            serverBytesInWithoutCompression / (serverPacketsIn ? serverPacketsIn : 1));
+        ui::Text("BytesInWOC %d (%dpp)", serverBytesInWOC, serverBytesInWOC / Max(serverPacketsIn, 1));
         ui::SetCursorPosX(left_offset);
-        ui::Text("BytesOut %d (%dpp)", serverBytesOut, serverBytesOut / (serverPacketsOut ? serverPacketsOut : 1));
+        ui::Text("BytesOut %d (%dpp)", serverBytesOut, serverBytesOut / Max(serverPacketsOut, 1));
         ui::SetCursorPosX(left_offset);
-        ui::Text("BytesOutWOC %d (%dpp)", serverBytesOutWithoutCompression,
-            serverBytesOutWithoutCompression / (serverPacketsOut ? serverPacketsOut : 1));
+        ui::Text("BytesOutWOC %d (%dpp)", serverBytesOutWOC, serverBytesOutWOC / Max(serverPacketsOut, 1));
         ui::SetCursorPosX(left_offset);
     }
 
-    if (connectionToServer)
+    int i = 0;
+    while (auto* connectionToServer = network->GetServerConnection(i))
     {
-        ui::Text("[Client]");
+        ui::Text("[Client(%d)]", i);
         ui::SetCursorPosX(left_offset);
         ui::Text("PacketsIn %d", clientPacketsIn);
         ui::SetCursorPosX(left_offset);
         ui::Text("PacketsOut %d", clientPacketsOut);
         ui::SetCursorPosX(left_offset);
-        ui::Text("BytesIn %d", clientBytesIn);
+        ui::Text("BytesIn %d (%dpp)", clientBytesIn, clientBytesIn / Max(1, clientPacketsIn));
         ui::SetCursorPosX(left_offset);
-        ui::Text("BytesInWOC %d", clientBytesWithoutCompression);
+        ui::Text("BytesInWOC %d (%dpp)", clientBytesInWOC, clientBytesInWOC / Max(1, clientPacketsIn));
         ui::SetCursorPosX(left_offset);
-        ui::Text("BytesOut %d", clientBytesOut);
+        ui::Text("BytesOut %d (%dpp)", clientBytesOut, clientBytesOut / Max(1, clientPacketsOut));
         ui::SetCursorPosX(left_offset);
-        ui::Text("BytesOutWOC %d", clientBytesOutWithoutCompression);
+        ui::Text("BytesOutWOC %d (%dpp)", clientBytesOutWOC, clientBytesOutWOC / Max(1, clientPacketsOut));
         ui::SetCursorPosX(left_offset);
+
+        ++i;
     }
 
     if (packetCounterTimer_.GetMSec(false) < 1000)
@@ -192,22 +193,22 @@ void DebugHud::RenderNetworkUI(float left_offset)
     serverPacketsOut = 0;
     serverBytesIn = 0;
     serverBytesOut = 0;
-    serverBytesOutWithoutCompression = 0;
-    serverBytesInWithoutCompression = 0;
+    serverBytesOutWOC = 0;
+    serverBytesInWOC = 0;
 
     clientPacketsIn = 0;
     clientPacketsOut = 0;
     clientBytesIn = 0;
     clientBytesOut = 0;
-    clientBytesWithoutCompression = 0;
-    clientBytesOutWithoutCompression = 0;
+    clientBytesInWOC = 0;
+    clientBytesOutWOC = 0;
 
     packetCounterTimer_.Reset();
 
     if (connectionToServer)
     {
         SampleConnection(connectionToServer, clientPacketsIn, clientPacketsOut, clientBytesIn, clientBytesOut,
-            clientBytesWithoutCompression, clientBytesOutWithoutCompression);
+            clientBytesInWOC, clientBytesOutWOC);
     }
 
     if (serverConnectionCount > 0)
@@ -216,7 +217,7 @@ void DebugHud::RenderNetworkUI(float left_offset)
         {
             auto conn = connectionsToClients[i];
             SampleConnection(conn, serverPacketsIn, serverPacketsOut, serverBytesIn, serverBytesOut,
-                serverBytesInWithoutCompression, serverBytesOutWithoutCompression);
+                serverBytesInWOC, serverBytesOutWOC);
         }
     }
 }

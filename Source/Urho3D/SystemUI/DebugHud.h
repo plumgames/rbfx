@@ -102,15 +102,15 @@ private:
     unsigned serverPacketsOut = 0;
     unsigned serverBytesIn = 0;
     unsigned serverBytesOut = 0;
-    unsigned serverBytesInWithoutCompression = 0;
-    unsigned serverBytesOutWithoutCompression = 0;
+    unsigned serverBytesInWOC = 0;
+    unsigned serverBytesOutWOC = 0;
 
     unsigned clientPacketsIn = 0;
     unsigned clientPacketsOut = 0;
     unsigned clientBytesIn = 0;
     unsigned clientBytesOut = 0;
-    unsigned clientBytesWithoutCompression = 0;
-    unsigned clientBytesOutWithoutCompression = 0;
+    unsigned clientBytesInWOC = 0;
+    unsigned clientBytesOutWOC = 0;
 
     Timer packetCounterTimer_;
 };
