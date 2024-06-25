@@ -37,6 +37,7 @@ public:
     explicit NetworkServer(Context* context) : Object(context) { }
     virtual bool Listen(const URL& url) = 0;
     virtual void Stop() = 0;
+    virtual bool IsReady() { return true; }
 
     /// Called once, when new connection is established and ready to be used. May be called from non-main thread.
     ea::function<void(NetworkConnection*)> onConnected_;

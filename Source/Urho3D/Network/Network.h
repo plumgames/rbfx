@@ -22,6 +22,7 @@
 
 #pragma once
 
+#include <EASTL/map.h>
 #include <EASTL/hash_set.h>
 
 #include <Urho3D/Core/Object.h>

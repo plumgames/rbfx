@@ -462,7 +462,7 @@ ea::vector<SharedPtr<Connection>> Network::GetClientConnections() const
 
 bool Network::IsServerRunning() const
 {
-    return transportServer_ != nullptr;
+    return transportServer_ != nullptr && transportServer_->IsReady();
 }
 
 bool Network::CheckRemoteEvent(StringHash eventType) const
