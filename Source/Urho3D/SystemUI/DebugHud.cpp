@@ -251,6 +251,7 @@ void DebugHud::RenderUI(DebugHudModeFlags mode)
 
         ui::Text("FPS %d", fps_);
         ui::SetCursorPosX(left_offset);
+        /*
         ui::Text("Triangles %u", renderDevice->GetMaxStats().numPrimitives_);
         ui::SetCursorPosX(left_offset);
         ui::Text("Draws %u", renderDevice->GetMaxStats().numDraws_);
@@ -267,6 +268,7 @@ void DebugHud::RenderUI(DebugHudModeFlags mode)
         ui::SetCursorPosX(left_offset);
         ui::Text("Animations %u(%u)", stats.animations_, numChangedAnimations_[0]);
         ui::SetCursorPosX(left_offset);
+        */
         RenderNetworkUI(left_offset);
         
         for (auto i = appStats_.begin(); i != appStats_.end(); ++i)
