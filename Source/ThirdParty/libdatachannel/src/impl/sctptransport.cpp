@@ -667,6 +667,8 @@ void SctpTransport::updateBufferedAmount(uint16_t streamId, ptrdiff_t delta) {
 
 void SctpTransport::triggerBufferedAmount(uint16_t streamId, size_t amount) {
 	try {
+		if (!mBufferedAmountCallback)
+			return;
 		mBufferedAmountCallback(streamId, amount);
 	} catch (const std::exception &e) {
 		PLOG_WARNING << "SCTP buffered amount callback: " << e.what();
