@@ -40,12 +40,18 @@ OutlineGroupBinder::~OutlineGroupBinder()
 
 void OutlineGroupBinder::Unbind()
 {
-    if (!drawable_.Expired() && !outlineGroup_.Expired() && outlineGroup_->HasDrawable(drawable_))
+    if (!outlineGroup_.Expired())
     {
-        outlineGroup_->RemoveDrawable(drawable_);
+        for (auto& drawable : drawables_)
+        {
+            if (!drawable.Expired())
+            {
+                outlineGroup_->RemoveDrawable(drawable);
+            }
+        }
     }
 
-    drawable_.Reset();
+    drawables_.clear();
     outlineGroup_.Reset();
 }
 
@@ -58,31 +64,59 @@ void OutlineGroupBinder::Bind(Scene* scene)
         return;
     }
 
-    auto drawable = node_->GetDerivedComponent<Drawable>();
-    if (!drawable)
+    if (binderTag_.empty())
     {
-        URHO3D_LOGWARNING("OutlineGroupBinder on node {} doesn't have a drawable", node_->GetName());
         return;
     }
 
     ea::vector<OutlineGroup*> outlineGroups;
     scene->GetComponents(outlineGroups);
     auto outlineGroupItr =
-        ea::find_if(outlineGroups.begin(), outlineGroups.end(), [](const auto* group) { return !group->IsDebug(); });
+        ea::find_if(outlineGroups.begin(), outlineGroups.end(), [this](const auto* group) { return group->GetBinderTag() == binderTag_; });
     if (outlineGroupItr == outlineGroups.end())
     {
         URHO3D_LOGWARNING(
-            "OutlineGroupBinder on node {} is in a scene that doesn't have a non-debug OutlineGroup in it",
-            node_->GetName());
+            "OutlineGroupBinder on node {} is in a scene that doesn't have an OutlineGroup with the binder tag of '{}'",
+            node_->GetName(),
+            binderTag_);
         return;
     }
 
-    drawable_.Reset(drawable);
+    ea::vector<Node*> nodes;
+    nodes.push_back(node_);
+
+    if (recursive_)
+    {
+        nodes.append(node_->GetChildren(true));
+    }
+
+    for (auto node : nodes)
+    {
+        auto& components = node->GetComponents();
+        for (auto component : components)
+        {
+            if (component->IsInstanceOf(Drawable::GetTypeStatic()))
+            {
+                auto drawable = static_cast<Drawable*>(component.GetPointer());
+                drawables_.push_back(WeakPtr(drawable));
+            }
+        }
+    }
+
+    if (drawables_.empty())
+    {
+        URHO3D_LOGWARNING("OutlineGroupBinder on node {} doesn't have any drawables on it (recursive={})", node_->GetName(), recursive_);
+        return;
+    }
+
     outlineGroup_.Reset(*outlineGroupItr);
 
-    if (!outlineGroup_->HasDrawable(drawable))
+    for (auto drawable : drawables_)
     {
-        outlineGroup_->AddDrawable(drawable_);
+        if (!outlineGroup_->HasDrawable(drawable))
+        {
+            outlineGroup_->AddDrawable(drawable);
+        }
     }
 }
 
@@ -106,6 +140,18 @@ void OutlineGroupBinder::OnSceneSet(Scene* scene)
 void OutlineGroupBinder::RegisterObject(Context* context)
 {
     context->AddFactoryReflection<OutlineGroupBinder>(Category_Scene);
+
+    URHO3D_ACCESSOR_ATTRIBUTE("Is Recursive", IsRecursive, SetRecursive, bool, true, AM_DEFAULT);
+    URHO3D_ACCESSOR_ATTRIBUTE("Binder Tag", GetBinderTag, SetBinderTag, ea::string, EMPTY_STRING, AM_DEFAULT);
+}
+
+void OutlineGroupBinder::SetBinderTag(const ea::string& tag)
+{
+    binderTag_ = tag;
+    if (enabled_)
+    {
+        Bind(GetScene());
+    }
 }
 
 }
