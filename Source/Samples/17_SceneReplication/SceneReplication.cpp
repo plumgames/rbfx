@@ -512,16 +512,19 @@ void SceneReplication::HandlePostUpdate(StringHash eventType, VariantMap& eventD
 
     if (auto* connectionToServer = network->GetServerConnection())
     {
+        connectionCount = 1;
         SampleConnection(connectionToServer, packetsIn, packetsOut, bytesIn, bytesOut);
+        packetsOut_->SetText("Packets out: " + ea::to_string(GetSubsystem<Network>()->GetServerConnection()->GetPacketsOutPerSec()));
+        packetCounterTimer_.Reset();
         connectionCount = 1;
     }
     else
     {
+        connectionCount = network->GetClientConnections().size();
         for (const auto& connection : network->GetClientConnections())
         {
             ++connectionCount;
             SampleConnection(connection, packetsIn, packetsOut, bytesIn, bytesOut);
-        }
     }
 
     UpdateOverlay(packetsIn, packetsOut, bytesIn, bytesOut, connectionCount);
