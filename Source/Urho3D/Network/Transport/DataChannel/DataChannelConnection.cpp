@@ -1,4 +1,3 @@
-#if URHO3D_DATACHANNEL
 //
 // Copyright (c) 2017-2022 the rbfx project.
 //
@@ -280,4 +279,3 @@ void DataChannelConnection::InitializeFromSocket(DataChannelServer* server, std:
 }
 
 }   // namespace Urho3D
-#endif

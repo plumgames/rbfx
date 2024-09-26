@@ -1,4 +1,3 @@
-#if URHO3D_DATACHANNEL
 //
 // Copyright (c) 2017-2022 the rbfx project.
 //
@@ -71,4 +70,3 @@ protected:
 };
 
 }   // namespace Urho3D
-#endif
