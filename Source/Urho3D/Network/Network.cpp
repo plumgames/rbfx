@@ -69,14 +69,6 @@ Network::Network(Context* context)
     SubscribeToEvent(E_BEGINFRAME, URHO3D_HANDLER(Network, HandleBeginFrame));
     SubscribeToEvent(E_RENDERUPDATE, URHO3D_HANDLER(Network, HandleRenderUpdate));
     SubscribeToEvent(E_APPLICATIONSTOPPED, URHO3D_HANDLER(Network, HandleApplicationExit));
-
-    transportAppServerCreateFunc_ = [](Context* context) { return MakeShared<AppServer>(context); };
-    transportAppConnectionCreateFunc_ = [](Context* context) { return MakeShared<AppConnection>(context); };
-
-    transportDataChannelServerCreateFunc_ = [](Context* context) { return MakeShared<DataChannelServer>(context); };
-    transportDataChannelConnectionCreateFunc_ = [](Context* context) { return MakeShared<DataChannelConnection>(context); };
-
-    SetTransportDefault();
 }
 
 Network::~Network()
@@ -419,12 +411,16 @@ void Network::SetTransportDefault()
 
 void Network::SetTransportApp()
 {
+    InitializeTransportCreateFuncs();
+
     transportServerCreateFunc_ = transportAppServerCreateFunc_;
     transportConnectionCreateFunc_ = transportAppConnectionCreateFunc_;
 }
 
 void Network::SetTransportWebRTC()
 {
+    InitializeTransportCreateFuncs();
+
     transportServerCreateFunc_ = transportDataChannelServerCreateFunc_;
     transportConnectionCreateFunc_ = transportDataChannelConnectionCreateFunc_;
 }
@@ -435,8 +431,26 @@ void Network::SetTransportCustom(ea::function<SharedPtr<NetworkServer>(Context*)
     URHO3D_ASSERT(createServerFunc);
     URHO3D_ASSERT(createConnectionFunc);
 
+    InitializeTransportCreateFuncs();
+
     transportServerCreateFunc_ = createServerFunc;
     transportConnectionCreateFunc_ = createConnectionFunc;
+}
+
+void Network::InitializeTransportCreateFuncs()
+{
+    if (transportAppServerCreateFunc_)
+    {
+        return;
+    }
+
+    transportAppServerCreateFunc_ = [](Context* context) { return MakeShared<AppServer>(context); };
+    transportAppConnectionCreateFunc_ = [](Context* context) { return MakeShared<AppConnection>(context); };
+
+    transportDataChannelServerCreateFunc_ = [](Context* context) { return MakeShared<DataChannelServer>(context); };
+    transportDataChannelConnectionCreateFunc_ = [](Context* context) { return MakeShared<DataChannelConnection>(context); };
+
+    SetTransportDefault();
 }
 
 Connection* Network::GetServerConnection(unsigned connectionIndex) const
