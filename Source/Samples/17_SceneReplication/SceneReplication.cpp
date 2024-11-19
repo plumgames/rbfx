@@ -525,6 +525,7 @@ void SceneReplication::HandlePostUpdate(StringHash eventType, VariantMap& eventD
         {
             ++connectionCount;
             SampleConnection(connection, packetsIn, packetsOut, bytesIn, bytesOut);
+        }
     }
 
     UpdateOverlay(packetsIn, packetsOut, bytesIn, bytesOut, connectionCount);
