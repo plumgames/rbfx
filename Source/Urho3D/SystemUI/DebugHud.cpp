@@ -33,7 +33,9 @@
 #include "../Graphics/GraphicsEvents.h"
 #include "../Graphics/Renderer.h"
 #include "../IO/Log.h"
+#if URHO3D_NETWORK
 #include "../Network/Network.h"
+#endif
 #include "../RenderAPI/RenderDevice.h"
 #include "../SystemUI/SystemUI.h"
 #include "../UI/UI.h"
@@ -127,6 +129,7 @@ void DebugHud::ClearAppStats()
     appStats_.clear();
 }
 
+#if URHO3D_NETWORK
 void SampleConnection(const Connection* connection, unsigned& packetsIn, unsigned& packetsOut, unsigned& bytesIn,
     unsigned& bytesOut, unsigned& bytesInWithoutCompression, unsigned& bytesOutWithoutCompression)
 {
@@ -221,6 +224,7 @@ void DebugHud::RenderNetworkUI(float left_offset)
         }
     }
 }
+#endif
 
 void DebugHud::RenderUI(DebugHudModeFlags mode)
 {
@@ -251,7 +255,6 @@ void DebugHud::RenderUI(DebugHudModeFlags mode)
 
         ui::Text("FPS %d", fps_);
         ui::SetCursorPosX(left_offset);
-        /*
         ui::Text("Triangles %u", renderDevice->GetMaxStats().numPrimitives_);
         ui::SetCursorPosX(left_offset);
         ui::Text("Draws %u", renderDevice->GetMaxStats().numDraws_);
@@ -268,8 +271,9 @@ void DebugHud::RenderUI(DebugHudModeFlags mode)
         ui::SetCursorPosX(left_offset);
         ui::Text("Animations %u(%u)", stats.animations_, numChangedAnimations_[0]);
         ui::SetCursorPosX(left_offset);
-        */
+        /*
         RenderNetworkUI(left_offset);
+        */
         
         for (auto i = appStats_.begin(); i != appStats_.end(); ++i)
         {

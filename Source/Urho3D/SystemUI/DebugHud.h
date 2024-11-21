@@ -86,7 +86,9 @@ private:
     /// Render debug hud on to entire viewport.
     void OnRenderDebugUI(StringHash, VariantMap&);
 
+#if URHO3D_NETWORK
     void RenderNetworkUI(float left_offset);
+ #endif
 
     /// Hashmap containing application specific stats.
     ea::map<ea::string, ea::string> appStats_{};

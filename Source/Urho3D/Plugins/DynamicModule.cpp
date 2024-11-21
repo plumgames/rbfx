@@ -256,8 +256,11 @@ ModuleType DynamicModule::ReadModuleInformation(Context* context, const ea::stri
     // This function implements a naive check for plugin validity. Proper check would parse executable headers and look
     // for relevant exported function names.
     ea::vector<unsigned char> data;
+#if !__APPLE__
     const char pluginEntryPoint[] = "PluginApplicationMain";
-
+#else
+    const char pluginEntryPoint[] = "_PluginApplicationMain";
+#endif
 #if __linux__
     // ELF magic
     if (path.ends_with(".so"))
