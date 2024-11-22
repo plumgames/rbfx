@@ -32,7 +32,7 @@
 #include "../IO/Log.h"
 #include "../IO/MemoryBuffer.h"
 #include "../Input/InputEvents.h"
-#include "../Network/HttpRequest.h"
+#include "../HTTP/HttpRequest.h"
 #include "../Network/Network.h"
 #include "../Network/NetworkEvents.h"
 #include "../Network/Protocol.h"

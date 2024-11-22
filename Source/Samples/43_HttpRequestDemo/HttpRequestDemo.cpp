@@ -24,7 +24,7 @@
 #include <Urho3D/Core/ProcessUtils.h>
 #include <Urho3D/Input/Input.h>
 #include <Urho3D/Network/Network.h>
-#include <Urho3D/Network/HttpRequest.h>
+#include <Urho3D/HTTP/HttpRequest.h>
 #include <Urho3D/UI/Font.h>
 #include <Urho3D/UI/Text.h>
 #include <Urho3D/UI/UI.h>

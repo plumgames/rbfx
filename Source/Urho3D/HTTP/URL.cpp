@@ -21,7 +21,7 @@
 //
 
 #include <Urho3D/Core/Format.h>
-#include <Urho3D/Network/URL.h>
+#include <Urho3D/HTTP/URL.h>
 #include <string>
 #include <regex>
 

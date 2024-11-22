@@ -1,6 +1,6 @@
 #include "../CommonUtils.h"
 
-#include <Urho3D/Network/URL.h>
+#include <Urho3D/HTTP/URL.h>
 
 
 TEST_CASE("URL::Encode and URL::Decode")

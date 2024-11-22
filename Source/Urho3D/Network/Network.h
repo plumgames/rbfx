@@ -28,7 +28,7 @@
 #include <Urho3D/Core/Object.h>
 #include <Urho3D/IO/VectorBuffer.h>
 #include <Urho3D/Network/Connection.h>
-#include <Urho3D/Network/URL.h>
+#include <Urho3D/HTTP/URL.h>
 
 namespace Urho3D
 {

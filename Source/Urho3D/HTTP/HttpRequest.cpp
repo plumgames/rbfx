@@ -25,7 +25,7 @@
 #include <Urho3D/Core/Profiler.h>
 #include <Urho3D/Core/Timer.h>
 #include <Urho3D/IO/Log.h>
-#include <Urho3D/Network/HttpRequest.h>
+#include <Urho3D/HTTP/HttpRequest.h>
 
 #ifdef URHO3D_PLATFORM_WEB
 #include <emscripten/fetch.h>
