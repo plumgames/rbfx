@@ -100,6 +100,7 @@ HttpRequest::HttpRequest(
         request->readBuffer_.Resize(fetch->numBytes - 1);
         request->readBuffer_.SetData(fetch->data, fetch->numBytes - 1);
         request->requestHandle_ = nullptr;
+        request->statusCode_ = fetch->status;
 
         emscripten_fetch_close(fetch);
     };
@@ -113,6 +114,7 @@ HttpRequest::HttpRequest(
         request->state_ = HTTP_ERROR;
         request->error_ = fetch->statusText;
         request->requestHandle_ = nullptr;
+        request->statusCode_ = fetch->status;
 
         emscripten_fetch_close(fetch);
     };
@@ -268,12 +270,21 @@ void HttpRequest::ThreadFunction()
     }
 
     // Close the connection
+    const struct mg_response_info* request_info = mg_get_response_info(connection);
+    if (request_info) {
+        statusCode_ = request_info->status_code;
+    }
     mg_close_connection(connection);
     {
         MutexLock lock(mutex_);
         state_ = HTTP_CLOSED;
     }
 #endif  // URHO3D_PLATFORM_WEB
+}
+
+int HttpRequest::GetStatusCode() const
+{
+    return statusCode_;
 }
 
 unsigned HttpRequest::Read(void* dest, unsigned size)

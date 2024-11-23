@@ -87,6 +87,8 @@ public:
     /// @property
     bool IsOpen() const { return GetState() == HTTP_OPEN; }
 
+    int GetStatusCode() const;
+
 private:
     /// URL.
     URL url_;
@@ -106,6 +108,7 @@ private:
     VectorBuffer readBuffer_;
     /// Read buffer read cursor.
     unsigned readPosition_ = 0;
+    int statusCode_ = 0;
 #ifdef URHO3D_PLATFORM_WEB
     /// HTTP request handle.
     void* requestHandle_ = nullptr;
