@@ -25,7 +25,7 @@
 #include <Urho3D/Core/Object.h>
 #include <Urho3D/Network/AbstractConnection.h>
 #include <Urho3D/Network/Transport/NetworkConnection.h>
-#include <Urho3D/HTTP/URL.h>
+#include <Urho3D/Core/URL.h>
 
 namespace rtc
 {

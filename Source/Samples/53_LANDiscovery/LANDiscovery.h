@@ -37,7 +37,7 @@ class LANDiscoveryManager;
 
 /// Chat example
 /// This sample demonstrates:
-///     - Starting up a network server or connecting to it
+///     - Starting up a LAN server or connecting to it
 ///     - Implementing simple chat functionality with network messages
 class LANDiscovery : public Sample
 {
@@ -85,13 +85,13 @@ private:
     void FormatServerListUI();
 
     /// Handle found LAN server
-    void HandleNetworkHostDiscovered(StringHash eventType, VariantMap& eventData);
+    void HandleLANHostDiscovered(StringHash eventType, VariantMap& eventData);
     /// Start server
     void HandleStartServer(StringHash eventType, VariantMap& eventData);
     /// Stop server
     void HandleStopServer(StringHash eventType, VariantMap& eventData);
-    /// Start network discovery
-    void HandleDoNetworkDiscovery(StringHash eventType, VariantMap& eventData);
+    /// Start LAN discovery
+    void HandleDoLANDiscovery(StringHash eventType, VariantMap& eventData);
     /// Expire servers that did not reannouce themselves
     void HandleExpireServers(StringHash eventType, VariantMap& eventData);
     /// Start server

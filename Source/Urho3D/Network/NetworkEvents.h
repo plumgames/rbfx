@@ -136,12 +136,4 @@ URHO3D_EVENT(E_REMOTEEVENTDATA, RemoteEventData)
     URHO3D_PARAM(P_CONNECTION, Connection);      // Connection pointer
 }
 
-/// When LAN discovery found hosted server.
-URHO3D_EVENT(E_NETWORKHOSTDISCOVERED, NetworkHostDiscovered)
-{
-    URHO3D_PARAM(P_ADDRESS, Address);   // String
-    URHO3D_PARAM(P_PORT, Port);         // int
-    URHO3D_PARAM(P_BEACON, Beacon);     // VariantMap
-}
-
 }

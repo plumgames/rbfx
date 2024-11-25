@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2017-2022 the rbfx project.
+// Copyright (c) 2008-2022 the Urho3D project.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -22,27 +22,17 @@
 
 #pragma once
 
-#include <Urho3D/Core/Object.h>
-#include <Urho3D/Core/URL.h>
-#include <Urho3D/Network/Transport/NetworkConnection.h>
-
+#include "../Core/Object.h"
 
 namespace Urho3D
 {
 
-class URHO3D_API NetworkServer : public Object
+/// When LAN discovery found hosted server.
+URHO3D_EVENT(E_LANHOSTDISCOVERED, LANHostDiscovered)
 {
-    URHO3D_OBJECT(NetworkServer, Object);
-public:
-    explicit NetworkServer(Context* context) : Object(context) { }
-    virtual bool Listen(const URL& url) = 0;
-    virtual void Stop() = 0;
-    virtual bool IsReady() { return true; }
+    URHO3D_PARAM(P_ADDRESS, Address);   // String
+    URHO3D_PARAM(P_PORT, Port);         // int
+    URHO3D_PARAM(P_BEACON, Beacon);     // VariantMap
+}
 
-    /// Called once, when new connection is established and ready to be used. May be called from non-main thread.
-    ea::function<void(NetworkConnection*)> onConnected_;
-    /// Called once, when a fully established connection disconnects gracefully or is aborted abruptly. May be called from non-main thread.
-    ea::function<void(NetworkConnection*)> onDisconnected_;
-};
-
-}   // namespace Urho3D
+}

@@ -19,8 +19,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 //
-#include <Urho3D/Network/LANDiscoveryManager.h>
-#include <Urho3D/Network/NetworkEvents.h>
+#include <Urho3D/LAN/LANDiscoveryManager.h>
+#include <Urho3D/LAN/LANEvents.h>
 #include <Urho3D/IO/Log.h>
 #include <Urho3D/IO/MemoryBuffer.h>
 #include <Urho3D/Core/CoreEvents.h>
@@ -132,7 +132,7 @@ bool LANDiscoveryManager::Start(unsigned short port, LANDiscoveryModeFlags mode)
             int result = recvfrom(socket_, (char*)buffer_.GetData(), buffer_.GetSize(), 0, (sockaddr*)&addr, &addrLen);
             if (result > 0)
             {
-                using namespace NetworkHostDiscovered;
+                using namespace LANHostDiscovered;
                 VariantMap& args = GetEventDataMap();
                 char ipv4[16];
 #ifdef _WIN32
@@ -147,7 +147,7 @@ bool LANDiscoveryManager::Start(unsigned short port, LANDiscoveryModeFlags mode)
                 if (msg.ReadStringHash() != MAGIC)
                     return;
                 args[P_BEACON] = msg.ReadVariantMap();
-                SendEvent(E_NETWORKHOSTDISCOVERED, args);
+                SendEvent(E_LANHOSTDISCOVERED, args);
             }
             else if (result < 0)
             {

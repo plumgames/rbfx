@@ -31,9 +31,7 @@
 #include <Urho3D/IO/Log.h>
 #include <Urho3D/IO/MemoryBuffer.h>
 #include <Urho3D/IO/VectorBuffer.h>
-#include <Urho3D/Network/Network.h>
-#include <Urho3D/Network/NetworkEvents.h>
-#include <Urho3D/Network/LANDiscoveryManager.h>
+#include <Urho3D/LAN/LANDiscoveryManager.h>
 #include <Urho3D/Resource/ResourceCache.h>
 #include <Urho3D/Scene/Scene.h>
 #include <Urho3D/UI/Button.h>
@@ -42,6 +40,7 @@
 #include <Urho3D/UI/Text.h>
 #include <Urho3D/UI/UI.h>
 #include <Urho3D/UI/UIEvents.h>
+#include <Urho3D/LAN/LANEvents.h>
 
 #include "LANDiscovery.h"
 
@@ -111,12 +110,12 @@ void LANDiscovery::CreateUI()
 
 void LANDiscovery::SubscribeToEvents()
 {
-    SubscribeToEvent(E_NETWORKHOSTDISCOVERED, URHO3D_HANDLER(LANDiscovery, HandleNetworkHostDiscovered));
+    SubscribeToEvent(E_LANHOSTDISCOVERED, URHO3D_HANDLER(LANDiscovery, HandleLANHostDiscovered));
     SubscribeToEvent(E_UPDATE, URHO3D_HANDLER(LANDiscovery, HandleExpireServers));
 
     SubscribeToEvent(startServer_, "Released", URHO3D_HANDLER(LANDiscovery, HandleStartServer));
     SubscribeToEvent(stopServer_, "Released", URHO3D_HANDLER(LANDiscovery, HandleStopServer));
-    SubscribeToEvent(refreshServerList_, "Released", URHO3D_HANDLER(LANDiscovery, HandleDoNetworkDiscovery));
+    SubscribeToEvent(refreshServerList_, "Released", URHO3D_HANDLER(LANDiscovery, HandleDoLANDiscovery));
 }
 
 Button* LANDiscovery::CreateButton(const ea::string& text, int width, IntVector2 position)
@@ -151,9 +150,9 @@ Text* LANDiscovery::CreateLabel(const ea::string& text, IntVector2 pos)
     return label;
 }
 
-void LANDiscovery::HandleNetworkHostDiscovered(StringHash eventType, VariantMap& eventData)
+void LANDiscovery::HandleLANHostDiscovered(StringHash eventType, VariantMap& eventData)
 {
-    using namespace NetworkHostDiscovered;
+    using namespace LANHostDiscovered;
 
     VariantMap data = eventData[P_BEACON].GetVariantMap();
     ea::string name = data["Name"].GetString();
@@ -200,7 +199,7 @@ void LANDiscovery::HandleStopServer(StringHash eventType, VariantMap& eventData)
     stopServer_->SetVisible(false);
 }
 
-void LANDiscovery::HandleDoNetworkDiscovery(StringHash eventType, VariantMap& eventData)
+void LANDiscovery::HandleDoLANDiscovery(StringHash eventType, VariantMap& eventData)
 {
     /// Pass in the port that should be checked
     lanDiscovery_->Start(SERVER_PORT);

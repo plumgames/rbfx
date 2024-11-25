@@ -20,7 +20,7 @@
 # THE SOFTWARE.
 #
 
-if (NOT URHO3D_NETWORK)
+if (NOT URHO3D_LAN)
     return ()
 endif ()
 

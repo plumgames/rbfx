@@ -100,7 +100,7 @@
 #include "39_CrowdNavigation/CrowdNavigation.h"
 #endif
 #include "40_Localization/L10n.h"
-#if URHO3D_NETWORK
+#if URHO3D_HTTP
 #include "43_HttpRequestDemo/HttpRequestDemo.h"
 #endif
 #include "44_RibbonTrailDemo/RibbonTrailDemo.h"
@@ -113,7 +113,7 @@
 #include "49_Urho2DIsometricDemo/Urho2DIsometricDemo.h"
 #include "50_Urho2DPlatformer/Urho2DPlatformer.h"
 #endif
-#if URHO3D_NETWORK
+#if URHO3D_LAN
 #include "53_LANDiscovery/LANDiscovery.h"
 #endif
 #include "54_WindowSettingsDemo/WindowSettingsDemo.h"
@@ -358,7 +358,7 @@ void SamplesManager::Start()
     RegisterSample<CrowdNavigation>();
 #endif
     RegisterSample<L10n>();
-#if URHO3D_NETWORK
+#if URHO3D_HTTP
     RegisterSample<HttpRequestDemo>();
 #endif
     RegisterSample<RibbonTrailDemo>();
@@ -374,7 +374,7 @@ void SamplesManager::Start()
     RegisterSample<Urho2DIsometricDemo>();
     RegisterSample<Urho2DPlatformer>();
 #endif
-#if URHO3D_NETWORK
+#if URHO3D_LAN
     RegisterSample<LANDiscovery>();
 #endif
     RegisterSample<WindowSettingsDemo>();

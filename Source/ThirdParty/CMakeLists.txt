@@ -151,7 +151,7 @@ if (URHO3D_NETWORK)
     endif ()
 endif ()
 
-if (NOT WEB)
+if (URHO3D_HTTP AND NOT WEB)
     add_subdirectory(openssl)
     add_subdirectory(Civetweb)
 endif ()

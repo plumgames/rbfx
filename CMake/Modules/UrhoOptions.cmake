@@ -183,6 +183,8 @@ option                (URHO3D_IK                 "Inverse kinematics subsystem e
 option                (URHO3D_LOGGING            "Enable logging subsystem"                              ${URHO3D_ENABLE_ALL})
 option                (URHO3D_NAVIGATION         "Navigation subsystem enabled"                          ${URHO3D_ENABLE_ALL})
 option                (URHO3D_NETWORK            "Networking subsystem enabled"                          ${URHO3D_ENABLE_ALL})
+option                (URHO3D_HTTP               "HTTP client enabled"                                   ${URHO3D_ENABLE_ALL})
+option                (URHO3D_LAN                "LAN discovery enabled"                                 ${URHO3D_ENABLE_ALL})
 option                (URHO3D_PHYSICS            "Physics subsystem enabled"                             ${URHO3D_ENABLE_ALL})
 cmake_dependent_option(URHO3D_PROFILING          "Profiler support enabled"                              ${URHO3D_ENABLE_ALL} "NOT EMSCRIPTEN;NOT MINGW;NOT UWP"     OFF)
 cmake_dependent_option(URHO3D_PROFILING_FALLBACK "Profiler uses low-precision timer"                     OFF                  "URHO3D_PROFILING"              OFF)

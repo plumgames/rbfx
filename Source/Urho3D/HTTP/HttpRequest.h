@@ -31,7 +31,7 @@
 #include <Urho3D/Core/Thread.h>
 #include <Urho3D/IO/Deserializer.h>
 #include <Urho3D/IO/VectorBuffer.h>
-#include <Urho3D/HTTP/URL.h>
+#include <Urho3D/Core/URL.h>
 
 namespace Urho3D
 {
@@ -50,7 +50,7 @@ class URHO3D_API HttpRequest : public RefCounted, public Deserializer, public Th
 {
 public:
     /// Construct with parameters.
-    HttpRequest(const ea::string& url, const ea::string& verb, const ea::vector<ea::string>& headers, const ea::string& postData);
+    HttpRequest(const ea::string& url, const ea::string& verb = EMPTY_STRING, const ea::vector<ea::string>& headers = ea::vector<ea::string>(), const ea::string& postData = EMPTY_STRING);
     /// Destruct. Release the connection object.
     ~HttpRequest() override;
 
