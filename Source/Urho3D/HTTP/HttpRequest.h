@@ -46,6 +46,8 @@ enum HttpRequestState
 };
 
 /// An HTTP connection with response data stream.
+/// Perform an HTTP request to the specified URL. Empty verb defaults to a GET request. Return a request object which
+/// can be used to read the response data.
 class URHO3D_API HttpRequest : public RefCounted, public Deserializer, public Thread
 {
 public:
