@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2017-2022 the rbfx project.
+// Copyright (c) 2017-2024 the rbfx project.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -23,44 +23,36 @@
 #pragma once
 
 #include <Urho3D/Core/Object.h>
-#include <Urho3D/Core/Signal.h>
 #include <Urho3D/Network/Transport/NetworkServer.h>
-
-struct juice_server;
-
-namespace rtc
-{
-
-class WebSocket;
-class WebSocketServer;
-
-}
 
 namespace Urho3D
 {
+class EventConnection;
 
-class DataChannelConnection;
-
-class URHO3D_API DataChannelServer : public NetworkServer
+class URHO3D_API EventServer : public NetworkServer
 {
-    friend class DataChannelConnection;
-    URHO3D_OBJECT(DataChannelServer, NetworkServer);
+    URHO3D_OBJECT(EventServer, NetworkServer);
 public:
-    explicit DataChannelServer(Context* context);
+    explicit EventServer(Context* context);
     static void RegisterObject(Context* context);
-    /// Supports "ws" and "wss" schemes. "wss" scheme requires calling %SetTLSCertificate before calling %Listen.
-    bool Listen(const URL& url) override;
+    bool Listen(const URL&) override;
     void Stop() override;
-    void SetTLSCertificate(ea::string_view certificatePemFile, ea::string_view keyPemFile, ea::string_view keyPassword);
 
-protected:
-    void OnDisconnected(DataChannelConnection* connection);
+private:
+    void HandleConnected(StringHash eventType, VariantMap& eventData);
+    void HandleDisconnected(StringHash eventType, VariantMap& eventData);
+    void HandleMessage(StringHash eventType, VariantMap& eventData);
 
-    ea::shared_ptr<rtc::WebSocketServer> webSocketServer_ = {};
-    ea::vector<SharedPtr<DataChannelConnection>> connections_;
-    ea::string certificatePemFile_;
-    ea::string keyPemFile_;
-    ea::string keyPassword_;
+    void OnConnected(EventConnection* connection);
+    void OnDisconnected(EventConnection* connection);
+    void OnMessage(EventConnection* connection, const ea::string& data);
+
+    struct ConnectionLink
+    {
+        SharedPtr<EventConnection> client_;
+        SharedPtr<EventConnection> server_;
+    };
+    ea::map<SharedPtr<EventConnection>, ea::shared_ptr<ConnectionLink>> connections_;
 };
 
 }   // namespace Urho3D

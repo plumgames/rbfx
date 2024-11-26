@@ -20,54 +20,54 @@
 // THE SOFTWARE.
 //
 
-#include <Urho3D/Network/Transport/App/AppConnection.h>
+#include <Urho3D/Network/Transport/Event/EventConnection.h>
 #include <Urho3D/Core/Context.h>
 
 namespace Urho3D
 {
 
-AppConnection::AppConnection(Context* context)
+EventConnection::EventConnection(Context* context)
     : NetworkConnection(context)
 {
 }
 
-AppConnection::~AppConnection()
+EventConnection::~EventConnection()
 {
     URHO3D_ASSERT(state_ == NetworkConnection::State::Disconnected);
 }
 
-void AppConnection::RegisterObject(Context* context)
+void EventConnection::RegisterObject(Context* context)
 {
-    context->AddAbstractReflection<AppConnection>(Category_Network);
+    context->AddAbstractReflection<EventConnection>(Category_Network);
 }
 
-bool AppConnection::Connect(const URL&)
+bool EventConnection::Connect(const URL&)
 {
-    using namespace AppConnectionConnected;
+    using namespace EventConnectionConnected;
     VariantMap& eventData = GetEventDataMap();
-    eventData[P_APPCONNECTION] = this;
-    SendEvent(E_APPCONNCONNECTED, eventData);
+    eventData[P_EVENTCONNECTION] = this;
+    SendEvent(E_EVENTCONNCONNECTED, eventData);
     return true;
 }
 
-void AppConnection::Disconnect()
+void EventConnection::Disconnect()
 {
-    using namespace AppConnectionDisconnected;
+    using namespace EventConnectionDisconnected;
     VariantMap& eventData = GetEventDataMap();
-    eventData[P_APPCONNECTION] = this;
-    SendEvent(E_APPCONNDISCONNECTED, eventData);
+    eventData[P_EVENTCONNECTION] = this;
+    SendEvent(E_EVENTCONNDISCONNECTED, eventData);
 }
 
-void AppConnection::SendMessage(ea::string_view data, PacketTypeFlags)
+void EventConnection::SendMessage(ea::string_view data, PacketTypeFlags)
 {
-    using namespace AppConnectionMessage;
+    using namespace EventConnectionMessage;
     VariantMap& eventData = GetEventDataMap();
-    eventData[P_APPCONNECTION] = this;
+    eventData[P_EVENTCONNECTION] = this;
     eventData[P_DATA] = ea::string(data);
-    SendEvent(E_APPCONNMESSAGE, eventData);
+    SendEvent(E_EVENTCONNMESSAGE, eventData);
 }
 
-void AppConnection::OnMessage(const ea::string_view& data)
+void EventConnection::OnMessage(const ea::string_view& data)
 {
     if (!onMessage_)
     {
@@ -77,7 +77,7 @@ void AppConnection::OnMessage(const ea::string_view& data)
     onMessage_(data);
 }
 
-void AppConnection::OnConnected()
+void EventConnection::OnConnected()
 {
     if (state_ == NetworkConnection::State::Connected)
     {
@@ -92,7 +92,7 @@ void AppConnection::OnConnected()
     }
 }
 
-void AppConnection::OnDisconnected()
+void EventConnection::OnDisconnected()
 {
     if (state_ == NetworkConnection::State::Disconnected)
     {

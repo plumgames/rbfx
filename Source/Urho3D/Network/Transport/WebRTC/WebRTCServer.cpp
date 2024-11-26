@@ -21,8 +21,8 @@
 //
 
 #include <Urho3D/Core/Context.h>
-#include <Urho3D/Network/Transport/DataChannel/DataChannelServer.h>
-#include <Urho3D/Network/Transport/DataChannel/DataChannelConnection.h>
+#include <Urho3D/Network/Transport/WebRTC/WebRTCServer.h>
+#include <Urho3D/Network/Transport/WebRTC/WebRTCConnection.h>
 
 #ifndef URHO3D_PLATFORM_WEB
 #include <rtc/websocketserver.hpp>
@@ -31,17 +31,17 @@
 namespace Urho3D
 {
 
-DataChannelServer::DataChannelServer(Context* context)
+WebRTCServer::WebRTCServer(Context* context)
     : NetworkServer(context)
 {
 }
 
-void DataChannelServer::RegisterObject(Context* context)
+void WebRTCServer::RegisterObject(Context* context)
 {
-    context->AddAbstractReflection<DataChannelServer>(Category_Network);
+    context->AddAbstractReflection<WebRTCServer>(Category_Network);
 }
 
-bool DataChannelServer::Listen(const URL& url)
+bool WebRTCServer::Listen(const URL& url)
 {
 #ifndef URHO3D_PLATFORM_WEB
     // Signaling server
@@ -62,7 +62,7 @@ bool DataChannelServer::Listen(const URL& url)
     webSocketServer_ = ea::make_shared<rtc::WebSocketServer>(config);
     webSocketServer_->onClient([this](std::shared_ptr<rtc::WebSocket> ws)
     {
-        SharedPtr<DataChannelConnection> connection = MakeShared<DataChannelConnection>(context_);
+        SharedPtr<WebRTCConnection> connection = MakeShared<WebRTCConnection>(context_);
         connection->InitializeFromSocket(this, ws);
         connections_.push_back(connection);
         onConnected_(connection);
@@ -73,22 +73,22 @@ bool DataChannelServer::Listen(const URL& url)
 #endif
 }
 
-void DataChannelServer::Stop()
+void WebRTCServer::Stop()
 {
 #ifndef URHO3D_PLATFORM_WEB
     webSocketServer_->stop();
 #endif
 }
 
-void DataChannelServer::OnDisconnected(DataChannelConnection* connection)
+void WebRTCServer::OnDisconnected(WebRTCConnection* connection)
 {
 #ifndef URHO3D_PLATFORM_WEB
     onDisconnected_(connection);
-    connections_.erase_first(SharedPtr<DataChannelConnection>(connection));
+    connections_.erase_first(SharedPtr<WebRTCConnection>(connection));
 #endif
 }
 
-void DataChannelServer::SetTLSCertificate(ea::string_view certificatePemFile, ea::string_view keyPemFile, ea::string_view keyPassword)
+void WebRTCServer::SetTLSCertificate(ea::string_view certificatePemFile, ea::string_view keyPemFile, ea::string_view keyPassword)
 {
     certificatePemFile_ = certificatePemFile;
     keyPemFile_ = keyPemFile;

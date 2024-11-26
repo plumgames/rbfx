@@ -26,28 +26,28 @@
 #include <rtc/candidate.hpp>
 #include <Urho3D/Core/Context.h>
 #include <Urho3D/Core/Timer.h>
-#include <Urho3D/Network/Transport/DataChannel/DataChannelServer.h>
-#include <Urho3D/Network/Transport/DataChannel/DataChannelConnection.h>
+#include <Urho3D/Network/Transport/WebRTC/WebRTCServer.h>
+#include <Urho3D/Network/Transport/WebRTC/WebRTCConnection.h>
 
 namespace Urho3D
 {
 
-DataChannelConnection::DataChannelConnection(Context* context)
+WebRTCConnection::WebRTCConnection(Context* context)
     : NetworkConnection(context)
 {
 }
 
-DataChannelConnection::~DataChannelConnection()
+WebRTCConnection::~WebRTCConnection()
 {
     URHO3D_ASSERT(state_ == NetworkConnection::State::Disconnected);
 }
 
-void DataChannelConnection::RegisterObject(Context* context)
+void WebRTCConnection::RegisterObject(Context* context)
 {
-    context->AddAbstractReflection<DataChannelConnection>(Category_Network);
+    context->AddAbstractReflection<WebRTCConnection>(Category_Network);
 }
 
-bool DataChannelConnection::Connect(const URL& url)
+bool WebRTCConnection::Connect(const URL& url)
 {
     URL finalUrl = url;
     if (finalUrl.scheme_.empty())
@@ -65,7 +65,7 @@ bool DataChannelConnection::Connect(const URL& url)
     return true;
 }
 
-void DataChannelConnection::Disconnect()
+void WebRTCConnection::Disconnect()
 {
     if (peer_)
     {
@@ -79,7 +79,7 @@ void DataChannelConnection::Disconnect()
     }
 }
 
-void DataChannelConnection::SendMessage(ea::string_view data, PacketTypeFlags type)
+void WebRTCConnection::SendMessage(ea::string_view data, PacketTypeFlags type)
 {
     if (state_ != NetworkConnection::State::Connected)
     {
@@ -89,7 +89,7 @@ void DataChannelConnection::SendMessage(ea::string_view data, PacketTypeFlags ty
 
     if (data.size() > maxDataSize_)
     {
-        URHO3D_LOGERROR("DataChannel tried to send {} bytes of data, which is more than max allowed {} bytes of data per message.",
+        URHO3D_LOGERROR("WebRTC tried to send {} bytes of data, which is more than max allowed {} bytes of data per message.",
             data.size(), maxDataSize_);
         return;
     }
@@ -103,12 +103,12 @@ void DataChannelConnection::SendMessage(ea::string_view data, PacketTypeFlags ty
     }
     else
     {
-        URHO3D_LOGERROR("DataChannel {} is not connected!", (int)type);
+        URHO3D_LOGERROR("WebRTC {} is not connected!", (int)type);
         Disconnect();
     }
 }
 
-void DataChannelConnection::OnDataChannelConnected(int index)
+void WebRTCConnection::OnWebRTCConnected(int index)
 {
     // Web builds may call this callback multiple times for an already open datachannel!
     if (state_ == State::Connected)
@@ -134,7 +134,7 @@ void DataChannelConnection::OnDataChannelConnected(int index)
     websocket_ = nullptr;
 }
 
-void DataChannelConnection::OnDataChannelDisconnected(int index)
+void WebRTCConnection::OnWebRTCDisconnected(int index)
 {
     // Web builds may call this callback multiple times for an already open datachannel!
     if (state_ == State::Disconnected)
@@ -174,7 +174,7 @@ void DataChannelConnection::OnDataChannelDisconnected(int index)
     ReleaseRef();
 }
 
-void DataChannelConnection::InitializeFromSocket(DataChannelServer* server, std::shared_ptr<rtc::WebSocket> websocket)
+void WebRTCConnection::InitializeFromSocket(WebRTCServer* server, std::shared_ptr<rtc::WebSocket> websocket)
 {
     server_ = WeakPtr(server);
     websocket_ = websocket;
@@ -204,15 +204,15 @@ void DataChannelConnection::InitializeFromSocket(DataChannelServer* server, std:
     if (server != nullptr)
     {
         using namespace std::chrono_literals;
-        dataChannels_[PacketType::UnreliableUnordered] = peer_->createDataChannel("uu", {{rtc::Reliability::Type::Rexmit, false, 0}});
-        dataChannels_[PacketType::Reliable] = peer_->createDataChannel("ru", {{rtc::Reliability::Type::Reliable, false}});
-        dataChannels_[PacketType::Ordered] = peer_->createDataChannel("uo", {{rtc::Reliability::Type::Rexmit, true, 0}});
-        dataChannels_[PacketType::ReliableOrdered] = peer_->createDataChannel("ro", {{rtc::Reliability::Type::Reliable, true}});
+        dataChannels_[PacketType::UnreliableUnordered] = peer_->createWebRTC("uu", {{rtc::Reliability::Type::Rexmit, false, 0}});
+        dataChannels_[PacketType::Reliable] = peer_->createWebRTC("ru", {{rtc::Reliability::Type::Reliable, false}});
+        dataChannels_[PacketType::Ordered] = peer_->createWebRTC("uo", {{rtc::Reliability::Type::Rexmit, true, 0}});
+        dataChannels_[PacketType::ReliableOrdered] = peer_->createWebRTC("ro", {{rtc::Reliability::Type::Reliable, true}});
         for (int i = 0; i < URHO3D_ARRAYSIZE(dataChannels_); i++)
         {
             auto& dc = dataChannels_[i];
-            dc->onOpen(std::bind(&DataChannelConnection::OnDataChannelConnected, this, i));
-            dc->onClosed(std::bind(&DataChannelConnection::OnDataChannelDisconnected, this, i));
+            dc->onOpen(std::bind(&WebRTCConnection::OnWebRTCConnected, this, i));
+            dc->onClosed(std::bind(&WebRTCConnection::OnWebRTCDisconnected, this, i));
             dc->onMessage([this](const rtc::binary& data)
             {
                 if (onMessage_)
@@ -221,7 +221,7 @@ void DataChannelConnection::InitializeFromSocket(DataChannelServer* server, std:
         }
     }
 
-    peer_->onDataChannel([this](std::shared_ptr<rtc::DataChannel> dc)
+    peer_->onWebRTC([this](std::shared_ptr<rtc::WebRTC> dc)
     {
         rtc::Reliability reliability = dc->reliability();
         PacketTypeFlags packetType = {};
@@ -233,8 +233,8 @@ void DataChannelConnection::InitializeFromSocket(DataChannelServer* server, std:
         URHO3D_ASSERT(dataChannels_[packetType] == nullptr);
 
         dataChannels_[packetType] = dc;
-        dc->onOpen(std::bind(&DataChannelConnection::OnDataChannelConnected, this, packetType));
-        dc->onClosed(std::bind(&DataChannelConnection::OnDataChannelDisconnected, this, packetType));
+        dc->onOpen(std::bind(&WebRTCConnection::OnWebRTCConnected, this, packetType));
+        dc->onClosed(std::bind(&WebRTCConnection::OnWebRTCDisconnected, this, packetType));
         dc->onMessage([this](const rtc::binary& data)
         {
             if (onMessage_)

@@ -30,28 +30,28 @@
 namespace Urho3D
 {
 
-URHO3D_EVENT(E_APPCONNCONNECTED, AppConnectionConnected)
+URHO3D_EVENT(E_EVENTCONNCONNECTED, EventConnectionConnected)
 {
-    URHO3D_PARAM(P_APPCONNECTION, AppConnection); // AppConnection pointer
+    URHO3D_PARAM(P_EVENTCONNECTION, EventConnection); // EventConnection pointer
 }
 
-URHO3D_EVENT(E_APPCONNDISCONNECTED, AppConnectionDisconnected)
+URHO3D_EVENT(E_EVENTCONNDISCONNECTED, EventConnectionDisconnected)
 {
-    URHO3D_PARAM(P_APPCONNECTION, AppConnection); // AppConnection pointer
+    URHO3D_PARAM(P_EVENTCONNECTION, EventConnection); // EventConnection pointer
 }
 
-URHO3D_EVENT(E_APPCONNMESSAGE, AppConnectionMessage)
+URHO3D_EVENT(E_EVENTCONNMESSAGE, EventConnectionMessage)
 {
-    URHO3D_PARAM(P_APPCONNECTION, AppConnection); // AppConnection pointer
+    URHO3D_PARAM(P_EVENTCONNECTION, EventConnection); // EventConnection pointer
     URHO3D_PARAM(P_DATA, Data); // String
 }
 
-class URHO3D_API AppConnection : public NetworkConnection
+class URHO3D_API EventConnection : public NetworkConnection
 {
-    URHO3D_OBJECT(AppConnection, NetworkConnection);
+    URHO3D_OBJECT(EventConnection, NetworkConnection);
 public:
-    explicit AppConnection(Context* context);
-    ~AppConnection();
+    explicit EventConnection(Context* context);
+    ~EventConnection();
     static void RegisterObject(Context* context);
     bool Connect(const URL&) override;
     void Disconnect() override;

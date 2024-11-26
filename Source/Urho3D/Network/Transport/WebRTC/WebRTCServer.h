@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2017-2024 the rbfx project.
+// Copyright (c) 2017-2022 the rbfx project.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -23,36 +23,44 @@
 #pragma once
 
 #include <Urho3D/Core/Object.h>
+#include <Urho3D/Core/Signal.h>
 #include <Urho3D/Network/Transport/NetworkServer.h>
+
+struct juice_server;
+
+namespace rtc
+{
+
+class WebSocket;
+class WebSocketServer;
+
+}
 
 namespace Urho3D
 {
-class AppConnection;
 
-class URHO3D_API AppServer : public NetworkServer
+class WebRTCConnection;
+
+class URHO3D_API WebRTCServer : public NetworkServer
 {
-    URHO3D_OBJECT(AppServer, NetworkServer);
+    friend class WebRTCConnection;
+    URHO3D_OBJECT(WebRTCServer, NetworkServer);
 public:
-    explicit AppServer(Context* context);
+    explicit WebRTCServer(Context* context);
     static void RegisterObject(Context* context);
-    bool Listen(const URL&) override;
+    /// Supports "ws" and "wss" schemes. "wss" scheme requires calling %SetTLSCertificate before calling %Listen.
+    bool Listen(const URL& url) override;
     void Stop() override;
+    void SetTLSCertificate(ea::string_view certificatePemFile, ea::string_view keyPemFile, ea::string_view keyPassword);
 
-private:
-    void HandleConnected(StringHash eventType, VariantMap& eventData);
-    void HandleDisconnected(StringHash eventType, VariantMap& eventData);
-    void HandleMessage(StringHash eventType, VariantMap& eventData);
+protected:
+    void OnDisconnected(WebRTCConnection* connection);
 
-    void OnConnected(AppConnection* connection);
-    void OnDisconnected(AppConnection* connection);
-    void OnMessage(AppConnection* connection, const ea::string& data);
-
-    struct ConnectionLink
-    {
-        SharedPtr<AppConnection> client_;
-        SharedPtr<AppConnection> server_;
-    };
-    ea::map<SharedPtr<AppConnection>, ea::shared_ptr<ConnectionLink>> connections_;
+    ea::shared_ptr<rtc::WebSocketServer> webSocketServer_ = {};
+    ea::vector<SharedPtr<WebRTCConnection>> connections_;
+    ea::string certificatePemFile_;
+    ea::string keyPemFile_;
+    ea::string keyPassword_;
 };
 
 }   // namespace Urho3D

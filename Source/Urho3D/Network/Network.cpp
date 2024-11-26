@@ -36,10 +36,10 @@
 #include "../Network/Network.h"
 #include "../Network/NetworkEvents.h"
 #include "../Network/Protocol.h"
-#include "../Network/Transport/App/AppConnection.h"
-#include "../Network/Transport/App/AppServer.h"
-#include "../Network/Transport/DataChannel/DataChannelConnection.h"
-#include "../Network/Transport/DataChannel/DataChannelServer.h"
+#include "../Network/Transport/Event/EventConnection.h"
+#include "../Network/Transport/Event/EventServer.h"
+#include "../Network/Transport/WebRTC/WebRTCConnection.h"
+#include "../Network/Transport/WebRTC/WebRTCServer.h"
 #include "../Replica/BehaviorNetworkObject.h"
 #include "../Replica/FilteredByDistance.h"
 #include "../Replica/NetworkObject.h"
@@ -244,7 +244,7 @@ bool Network::StartServer(const URL& url, unsigned int maxConnections)
     };
     transportServer_->onDisconnected_ = [this, queue](NetworkConnection* connection)
     {
-        // Similarly, ensure that dataChannel reference is kept until callback finishes executing.
+        // Similarly, ensure that connection reference is kept until callback finishes executing.
         SharedPtr<NetworkConnection> conn(connection);
         queue->CallFromMainThread([this, conn](int)
         {
@@ -405,14 +405,14 @@ void Network::SetTransportApp()
 {
     InitializeTransportCreateFuncs();
 
-    transportServerCreateFunc_ = transportAppServerCreateFunc_;
-    transportConnectionCreateFunc_ = transportAppConnectionCreateFunc_;
+    transportServerCreateFunc_ = transportEventServerCreateFunc_;
+    transportConnectionCreateFunc_ = transportEventConnectionCreateFunc_;
 }
 
 void Network::SetTransportWebRTC()
 {
-    createServer_ = [](Context* context) { return MakeShared<DataChannelServer>(context); };
-    createConnection_ = [](Context* context) { return MakeShared<DataChannelConnection>(context); };
+    createServer_ = [](Context* context) { return MakeShared<WebRTCServer>(context); };
+    createConnection_ = [](Context* context) { return MakeShared<WebRTCConnection>(context); };
 }
 
 void Network::SetTransportCustom(
@@ -427,16 +427,16 @@ void Network::SetTransportCustom(
 
 void Network::InitializeTransportCreateFuncs()
 {
-    if (transportAppServerCreateFunc_)
+    if (transportEventServerCreateFunc_)
     {
         return;
     }
 
-    transportAppServerCreateFunc_ = [](Context* context) { return MakeShared<AppServer>(context); };
-    transportAppConnectionCreateFunc_ = [](Context* context) { return MakeShared<AppConnection>(context); };
+    transportEventServerCreateFunc_ = [](Context* context) { return MakeShared<EventServer>(context); };
+    transportEventConnectionCreateFunc_ = [](Context* context) { return MakeShared<EventConnection>(context); };
 
-    transportDataChannelServerCreateFunc_ = [](Context* context) { return MakeShared<DataChannelServer>(context); };
-    transportDataChannelConnectionCreateFunc_ = [](Context* context) { return MakeShared<DataChannelConnection>(context); };
+    transportWebRTCServerCreateFunc_ = [](Context* context) { return MakeShared<WebRTCServer>(context); };
+    transportWebRTCConnectionCreateFunc_ = [](Context* context) { return MakeShared<WebRTCConnection>(context); };
 
     SetTransportDefault();
 }
@@ -451,7 +451,7 @@ Connection* Network::GetServerConnection(unsigned connectionIndex) const
 ea::vector<SharedPtr<Connection>> Network::GetClientConnections() const
 {
     ea::vector<SharedPtr<Connection>> connections;
-    for (auto&[dataChannel, connection] : clientConnections_)
+    for (auto&[_, connection] : clientConnections_)
         connections.push_back(connection);
     return connections;
 }
@@ -622,10 +622,10 @@ void RegisterNetworkLibrary(Context* context)
 #endif
 
     Connection::RegisterObject(context);
-    AppConnection::RegisterObject(context);
-    AppServer::RegisterObject(context);
-    DataChannelConnection::RegisterObject(context);
-    DataChannelServer::RegisterObject(context);
+    EventConnection::RegisterObject(context);
+    EventServer::RegisterObject(context);
+    WebRTCConnection::RegisterObject(context);
+    WebRTCServer::RegisterObject(context);
 }
 
 }

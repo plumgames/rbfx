@@ -32,22 +32,22 @@ namespace rtc
 
 class WebSocket;
 class PeerConnection;
-class DataChannel;
+class WebRTC;
 
 }
 
 namespace Urho3D
 {
 
-class DataChannelServer;
+class WebRTCServer;
 
-class URHO3D_API DataChannelConnection : public NetworkConnection
+class URHO3D_API WebRTCConnection : public NetworkConnection
 {
-    friend class DataChannelServer;
-    URHO3D_OBJECT(DataChannelConnection, NetworkConnection);
+    friend class WebRTCServer;
+    URHO3D_OBJECT(WebRTCConnection, NetworkConnection);
 public:
-    explicit DataChannelConnection(Context* context);
-    ~DataChannelConnection();
+    explicit WebRTCConnection(Context* context);
+    ~WebRTCConnection();
     static void RegisterObject(Context* context);
     /// Address may be a full URL and port may be set to 0. Otherwise, port is appended to address.
     bool Connect(const URL& url) override;
@@ -55,15 +55,15 @@ public:
     void SendMessage(ea::string_view data, PacketTypeFlags type = PacketType::ReliableOrdered) override;
 
 protected:
-    void InitializeFromSocket(DataChannelServer* server, std::shared_ptr<rtc::WebSocket> websocket);
-    void OnDataChannelConnected(int index);
-    void OnDataChannelDisconnected(int index);
+    void InitializeFromSocket(WebRTCServer* server, std::shared_ptr<rtc::WebSocket> websocket);
+    void OnWebRTCConnected(int index);
+    void OnWebRTCDisconnected(int index);
 
     Mutex mutex_;
-    WeakPtr<DataChannelServer> server_ = {};
+    WeakPtr<WebRTCServer> server_ = {};
     std::shared_ptr<rtc::WebSocket> websocket_ = {};
     std::shared_ptr<rtc::PeerConnection> peer_ = {};
-    std::shared_ptr<rtc::DataChannel> dataChannels_[4] = {};
+    std::shared_ptr<rtc::WebRTC> dataChannels_[4] = {};
     static const unsigned short maxDataSize_ = UINT16_MAX;
     VectorBuffer buffer_;
     bool websocketWasOpened_ = false;

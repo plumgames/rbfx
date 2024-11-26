@@ -21,31 +21,31 @@
 //
 
 #include <Urho3D/Core/Context.h>
-#include <Urho3D/Network/Transport/App/AppServer.h>
-#include <Urho3D/Network/Transport/App/AppConnection.h>
+#include <Urho3D/Network/Transport/Event/EventServer.h>
+#include <Urho3D/Network/Transport/Event/EventConnection.h>
 
 namespace Urho3D
 {
 
-AppServer::AppServer(Context* context)
+EventServer::EventServer(Context* context)
     : NetworkServer(context)
 {
-    SubscribeToEvent(E_APPCONNCONNECTED, URHO3D_HANDLER(AppServer, HandleConnected));
-    SubscribeToEvent(E_APPCONNDISCONNECTED, URHO3D_HANDLER(AppServer, HandleDisconnected));
-    SubscribeToEvent(E_APPCONNMESSAGE, URHO3D_HANDLER(AppServer, HandleMessage));
+    SubscribeToEvent(E_EVENTCONNCONNECTED, URHO3D_HANDLER(EventServer, HandleConnected));
+    SubscribeToEvent(E_EVENTCONNDISCONNECTED, URHO3D_HANDLER(EventServer, HandleDisconnected));
+    SubscribeToEvent(E_EVENTCONNMESSAGE, URHO3D_HANDLER(EventServer, HandleMessage));
 }
 
-void AppServer::RegisterObject(Context* context)
+void EventServer::RegisterObject(Context* context)
 {
-    context->AddAbstractReflection<AppServer>(Category_Network);
+    context->AddAbstractReflection<EventServer>(Category_Network);
 }
 
-bool AppServer::Listen(const URL&)
+bool EventServer::Listen(const URL&)
 {
     return true;
 }
 
-void AppServer::Stop()
+void EventServer::Stop()
 {
     while (!connections_.empty())
     {
@@ -53,31 +53,31 @@ void AppServer::Stop()
     }
 }
 
-void AppServer::HandleConnected(StringHash eventType, VariantMap& eventData)
+void EventServer::HandleConnected(StringHash eventType, VariantMap& eventData)
 {
-    using namespace AppConnectionConnected;
-    auto* connection = static_cast<AppConnection*>(eventData[P_APPCONNECTION].GetPtr());
+    using namespace EventConnectionConnected;
+    auto* connection = static_cast<EventConnection*>(eventData[P_EVENTCONNECTION].GetPtr());
     OnConnected(connection);
 }
 
-void AppServer::HandleDisconnected(StringHash eventType, VariantMap& eventData)
+void EventServer::HandleDisconnected(StringHash eventType, VariantMap& eventData)
 {
-    using namespace AppConnectionDisconnected;
-    auto* connection = static_cast<AppConnection*>(eventData[P_APPCONNECTION].GetPtr());
+    using namespace EventConnectionDisconnected;
+    auto* connection = static_cast<EventConnection*>(eventData[P_EVENTCONNECTION].GetPtr());
     OnDisconnected(connection);
 }
 
-void AppServer::HandleMessage(StringHash eventType, VariantMap& eventData)
+void EventServer::HandleMessage(StringHash eventType, VariantMap& eventData)
 {
-    using namespace AppConnectionMessage;
-    auto* connection = static_cast<AppConnection*>(eventData[P_APPCONNECTION].GetPtr());
+    using namespace EventConnectionMessage;
+    auto* connection = static_cast<EventConnection*>(eventData[P_EVENTCONNECTION].GetPtr());
     auto message = eventData[P_DATA].GetString();
     OnMessage(connection, message);
 }
 
-void AppServer::OnConnected(AppConnection* connection)
+void EventServer::OnConnected(EventConnection* connection)
 {
-    auto clientConnection = SharedPtr<AppConnection>(connection);
+    auto clientConnection = SharedPtr<EventConnection>(connection);
     const auto itr = connections_.find(clientConnection);
     if (itr != connections_.end())
     {
@@ -86,7 +86,7 @@ void AppServer::OnConnected(AppConnection* connection)
 
     auto link = ea::make_shared<ConnectionLink>();
     link->client_ = clientConnection;
-    link->server_ = MakeShared<AppConnection>(context_);
+    link->server_ = MakeShared<EventConnection>(context_);
 
     connections_.insert(ea::make_pair(link->client_, link));
     connections_.insert(ea::make_pair(link->server_, link));
@@ -100,9 +100,9 @@ void AppServer::OnConnected(AppConnection* connection)
     link->client_->OnConnected();
 }
 
-void AppServer::OnDisconnected(AppConnection* c)
+void EventServer::OnDisconnected(EventConnection* c)
 {
-    auto connection = SharedPtr<AppConnection>(c);
+    auto connection = SharedPtr<EventConnection>(c);
     const auto itr = connections_.find(connection);
     if (itr == connections_.end())
     {
@@ -123,9 +123,9 @@ void AppServer::OnDisconnected(AppConnection* c)
     connections_.erase(link->client_);
 }
 
-void AppServer::OnMessage(AppConnection* c, const ea::string& data)
+void EventServer::OnMessage(EventConnection* c, const ea::string& data)
 {
-    auto connection = SharedPtr<AppConnection>(c);
+    auto connection = SharedPtr<EventConnection>(c);
     const auto itr = connections_.find(connection);
     if (itr == connections_.end())
     {
