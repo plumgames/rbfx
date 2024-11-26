@@ -107,8 +107,8 @@ public:
 
     /// Use the default transport (WebRTC)
     void SetTransportDefault();
-    /// Use the app transport
-    void SetTransportApp();
+    /// Use the event transport
+    void SetTransportEvent();
     /// Use the WebRTC transport
     void SetTransportWebRTC();
     /// Use a user defined transport

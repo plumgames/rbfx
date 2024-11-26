@@ -204,10 +204,10 @@ void WebRTCConnection::InitializeFromSocket(WebRTCServer* server, std::shared_pt
     if (server != nullptr)
     {
         using namespace std::chrono_literals;
-        dataChannels_[PacketType::UnreliableUnordered] = peer_->createWebRTC("uu", {{rtc::Reliability::Type::Rexmit, false, 0}});
-        dataChannels_[PacketType::Reliable] = peer_->createWebRTC("ru", {{rtc::Reliability::Type::Reliable, false}});
-        dataChannels_[PacketType::Ordered] = peer_->createWebRTC("uo", {{rtc::Reliability::Type::Rexmit, true, 0}});
-        dataChannels_[PacketType::ReliableOrdered] = peer_->createWebRTC("ro", {{rtc::Reliability::Type::Reliable, true}});
+        dataChannels_[PacketType::UnreliableUnordered] = peer_->createDataChannel("uu", {{rtc::Reliability::Type::Rexmit, false, 0}});
+        dataChannels_[PacketType::Reliable] = peer_->createDataChannel("ru", {{rtc::Reliability::Type::Reliable, false}});
+        dataChannels_[PacketType::Ordered] = peer_->createDataChannel("uo", {{rtc::Reliability::Type::Rexmit, true, 0}});
+        dataChannels_[PacketType::ReliableOrdered] = peer_->createDataChannel("ro", {{rtc::Reliability::Type::Reliable, true}});
         for (int i = 0; i < URHO3D_ARRAYSIZE(dataChannels_); i++)
         {
             auto& dc = dataChannels_[i];
@@ -221,7 +221,7 @@ void WebRTCConnection::InitializeFromSocket(WebRTCServer* server, std::shared_pt
         }
     }
 
-    peer_->onWebRTC([this](std::shared_ptr<rtc::WebRTC> dc)
+    peer_->onDataChannel([this](std::shared_ptr<rtc::DataChannel> dc)
     {
         rtc::Reliability reliability = dc->reliability();
         PacketTypeFlags packetType = {};

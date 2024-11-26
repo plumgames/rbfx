@@ -32,7 +32,7 @@ namespace rtc
 
 class WebSocket;
 class PeerConnection;
-class WebRTC;
+class DataChannel;
 
 }
 
@@ -63,7 +63,7 @@ protected:
     WeakPtr<WebRTCServer> server_ = {};
     std::shared_ptr<rtc::WebSocket> websocket_ = {};
     std::shared_ptr<rtc::PeerConnection> peer_ = {};
-    std::shared_ptr<rtc::WebRTC> dataChannels_[4] = {};
+    std::shared_ptr<rtc::DataChannel> dataChannels_[4] = {};
     static const unsigned short maxDataSize_ = UINT16_MAX;
     VectorBuffer buffer_;
     bool websocketWasOpened_ = false;

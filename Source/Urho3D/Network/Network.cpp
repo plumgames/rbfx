@@ -397,16 +397,14 @@ void Network::SendPackageToClients(Scene* scene, PackageFile* package)
 
 void Network::SetTransportDefault()
 {
-    SetTransportApp();
+    SetTransportEvent();
     //SetTransportWebRTC();
 }
 
-void Network::SetTransportApp()
+void Network::SetTransportEvent()
 {
-    InitializeTransportCreateFuncs();
-
-    transportServerCreateFunc_ = transportEventServerCreateFunc_;
-    transportConnectionCreateFunc_ = transportEventConnectionCreateFunc_;
+    createServer_ = [](Context* context) { return MakeShared<EventServer>(context); };
+    createConnection_ = [](Context* context) { return MakeShared<EventConnection>(context); };
 }
 
 void Network::SetTransportWebRTC()
@@ -423,22 +421,6 @@ void Network::SetTransportCustom(
 
     createServer_ = createServer;
     createConnection_ = createConnection;
-}
-
-void Network::InitializeTransportCreateFuncs()
-{
-    if (transportEventServerCreateFunc_)
-    {
-        return;
-    }
-
-    transportEventServerCreateFunc_ = [](Context* context) { return MakeShared<EventServer>(context); };
-    transportEventConnectionCreateFunc_ = [](Context* context) { return MakeShared<EventConnection>(context); };
-
-    transportWebRTCServerCreateFunc_ = [](Context* context) { return MakeShared<WebRTCServer>(context); };
-    transportWebRTCConnectionCreateFunc_ = [](Context* context) { return MakeShared<WebRTCConnection>(context); };
-
-    SetTransportDefault();
 }
 
 Connection* Network::GetServerConnection(unsigned connectionIndex) const
