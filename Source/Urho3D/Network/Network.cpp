@@ -69,6 +69,8 @@ Network::Network(Context* context)
     SubscribeToEvent(E_BEGINFRAME, URHO3D_HANDLER(Network, HandleBeginFrame));
     SubscribeToEvent(E_RENDERUPDATE, URHO3D_HANDLER(Network, HandleRenderUpdate));
     SubscribeToEvent(E_APPLICATIONSTOPPED, URHO3D_HANDLER(Network, HandleApplicationExit));
+
+    SetTransportDefault();
 }
 
 Network::~Network()
@@ -122,7 +124,7 @@ bool Network::Connect(const URL& url, Scene* scene, const VariantMap& identity, 
     if (!connectionToServer)
     {
         URHO3D_LOGINFO("Connecting to server {}", url.ToString());
-        auto transportConnection = transportConnectionCreateFunc_(context_);
+        auto transportConnection = createConnection_(context_);
         connectionToServer = MakeShared<Connection>(context_, transportConnection);
         connectionToServer->SetScene(scene);
         connectionToServer->SetIdentity(identity);
@@ -230,7 +232,7 @@ bool Network::StartServer(const URL& url, unsigned int maxConnections)
     URHO3D_PROFILE("StartServer");
 
     WorkQueue* queue = GetSubsystem<WorkQueue>();
-    transportServer_ = transportServerCreateFunc_(context_);
+    transportServer_ = createServer_(context_);
     transportServer_->onConnected_ = [this, queue](NetworkConnection* connection)
     {
         // Hold on to DataChannelConnection reference until callback executes.
@@ -409,22 +411,18 @@ void Network::SetTransportApp()
 
 void Network::SetTransportWebRTC()
 {
-    InitializeTransportCreateFuncs();
-
-    transportServerCreateFunc_ = transportDataChannelServerCreateFunc_;
-    transportConnectionCreateFunc_ = transportDataChannelConnectionCreateFunc_;
+    createServer_ = [](Context* context) { return MakeShared<DataChannelServer>(context); };
+    createConnection_ = [](Context* context) { return MakeShared<DataChannelConnection>(context); };
 }
 
-void Network::SetTransportCustom(ea::function<SharedPtr<NetworkServer>(Context*)> createServerFunc,
-    ea::function<SharedPtr<NetworkConnection>(Context*)> createConnectionFunc)
+void Network::SetTransportCustom(
+    const CreateServerCallback& createServer, const CreateConnectionCallback& createConnection)
 {
-    URHO3D_ASSERT(createServerFunc);
-    URHO3D_ASSERT(createConnectionFunc);
+    URHO3D_ASSERT(createServer);
+    URHO3D_ASSERT(createConnection);
 
-    InitializeTransportCreateFuncs();
-
-    transportServerCreateFunc_ = createServerFunc;
-    transportConnectionCreateFunc_ = createConnectionFunc;
+    createServer_ = createServer;
+    createConnection_ = createConnection;
 }
 
 void Network::InitializeTransportCreateFuncs()

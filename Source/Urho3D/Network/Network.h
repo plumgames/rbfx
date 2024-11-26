@@ -44,6 +44,9 @@ class URHO3D_API Network : public Object
     URHO3D_OBJECT(Network, Object);
 
 public:
+    using CreateServerCallback = ea::function<SharedPtr<NetworkServer>(Context* context)>;
+    using CreateConnectionCallback = ea::function<SharedPtr<NetworkConnection>(Context* context)>;
+
     /// Construct.
     explicit Network(Context* context);
     /// Destruct.
@@ -109,8 +112,7 @@ public:
     /// Use the WebRTC transport
     void SetTransportWebRTC();
     /// Use a user defined transport
-    void SetTransportCustom(ea::function<SharedPtr<NetworkServer>(Context*)> createServerFunc,
-        ea::function<SharedPtr<NetworkConnection>(Context*)> createConnectionFunc);
+    void SetTransportCustom(const CreateServerCallback& createServer, const CreateConnectionCallback& createConnection);
 
     /// Return whether the network is updated on this frame.
     bool IsUpdateNow() const { return updateNow_; }
@@ -187,14 +189,8 @@ private:
     /// Actual server, which accepts connections.
     SharedPtr<NetworkServer> transportServer_;
 
-    ea::function<SharedPtr<NetworkServer>(Context*)> transportServerCreateFunc_;
-    ea::function<SharedPtr<NetworkConnection>(Context*)> transportConnectionCreateFunc_;
-
-    ea::function<SharedPtr<NetworkServer>(Context*)> transportAppServerCreateFunc_;
-    ea::function<SharedPtr<NetworkConnection>(Context*)> transportAppConnectionCreateFunc_;
-
-    ea::function<SharedPtr<NetworkServer>(Context*)> transportDataChannelServerCreateFunc_;
-    ea::function<SharedPtr<NetworkConnection>(Context*)> transportDataChannelConnectionCreateFunc_;
+    CreateServerCallback createServer_;
+    CreateConnectionCallback createConnection_;
 };
 
 /// Register Network library objects.
