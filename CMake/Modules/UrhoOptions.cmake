@@ -183,6 +183,7 @@ option                (URHO3D_IK                 "Inverse kinematics subsystem e
 option                (URHO3D_LOGGING            "Enable logging subsystem"                              ${URHO3D_ENABLE_ALL})
 option                (URHO3D_NAVIGATION         "Navigation subsystem enabled"                          ${URHO3D_ENABLE_ALL})
 option                (URHO3D_NETWORK            "Networking subsystem enabled"                          ${URHO3D_ENABLE_ALL})
+option                (URHO3D_NETWORK_WEBRTC     "Networking subsystem WebRTC transport enabled"         ${URHO3D_ENABLE_ALL})
 option                (URHO3D_HTTP               "HTTP client enabled"                                   ${URHO3D_ENABLE_ALL})
 option                (URHO3D_LAN                "LAN discovery enabled"                                 ${URHO3D_ENABLE_ALL})
 option                (URHO3D_PHYSICS            "Physics subsystem enabled"                             ${URHO3D_ENABLE_ALL})

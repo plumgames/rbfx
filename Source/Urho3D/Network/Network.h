@@ -105,12 +105,14 @@ public:
     /// Return the amount of time that happened after fixed-time network update.
     float GetUpdateOvertime() const { return updateAcc_; }
 
-    /// Use the default transport (WebRTC)
+    /// Use the default transport
     void SetTransportDefault();
     /// Use the event transport
     void SetTransportEvent();
+#ifdef URHO3D_NETWORK_WEBRTC
     /// Use the WebRTC transport
     void SetTransportWebRTC();
+#endif
     /// Use a user defined transport
     void SetTransportCustom(const CreateServerCallback& createServer, const CreateConnectionCallback& createConnection);
 

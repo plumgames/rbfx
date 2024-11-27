@@ -68,7 +68,11 @@ if (URHO3D_NAVIGATION)
 endif ()
 
 if (URHO3D_NETWORK)
-    define_engine_source_files (Network)
+    define_engine_source_files (Network NORECURSE)
+    define_engine_source_files (Network/Transport/Event)
+if (URHO3D_NETWORK_WEBRTC)
+    define_engine_source_files (Network/Transport/WebRTC)
+endif()
     define_engine_source_files (Replica)
 endif ()
 

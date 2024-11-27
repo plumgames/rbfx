@@ -38,8 +38,10 @@
 #include "../Network/Protocol.h"
 #include "../Network/Transport/Event/EventConnection.h"
 #include "../Network/Transport/Event/EventServer.h"
+#ifdef URHO3D_NETWORK_WEBRTC
 #include "../Network/Transport/WebRTC/WebRTCConnection.h"
 #include "../Network/Transport/WebRTC/WebRTCServer.h"
+#endif
 #include "../Replica/BehaviorNetworkObject.h"
 #include "../Replica/FilteredByDistance.h"
 #include "../Replica/NetworkObject.h"
@@ -398,7 +400,6 @@ void Network::SendPackageToClients(Scene* scene, PackageFile* package)
 void Network::SetTransportDefault()
 {
     SetTransportEvent();
-    //SetTransportWebRTC();
 }
 
 void Network::SetTransportEvent()
@@ -407,11 +408,13 @@ void Network::SetTransportEvent()
     createConnection_ = [](Context* context) { return MakeShared<EventConnection>(context); };
 }
 
+#ifdef URHO3D_NETWORK_WEBRTC
 void Network::SetTransportWebRTC()
 {
     createServer_ = [](Context* context) { return MakeShared<WebRTCServer>(context); };
     createConnection_ = [](Context* context) { return MakeShared<WebRTCConnection>(context); };
 }
+#endif
 
 void Network::SetTransportCustom(
     const CreateServerCallback& createServer, const CreateConnectionCallback& createConnection)
@@ -606,8 +609,10 @@ void RegisterNetworkLibrary(Context* context)
     Connection::RegisterObject(context);
     EventConnection::RegisterObject(context);
     EventServer::RegisterObject(context);
+#ifdef URHO3D_NETWORK_WEBRTC
     WebRTCConnection::RegisterObject(context);
     WebRTCServer::RegisterObject(context);
+#endif
 }
 
 }
