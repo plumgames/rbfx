@@ -166,6 +166,7 @@ Rml::DataModelConstructor* RmlUIComponent::ExpectDataModelConstructor() const
 
 void RmlUIComponent::OnSetEnabled()
 {
+    BaseClassName::OnSetEnabled();
     UpdateDocumentOpen();
 }
 
