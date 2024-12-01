@@ -226,6 +226,11 @@ void RmlUIComponent::OpenInternal()
 
 void RmlUIComponent::CloseInternal()
 {
+    if (!GetUI())
+    {
+        return;
+    }
+
     if (document_ == nullptr)
         return; // Already closed.
 
