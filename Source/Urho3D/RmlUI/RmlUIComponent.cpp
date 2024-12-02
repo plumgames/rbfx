@@ -241,7 +241,7 @@ void RmlUIComponent::CloseInternal()
     ui->documentReloaded_.Unsubscribe(this);
 
     //position_ = GetPosition();
-    size_ = GetSize();
+    //size_ = GetSize();
 
     OnDocumentPreUnload();
     document_->Close();
