@@ -511,12 +511,14 @@ Rml::Context* RmlUI::GetRmlContext() const
 
 void RmlUI::HandleScreenMode(StringHash, VariantMap& eventData)
 {
+    /*
     assert(rmlContext_ != nullptr);
     RmlCanvasResizedArgs args;
     args.oldSize_ = ToIntVector2(rmlContext_->GetDimensions());
     args.newSize_ = GetDesiredCanvasSize();
     rmlContext_->SetDimensions(ToRmlUi(args.newSize_));
     canvasResizedEvent_(this, args);
+    */
 }
 
 void RmlUI::HandleMouseButtonDown(StringHash, VariantMap& eventData)
