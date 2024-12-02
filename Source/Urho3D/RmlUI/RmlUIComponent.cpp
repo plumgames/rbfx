@@ -240,7 +240,7 @@ void RmlUIComponent::CloseInternal()
     ui->canvasResizedEvent_.Unsubscribe(this);
     ui->documentReloaded_.Unsubscribe(this);
 
-    position_ = GetPosition();
+    //position_ = GetPosition();
     size_ = GetSize();
 
     OnDocumentPreUnload();
@@ -466,7 +466,15 @@ void RmlUIComponent::UpdateDocumentOpen()
 
 void RmlUIComponent::UpdateConnectedCanvas()
 {
-    RmlCanvasComponent* newCanvasComponent = IsEnabledEffective() ? node_->GetComponent<RmlCanvasComponent>() : nullptr;
+    RmlCanvasComponent* newCanvasComponent = nullptr;
+    if (IsEnabledEffective())
+    {
+        newCanvasComponent = node_->GetComponent<RmlCanvasComponent>();
+        if (!newCanvasComponent)
+        {
+            newCanvasComponent = node_->GetScene()->GetComponent<RmlCanvasComponent>();
+        }
+    }
     if (canvasComponent_ != newCanvasComponent)
     {
         const bool wasOpen = document_ != nullptr;
