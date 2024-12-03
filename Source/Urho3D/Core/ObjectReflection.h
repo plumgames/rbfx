@@ -165,6 +165,8 @@ public:
     void RemoveReflection(StringHash typeNameHash);
     template <class T> void RemoveReflection();
 
+    void RemoveCategory(ea::string_view category);
+
     /// Create an object by type. Return pointer to it or null if no reflection is found.
     SharedPtr<Object> CreateObject(StringHash typeNameHash);
 

@@ -296,4 +296,21 @@ void ObjectReflectionRegistry::RemoveReflectionFromCurrentCategory(ObjectReflect
         URHO3D_ASSERTLOG(0, "Object {} is not found in category '{}'", reflection->GetTypeName(), oldCategory);
 }
 
+void ObjectReflectionRegistry::RemoveCategory(ea::string_view category)
+{
+    for (auto it = reflections_.begin(); it != reflections_.end();)
+    {
+        if (it->second->GetCategory() == category)
+        {
+            it = reflections_.erase(it);
+        }
+        else
+        {
+            ++it;
+        }
+    }
+
+    categories_.erase(ea::string(category));
+}
+
 }
