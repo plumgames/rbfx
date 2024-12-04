@@ -511,14 +511,16 @@ Rml::Context* RmlUI::GetRmlContext() const
 
 void RmlUI::HandleScreenMode(StringHash, VariantMap& eventData)
 {
-    /*
+    if (!handleScreenMode_)
+    {
+        return;
+    }
     assert(rmlContext_ != nullptr);
     RmlCanvasResizedArgs args;
     args.oldSize_ = ToIntVector2(rmlContext_->GetDimensions());
     args.newSize_ = GetDesiredCanvasSize();
     rmlContext_->SetDimensions(ToRmlUi(args.newSize_));
     canvasResizedEvent_(this, args);
-    */
 }
 
 void RmlUI::HandleMouseButtonDown(StringHash, VariantMap& eventData)
@@ -856,9 +858,13 @@ void RmlUI::Render()
 
     if (auto rmlRenderer = dynamic_cast<Detail::RmlRenderer*>(Rml::GetRenderInterface()))
     {
+        const auto statsBefore = renderContext->GetMutableStats();
         rmlRenderer->BeginRendering();
         rmlContext_->Render();
         rmlRenderer->EndRendering();
+        const auto& statsAfter = renderContext->GetMutableStats();
+        renderStats_.numDraws_ = statsAfter.numDraws_ - statsBefore.numDraws_;
+        renderStats_.numPrimitives_ = statsAfter.numPrimitives_ - statsBefore.numPrimitives_;
     }
 }
 

@@ -105,6 +105,9 @@ public:
     /// Unload passed document and load it's rml again, return newly loaded document. This operation preserves document position and size.
     Rml::ElementDocument* ReloadDocument(Rml::ElementDocument* document);
 
+    const RenderDeviceStats& GetRenderStats() const { return renderStats_; };
+    void SetHandleScreenMode(bool enable) { handleScreenMode_ = enable; }
+
     /// Emitted when mouse input is detected. Should be used for translating mouse coordinates when UI is rendered on 3D objects. Takes 2D screen coordinates as input, they may be modified by subscribers.
     Signal<void(IntVector2&)> mouseMoveEvent_;
     /// Emitted when a window document owned by this subsystem is closed.
@@ -167,6 +170,9 @@ private:
     bool isRendering_ = true;
     /// Other instances of RmlUI.
     ea::vector<WeakPtr<RmlUI>> siblingSubsystems_;
+
+    RenderDeviceStats renderStats_{};
+    bool handleScreenMode_ = true;
 
     friend class Detail::RmlPlugin;
 };
