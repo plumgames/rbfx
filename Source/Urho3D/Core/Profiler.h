@@ -26,15 +26,32 @@
 #if URHO3D_PROFILING
 #include <client/TracyLock.hpp>
 #endif
+#ifdef URHO3D_PROFILING_BASIC
+#include <Urho3D/Urho3D.h>
+#endif
 
 namespace Urho3D
 {
-
 static const unsigned PROFILER_COLOR_EVENTS = 0xb26d19;
 static const unsigned PROFILER_COLOR_RESOURCES = 0x006b82;
 
 void SetProfilerThreadName(const char* name);
 
+#ifdef URHO3D_PROFILING_BASIC
+class URHO3D_API ProfilerBasicSample
+{
+public:
+    ProfilerBasicSample(const char* name);
+    ~ProfilerBasicSample();
+
+    static void EndFrame();
+    static void PrintFrame();
+
+private:
+    struct PIMPL;
+    PIMPL* pimpl_ = nullptr;
+};
+#endif
 }
 
 #define URHO3D_PROFILE_FUNCTION()                   ZoneScopedN(__FUNCTION__)
@@ -51,4 +68,18 @@ void SetProfilerThreadName(const char* name);
 #else
 #   define URHO3D_PROFILE_SRC_LOCATION_DATA(title)
 #   define URHO3D_PROFILE_MUTEX(name)               Mutex name{}
+#endif
+
+#ifdef URHO3D_PROFILING_BASIC
+    #undef URHO3D_PROFILE_FUNCTION
+    #undef URHO3D_PROFILE_C
+    #undef URHO3D_PROFILE
+    #undef URHO3D_PROFILE_FRAME
+    #undef URHO3D_PROFILE_ZONENAME
+
+    #define URHO3D_PROFILE_FUNCTION() Urho3D::ProfilerBasicSample pbs_f_##__LINE__(__FUNCTION__)
+    #define URHO3D_PROFILE_C(name, color) Urho3D::ProfilerBasicSample pbs_c_##__LINE__(name)
+    #define URHO3D_PROFILE(name) Urho3D::ProfilerBasicSample pbs_##__LINE__(name)
+    #define URHO3D_PROFILE_FRAME() Urho3D::ProfilerBasicSample::EndFrame()
+    #define URHO3D_PROFILE_ZONENAME(txt, len) 
 #endif

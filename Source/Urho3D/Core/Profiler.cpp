@@ -33,6 +33,12 @@
 #endif
 #endif
 #include "Profiler.h"
+#if URHO3D_PROFILING_BASIC
+#include <Urho3D/Core/Timer.h>
+#include <Urho3D/IO/Log.h>
+#include <EASTL/map.h>
+#include <EASTL/string.h>
+#endif
 
 namespace Urho3D
 {
@@ -43,5 +49,61 @@ void SetProfilerThreadName(const char* name)
     tracy::SetThreadName(name);
 #endif
 }
+    
+#ifdef URHO3D_PROFILING_BASIC
+struct ProfilerBasicSample::PIMPL
+{
+    HiresTimer timer_{};
+    ea::string name_{};
+};
+
+ea::map<ea::string, unsigned> framePrev_;
+ea::map<ea::string, unsigned> frameCurr_;
+unsigned FrameCount = 0;
+
+ProfilerBasicSample::ProfilerBasicSample(const char* name)
+{
+    pimpl_ = new PIMPL();
+    pimpl_->name_ = name;
+}
+
+ProfilerBasicSample::~ProfilerBasicSample()
+{
+    frameCurr_[pimpl_->name_] = pimpl_->timer_.GetUSec();
+    delete pimpl_;
+}
+
+void ProfilerBasicSample::EndFrame()
+{
+    ++FrameCount;
+    framePrev_ = frameCurr_;
+    frameCurr_.clear();
+}
+
+void ProfilerBasicSample::PrintFrame()
+{
+    ea::vector<ea::pair<ea::string, unsigned>> sortedSamples;
+    for (auto& pair : framePrev_)
+    {
+        sortedSamples.push_back(pair);
+    }
+
+    ea::sort(sortedSamples.begin(), sortedSamples.end(),
+        [](const ea::pair<ea::string, unsigned>& a, const ea::pair<ea::string, unsigned>& b)
+    {
+        return a.second > b.second;
+    });
+
+    ea::string msg;
+    for (const auto& pair : sortedSamples)
+    {
+        msg += pair.first.c_str() + ea::string(": ") + ea::to_string(pair.second / 1000.0f) + '\n';
+    }
+
+    URHO3D_LOGDEBUG("***FRAME START*** ({})", FrameCount);
+    URHO3D_LOGDEBUG(msg);
+    URHO3D_LOGDEBUG("***FRAME END*** ({})", FrameCount);
+}
+#endif
 
 }
