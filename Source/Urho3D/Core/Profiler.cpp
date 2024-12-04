@@ -100,9 +100,9 @@ void ProfilerBasicSample::PrintFrame()
         msg += pair.first.c_str() + ea::string(": ") + ea::to_string(pair.second / 1000.0f) + '\n';
     }
 
-    URHO3D_LOGDEBUG("***FRAME START*** ({})", FrameCount);
+    URHO3D_LOGDEBUG("***PROFILER FRAME START*** ({})", FrameCount);
     URHO3D_LOGDEBUG(msg);
-    URHO3D_LOGDEBUG("***FRAME END*** ({})", FrameCount);
+    URHO3D_LOGDEBUG("***PROFILER FRAME END*** ({})", FrameCount);
 }
 #endif
 
