@@ -208,6 +208,8 @@ void RenderBufferManager::SwapColorBuffers(bool synchronizeContents)
 void RenderBufferManager::SetRenderTargetsRect(const IntRect& viewportRect,
     RenderBuffer* depthStencilBuffer, ea::span<RenderBuffer* const> colorBuffers, bool readOnlyDepth, CubeMapFace face)
 {
+    URHO3D_PROFILE_FUNCTION();
+
     ea::optional<IntRect> defaultViewportRect;
     OptionalRawTextureRTV depthStencilRef;
     if (depthStencilBuffer)

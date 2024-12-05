@@ -275,7 +275,10 @@ void DrawCommandQueue::ExecuteInContext(RenderContext* renderContext)
                 drawAttrs.Flags = Diligent::DRAW_FLAG_VERIFY_ALL;
                 drawAttrs.IndexType = GetIndexType(currentIndexBuffer);
 
-                deviceContext->DrawIndexed(drawAttrs);
+                {
+                    URHO3D_PROFILE("DrawIndexed");
+                    deviceContext->DrawIndexed(drawAttrs);
+                }
 
                 stats.numDraws_ += 1;
                 stats.numPrimitives_ += drawAttrs.NumIndices * drawAttrs.NumInstances;
@@ -289,7 +292,10 @@ void DrawCommandQueue::ExecuteInContext(RenderContext* renderContext)
                 drawAttrs.FirstInstanceLocation = caps.drawBaseInstance_ ? cmd.instanceStart_ : 0;
                 drawAttrs.Flags = Diligent::DRAW_FLAG_VERIFY_ALL;
 
-                deviceContext->Draw(drawAttrs);
+                {
+                    URHO3D_PROFILE("Draw");
+                    deviceContext->Draw(drawAttrs);
+                }
 
                 stats.numDraws_ += 1;
                 stats.numPrimitives_ += drawAttrs.NumVertices * drawAttrs.NumInstances;

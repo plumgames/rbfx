@@ -66,10 +66,11 @@ ea::map<ea::string, Entry> framePrev_;
 ea::map<ea::string, Entry> frameCurr_;
 unsigned frameCount_ = 0;
 
-ProfilerBasicSample::ProfilerBasicSample(const char* name)
+ProfilerBasicSample::ProfilerBasicSample(const char* file, int line, const char* func, const char* name)
 {
     pimpl_ = new PIMPL();
-    pimpl_->name_ = name;
+    pimpl_->name_ = fmt::format("{}_{}:{}", func, name, line).c_str();
+    //pimpl_->name_ = fmt::format("{}:{}_{}_{}", file, line, func, name).c_str();
 }
 
 ProfilerBasicSample::~ProfilerBasicSample()
@@ -101,11 +102,12 @@ void ProfilerBasicSample::PrintFrame()
         return a.second.ms_ > b.second.ms_;
     });
 
-    ea::string msg;
+    ea::string msg = "\n";
     for (const auto& pair : ranked)
     {
-        const eastl::string ms = fmt::format("{:.3f}", pair.second.ms_).c_str();
-        msg += pair.first.c_str() + ea::string(": ") + ms + '(' + ea::to_string(pair.second.count_) + ")\n";
+        const Entry& entry = pair.second;
+        const ea::string& name = pair.first;
+        msg += fmt::format("{:.3f}({}) {}\n", entry.ms_, entry.count_, name).c_str();
     }
 
     URHO3D_LOGDEBUG("***PROFILER FRAME START*** ({})", frameCount_);

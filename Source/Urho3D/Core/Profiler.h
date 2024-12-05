@@ -41,7 +41,7 @@ void SetProfilerThreadName(const char* name);
 class URHO3D_API ProfilerBasicSample
 {
 public:
-    ProfilerBasicSample(const char* name);
+    ProfilerBasicSample(const char* file, int line, const char* func, const char* name);
     ~ProfilerBasicSample();
 
     static void EndFrame();
@@ -77,9 +77,9 @@ private:
     #undef URHO3D_PROFILE_FRAME
     #undef URHO3D_PROFILE_ZONENAME
 
-    #define URHO3D_PROFILE_FUNCTION() Urho3D::ProfilerBasicSample pbs_f_##__LINE__(__FUNCTION__)
-    #define URHO3D_PROFILE_C(name, color) Urho3D::ProfilerBasicSample pbs_c_##__LINE__(name)
-    #define URHO3D_PROFILE(name) Urho3D::ProfilerBasicSample pbs_##__LINE__(name)
+    #define URHO3D_PROFILE_FUNCTION() Urho3D::ProfilerBasicSample pbs_f_##__LINE__(__FILE__, __LINE__, __FUNCTION__, "")
+    #define URHO3D_PROFILE_C(name, color) Urho3D::ProfilerBasicSample pbs_c_##__LINE__(__FILE__, __LINE__, __FUNCTION__, name)
+    #define URHO3D_PROFILE(name) Urho3D::ProfilerBasicSample pbs_##__LINE__(__FILE__, __LINE__, __FUNCTION__, name)
     #define URHO3D_PROFILE_FRAME() Urho3D::ProfilerBasicSample::EndFrame()
-    #define URHO3D_PROFILE_ZONENAME(txt, len) Urho3D::ProfilerBasicSample pbs_zn_##__LINE__(txt)
+    #define URHO3D_PROFILE_ZONENAME(txt, len) Urho3D::ProfilerBasicSample pbs_zn_##__LINE__(__FILE__, __LINE__, __FUNCTION__, txt)
 #endif

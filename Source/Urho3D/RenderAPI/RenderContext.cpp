@@ -56,6 +56,8 @@ void RenderContext::SetSwapChainRenderTargets()
 
 void RenderContext::SetRenderTargets(OptionalRawTextureRTV depthStencil, ea::span<const RenderTargetView> renderTargets)
 {
+    URHO3D_PROFILE_FUNCTION();
+
     const bool isDepthStencilSwapChain = depthStencil && depthStencil->IsSwapChain();
     const bool isRenderTargetsSwapChain = (renderTargets.size() == 1) && renderTargets[0].IsSwapChain();
     const bool isSingleView = (renderTargets.size() + (depthStencil ? 1 : 0)) == 1;
