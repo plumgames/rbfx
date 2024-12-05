@@ -57,9 +57,14 @@ struct ProfilerBasicSample::PIMPL
     ea::string name_{};
 };
 
-ea::map<ea::string, unsigned> framePrev_;
-ea::map<ea::string, unsigned> frameCurr_;
-unsigned FrameCount = 0;
+struct Entry {
+    float ms_ = 0;
+    unsigned count_ = 0;
+};
+
+ea::map<ea::string, Entry> framePrev_;
+ea::map<ea::string, Entry> frameCurr_;
+unsigned frameCount_ = 0;
 
 ProfilerBasicSample::ProfilerBasicSample(const char* name)
 {
@@ -69,40 +74,43 @@ ProfilerBasicSample::ProfilerBasicSample(const char* name)
 
 ProfilerBasicSample::~ProfilerBasicSample()
 {
-    frameCurr_[pimpl_->name_] = pimpl_->timer_.GetUSec();
+    Entry & entry = frameCurr_[pimpl_->name_];
+    entry.ms_ += pimpl_->timer_.GetUSec() / 1000.0f;
+    ++entry.count_;
     delete pimpl_;
 }
 
 void ProfilerBasicSample::EndFrame()
 {
-    ++FrameCount;
+    ++frameCount_;
     framePrev_ = frameCurr_;
     frameCurr_.clear();
 }
 
 void ProfilerBasicSample::PrintFrame()
 {
-    ea::vector<ea::pair<ea::string, unsigned>> sortedSamples;
+    ea::vector<ea::pair<ea::string, Entry>> ranked;
     for (auto& pair : framePrev_)
     {
-        sortedSamples.push_back(pair);
+        ranked.push_back(pair);
     }
 
-    ea::sort(sortedSamples.begin(), sortedSamples.end(),
-        [](const ea::pair<ea::string, unsigned>& a, const ea::pair<ea::string, unsigned>& b)
+    ea::sort(ranked.begin(), ranked.end(),
+        [](const ea::pair<ea::string, Entry>& a, const ea::pair<ea::string, Entry>& b)
     {
-        return a.second > b.second;
+        return a.second.ms_ > b.second.ms_;
     });
 
     ea::string msg;
-    for (const auto& pair : sortedSamples)
+    for (const auto& pair : ranked)
     {
-        msg += pair.first.c_str() + ea::string(": ") + ea::to_string(pair.second / 1000.0f) + '\n';
+        const eastl::string ms = fmt::format("{:.3f}", pair.second.ms_).c_str();
+        msg += pair.first.c_str() + ea::string(": ") + ms + '(' + ea::to_string(pair.second.count_) + ")\n";
     }
 
-    URHO3D_LOGDEBUG("***PROFILER FRAME START*** ({})", FrameCount);
+    URHO3D_LOGDEBUG("***PROFILER FRAME START*** ({})", frameCount_);
     URHO3D_LOGDEBUG(msg);
-    URHO3D_LOGDEBUG("***PROFILER FRAME END*** ({})", FrameCount);
+    URHO3D_LOGDEBUG("***PROFILER FRAME END*** ({})", frameCount_);
 }
 #endif
 
