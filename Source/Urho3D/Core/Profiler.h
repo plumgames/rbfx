@@ -81,5 +81,5 @@ private:
     #define URHO3D_PROFILE_C(name, color) Urho3D::ProfilerBasicSample pbs_c_##__LINE__(name)
     #define URHO3D_PROFILE(name) Urho3D::ProfilerBasicSample pbs_##__LINE__(name)
     #define URHO3D_PROFILE_FRAME() Urho3D::ProfilerBasicSample::EndFrame()
-    #define URHO3D_PROFILE_ZONENAME(txt, len) 
+    #define URHO3D_PROFILE_ZONENAME(txt, len) Urho3D::ProfilerBasicSample pbs_zn_##__LINE__(txt)
 #endif

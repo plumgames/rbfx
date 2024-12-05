@@ -548,6 +548,8 @@ void Graphics::SetMaxBones(unsigned numBones)
 
 void Graphics::Clear(ClearTargetFlags flags, const Color& color, float depth, unsigned stencil)
 {
+    URHO3D_PROFILE("Clear");
+
     URHO3D_ASSERT(renderDevice_);
 
     RenderContext* renderContext = renderDevice_->GetRenderContext();
@@ -568,6 +570,8 @@ void Graphics::Restore()
 
 void Graphics::ResetRenderTargets()
 {
+    URHO3D_PROFILE("ResetRenderTargets");
+
     URHO3D_ASSERT(renderDevice_);
 
     RenderContext* renderContext = renderDevice_->GetRenderContext();
