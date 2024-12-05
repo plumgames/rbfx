@@ -41,7 +41,7 @@ static void CallbackFunction(ConstFSEventStreamRef streamRef, void* clientCallBa
 
 - (MacFileWatcher*)initWithPathName:(const char*)pathName recursive:(bool)watchSubDirs;
 - (const char*)readChanges;
-- (void)addChange:(NSString*)fileName;
+- (void)addChange:(char)kind recursive:(NSString*)fileName;
 
 @end
 
