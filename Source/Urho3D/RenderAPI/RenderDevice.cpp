@@ -1013,6 +1013,11 @@ void RenderDevice::InitializeDevice()
     case RenderBackend::OpenGL:
     {
         Diligent::EngineGLCreateInfo createInfo;
+
+    #if URHO3D_PLATFORM_WEB
+        createInfo.WebGLAttribs.PowerPreference = Diligent::WEBGL_POWER_PREFERENCE_HIGH_PERFORMANCE;
+    #endif
+
         createInfo.AdapterId = FindBestAdapter(factory_, createInfo.GraphicsAPIVersion, deviceSettings_.adapterId_);
 
         factoryOpenGL_->AttachToActiveGLContext(createInfo, &renderDevice_, &deviceContext_);
