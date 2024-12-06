@@ -128,19 +128,6 @@ void ProfilerBasicSample::EndFrame()
     renderSeen_ = false;
 }
 
-void SetUpdateRender(const Entry& e, float& update, float& render)
-{
-    if (e.update)
-    {
-        update = e.ms_;
-    }
-
-    if (e.render)
-    {
-        render = e.ms_;
-    }
-}
-
 void ProfilerBasicSample::PrintFrame()
 {
     ea::vector<ea::pair<ea::string, Entry>> ranked;
@@ -155,9 +142,17 @@ void ProfilerBasicSample::PrintFrame()
     ea::sort(ranked.begin(), ranked.end(),
         [&update, &render](const ea::pair<ea::string, Entry>& a, const ea::pair<ea::string, Entry>& b)
     {
-        SetUpdateRender(a.second, update, render);
-        SetUpdateRender(b.second, update, render);
-        return a.second.ms_ > b.second.ms_;
+        const Entry& entryA = a.second;
+        const Entry& entryB = b.second;
+        if (a.second.update)
+        {
+            update = entryA.ms_;
+        }
+        if (a.second.render)
+        {
+            render = entryA.ms_;
+        }
+        return entryA.ms_ > entryB.ms_;
     });
 
     ea::string msg = "\n";
