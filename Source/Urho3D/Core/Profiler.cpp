@@ -51,41 +51,94 @@ void SetProfilerThreadName(const char* name)
 }
     
 #ifdef URHO3D_PROFILING_BASIC
+struct Entry
+{
+    float ms_ = 0;
+    unsigned count_ = 0;
+    bool render = false;
+    bool update = false;
+};
+
+ea::stack<ProfilerBasicSample*> samples_;
+ea::map<ea::string, Entry> framePrev_;
+ea::map<ea::string, Entry> frameCurr_;
+unsigned frameCount_ = 0;
+bool updateSeen_ = false;
+bool renderSeen_ = false;
+
 struct ProfilerBasicSample::PIMPL
 {
     HiresTimer timer_{};
     ea::string name_{};
-};
+    bool ended_ = false;
+    bool update_ = false;
+    bool render_ = false;
 
-struct Entry {
-    float ms_ = 0;
-    unsigned count_ = 0;
-};
+    void End()
+    {
+        if (ended_)
+        {
+            return;
+        }
 
-ea::map<ea::string, Entry> framePrev_;
-ea::map<ea::string, Entry> frameCurr_;
-unsigned frameCount_ = 0;
+        Entry& entry = frameCurr_[name_];
+        entry.ms_ += timer_.GetUSec() / 1000.0f;
+        entry.update = update_;
+        entry.render = render_;
+        ++entry.count_;
+        ended_ = true;
+    }
+};
 
 ProfilerBasicSample::ProfilerBasicSample(const char* file, int line, const char* func, const char* name)
 {
+    samples_.push(this);
     pimpl_ = new PIMPL();
     pimpl_->name_ = fmt::format("{}_{}:{}", func, name, line).c_str();
-    //pimpl_->name_ = fmt::format("{}:{}_{}_{}", file, line, func, name).c_str();
+    // pimpl_->name_ = fmt::format("{}:{}_{}_{}", file, line, func, name).c_str();
+
+    if (!updateSeen_ && strcmp(name, "Update") == 0)
+    {
+        pimpl_->update_ = true;
+        updateSeen_ = true;
+    }
+
+    if (!renderSeen_ && strcmp(name, "Render") == 0)
+    {
+        pimpl_->render_ = true;
+        renderSeen_ = true;
+    }
 }
 
 ProfilerBasicSample::~ProfilerBasicSample()
 {
-    Entry & entry = frameCurr_[pimpl_->name_];
-    entry.ms_ += pimpl_->timer_.GetUSec() / 1000.0f;
-    ++entry.count_;
+    samples_.pop();
+    pimpl_->End();
     delete pimpl_;
 }
 
 void ProfilerBasicSample::EndFrame()
 {
+    URHO3D_ASSERT(samples_.size() == 1);
+    samples_.top()->pimpl_->End();
     ++frameCount_;
     framePrev_ = frameCurr_;
     frameCurr_.clear();
+    updateSeen_ = false;
+    renderSeen_ = false;
+}
+
+void SetUpdateRender(const Entry& e, float& update, float& render)
+{
+    if (e.update)
+    {
+        update = e.ms_;
+    }
+
+    if (e.render)
+    {
+        render = e.ms_;
+    }
 }
 
 void ProfilerBasicSample::PrintFrame()
@@ -96,9 +149,14 @@ void ProfilerBasicSample::PrintFrame()
         ranked.push_back(pair);
     }
 
+    float update = 0;
+    float render = 0;
+
     ea::sort(ranked.begin(), ranked.end(),
-        [](const ea::pair<ea::string, Entry>& a, const ea::pair<ea::string, Entry>& b)
+        [&update, &render](const ea::pair<ea::string, Entry>& a, const ea::pair<ea::string, Entry>& b)
     {
+        SetUpdateRender(a.second, update, render);
+        SetUpdateRender(b.second, update, render);
         return a.second.ms_ > b.second.ms_;
     });
 
@@ -110,7 +168,7 @@ void ProfilerBasicSample::PrintFrame()
         msg += fmt::format("{:.3f}({}) {}\n", entry.ms_, entry.count_, name).c_str();
     }
 
-    URHO3D_LOGDEBUG("***PROFILER FRAME START*** ({})", frameCount_);
+    URHO3D_LOGDEBUG("***PROFILER FRAME START*** ({}) U:{:.3f} R:{:.3f}", frameCount_, update, render);
     URHO3D_LOGDEBUG(msg);
     URHO3D_LOGDEBUG("***PROFILER FRAME END*** ({})", frameCount_);
 }
