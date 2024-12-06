@@ -77,8 +77,10 @@ void DirectionAggregator::SetSubscriptionMask(DirectionAggregatorFlags mask)
         UpdateSubscriptions(enabledSubscriptions_);
 }
 
+#ifdef URHO3D_UI
 /// Set UI element to filter touch events. Only touch events originated in the element going to be handled.
 void DirectionAggregator::SetUIElement(UIElement* element) { uiElement_ = element; }
+#endif
 
 /// Set dead zone to mitigate axis drift.
 void DirectionAggregator::SetDeadZone(float deadZone) { axisAdapter_.SetDeadZone(deadZone); }
@@ -275,6 +277,8 @@ void DirectionAggregator::HandleTouchBegin(StringHash eventType, VariantMap& arg
     if (activeTouchId_.has_value())
         return;
 
+
+#ifdef URHO3D_UI
     // Start tracking touch
     using namespace TouchBegin;
     auto* touchState = input_->GetTouchById(args[P_TOUCHID].GetInt());
@@ -283,6 +287,7 @@ void DirectionAggregator::HandleTouchBegin(StringHash eventType, VariantMap& arg
         activeTouchId_ = touchState->touchID_;
         touchOrigin_ = IntVector2(args[P_X].GetInt(), args[P_Y].GetInt());
     }
+#endif
 }
 
 void DirectionAggregator::HandleTouchMove(StringHash eventType, VariantMap& args)

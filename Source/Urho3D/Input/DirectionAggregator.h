@@ -23,7 +23,9 @@
 
 #include "../Container/FlagSet.h"
 #include "../Core/Object.h"
+#ifdef URHO3D_UI
 #include "../UI/UIElement.h"
+#endif
 #include "../Input/AxisAdapter.h"
 #include <EASTL/fixed_vector.h>
 
@@ -85,8 +87,10 @@ public:
     void SetEnabled(bool enabled);
     /// Set input device subscription mask.
     void SetSubscriptionMask(DirectionAggregatorFlags mask);
+#ifdef URHO3D_UI
     /// Set UI element to filter touch events. Only touch events originated in the element going to be handled.
     void SetUIElement(UIElement* element);
+#endif
     /// Set dead zone to mitigate axis drift.
     void SetDeadZone(float deadZone);
 
@@ -94,8 +98,10 @@ public:
     bool IsEnabled() const { return enabled_; }
     /// Get input device subscription mask.
     DirectionAggregatorFlags GetSubscriptionMask() const { return enabledSubscriptions_; }
+#ifdef URHO3D_UI
     /// Get UI element to filter touch events.
     UIElement* GetUIElement() const { return uiElement_; }
+#endif
     /// Get dead zone.
     float GetDeadZone() const { return axisAdapter_.GetDeadZone(); }
 
@@ -133,8 +139,10 @@ private:
     AxisAdapter axisAdapter_{};
     /// Joystick to ignore (SDL gyroscope virtual joystick)
     int ignoreJoystickId_{-1};
+#ifdef URHO3D_UI
     /// UI element to filter touch events
     WeakPtr<UIElement> uiElement_{};
+#endif
     /// Identifier of active touch
     ea::optional<int> activeTouchId_{};
     /// Origin of the touch

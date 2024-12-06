@@ -140,7 +140,11 @@ struct URHO3D_API ActionMapping
     /// Serialize content from/to archive. May throw ArchiveException.
     void SerializeInBlock(Archive& archive);
     /// Evaluate action state based on current input.
+#ifdef URHO3D_UI
     float Evaluate(Input* input, UI* ui, float deadZone, int ignoreJoystickId) const;
+#else
+    float Evaluate(Input* input, float deadZone, int ignoreJoystickId) const;
+#endif
 };
 }
 

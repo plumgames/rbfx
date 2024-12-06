@@ -28,12 +28,16 @@
 #include "../Core/Mutex.h"
 #include "../Core/Object.h"
 #include "../Core/Signal.h"
+#include "../Core/Timer.h"
 #include "../Input/InputEvents.h"
+#ifdef URHO3D_UI
 #include "../UI/Cursor.h"
+#endif
 
 #include <EASTL/list.h>
 #include <EASTL/optional.h>
 #include <EASTL/unique_ptr.h>
+#include <EASTL/hash_set.h>
 
 union SDL_Event;
 
@@ -62,9 +66,11 @@ const IntVector2 MOUSE_POSITION_OFFSCREEN = IntVector2(M_MIN_INT, M_MIN_INT);
 /// @nocount
 struct URHO3D_API TouchState
 {
+#ifdef URHO3D_UI
     /// Return last touched UI element, used by scripting integration.
     /// @property
     UIElement* GetTouchedElement();
+#endif
 
     /// Touch (finger) ID.
     int touchID_;
@@ -76,8 +82,10 @@ struct URHO3D_API TouchState
     IntVector2 delta_;
     /// Finger pressure.
     float pressure_;
+#ifdef URHO3D_UI
     /// Last touched UI element from screen joystick.
     WeakPtr<UIElement> touchedElement_;
+#endif
 };
 
 /// %Input state for a joystick.
@@ -222,6 +230,7 @@ public:
     void SetMouseMode(MouseMode mode, bool suppressEvent = false);
     /// Reset the last mouse mode that wasn't suppressed in SetMouseMode.
     void ResetMouseMode();
+#ifdef URHO3D_UI
     /// Add screen joystick.
     /** Return the joystick instance ID when successful or negative on error.
      *  If layout file is not given, use the default screen joystick layout.
@@ -239,6 +248,7 @@ public:
     /// Set whether the virtual joystick is visible.
     /// @property
     void SetScreenJoystickVisible(SDL_JoystickID id, bool enable);
+#endif
     /// Show or hide on-screen keyboard on platforms that support it. When shown, keypresses from it are delivered as key events.
     /// @property
     void SetScreenKeyboardVisible(bool enable);
@@ -363,9 +373,11 @@ public:
     /// @property
     bool GetToggleFullscreen() const { return toggleFullscreen_; }
 
+#ifdef URHO3D_UI
     /// Return whether a virtual joystick is visible.
     /// @property
     bool IsScreenJoystickVisible(SDL_JoystickID id) const;
+#endif
     /// Return whether on-screen keyboard is supported.
     /// @property
     bool GetScreenKeyboardSupport() const;
@@ -450,8 +462,10 @@ private:
     void HandleScreenMode(StringHash eventType, VariantMap& eventData);
     /// Handle frame start event.
     void HandleBeginFrame(StringHash eventType, VariantMap& eventData);
+#ifdef URHO3D_UI
     /// Handle touch events from the controls of screen joystick(s).
     void HandleScreenJoystickTouch(StringHash eventType, VariantMap& eventData);
+#endif
     /// Handle SDL event.
     void HandleSDLEvent(void* sdlEvent);
     /// Send SDLRawInput event.

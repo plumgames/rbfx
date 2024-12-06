@@ -44,8 +44,10 @@
 #include "Urho3D/IO/Log.h"
 #include "Urho3D/IO/RWOpsWrapper.h"
 #include "Urho3D/Resource/ResourceCache.h"
+#ifdef URHO3D_UI
 #include "Urho3D/UI/Text.h"
 #include "Urho3D/UI/UI.h"
+#endif
 
 #ifdef _WIN32
 #include "../Engine/Engine.h"
@@ -86,11 +88,12 @@ Key ConvertSDLKeyCode(int keySym, int scanCode)
     else
         return (Key)SDL_tolower(keySym);
 }
-
+#ifdef URHO3D_UI
 UIElement* TouchState::GetTouchedElement()
 {
     return touchedElement_;
 }
+#endif
 
 #ifdef __EMSCRIPTEN__
 #define EM_TRUE 1
@@ -634,6 +637,7 @@ void Input::SetMouseVisible(bool enable, bool suppressEvent)
                 if (mouseMode_ == MM_ABSOLUTE)
                     SetMouseModeAbsolute(SDL_FALSE);
 
+#ifdef URHO3D_UI
                 // Update cursor position
                 auto* ui = GetSubsystem<UI>();
                 Cursor* cursor = ui->GetCursor();
@@ -648,6 +652,7 @@ void Input::SetMouseVisible(bool enable, bool suppressEvent)
                     }
                 }
                 else
+#endif
                 {
                     if (lastVisibleMousePosition_ != MOUSE_POSITION_OFFSCREEN)
                     {
@@ -748,9 +753,16 @@ void Input::SetMouseModeEmscriptenFinal(MouseMode mode, bool suppressEvent)
             SetMouseVisibleEmscripten(true, suppressEvent);
         }
 
+#ifdef URHO3D_UI
         UI* const ui = GetSubsystem<UI>();
         Cursor* const cursor = ui->GetCursor();
-        SetMouseGrabbed(!(mouseVisible_ || (cursor && cursor->IsVisible())), suppressEvent);
+#endif
+        SetMouseGrabbed(!
+        (mouseVisible_ 
+#ifdef URHO3D_UI
+        || (cursor && cursor->IsVisible())
+#endif
+        ), suppressEvent);
     }
     else if (mode == MM_RELATIVE && emscriptenPointerLock_)
     {
@@ -781,8 +793,10 @@ void Input::SetMouseModeEmscripten(MouseMode mode, bool suppressEvent)
     const MouseMode previousMode = mouseMode_;
     mouseMode_ = mode;
 
+#ifdef URHO3D_UI
     UI* const ui = GetSubsystem<UI>();
     Cursor* const cursor = ui->GetCursor();
+#endif
 
     // Handle changing from previous mode
     if (previousMode == MM_RELATIVE)
@@ -793,7 +807,11 @@ void Input::SetMouseModeEmscripten(MouseMode mode, bool suppressEvent)
     {
         // Attempt to cancel pending pointer-lock requests
         emscriptenInput_->ExitPointerLock(suppressEvent);
-        SetMouseGrabbed(!(mouseVisible_ || (cursor && cursor->IsVisible())), suppressEvent);
+        SetMouseGrabbed(!(mouseVisible_ 
+#ifdef URHO3D_UI
+        || (cursor && cursor->IsVisible())
+#endif
+        ), suppressEvent);
     }
     else if (mode == MM_ABSOLUTE)
     {
@@ -805,14 +823,20 @@ void Input::SetMouseModeEmscripten(MouseMode mode, bool suppressEvent)
             }
             else
             {
+#ifdef URHO3D_UI
                 if (!cursor)
+#endif
                     SetMouseVisible(true, suppressEvent);
                 // Deferred mouse mode change to pointer-lock callback
                 mouseMode_ = previousMode;
                 emscriptenInput_->RequestPointerLock(MM_ABSOLUTE, suppressEvent);
             }
 
-            SetMouseGrabbed(!(mouseVisible_ || (cursor && cursor->IsVisible())), suppressEvent);
+            SetMouseGrabbed(!(mouseVisible_ 
+#ifdef URHO3D_UI
+            || (cursor && cursor->IsVisible())
+#endif
+            ), suppressEvent);
         }
     }
     else if (mode == MM_RELATIVE)
@@ -820,7 +844,13 @@ void Input::SetMouseModeEmscripten(MouseMode mode, bool suppressEvent)
         if (emscriptenPointerLock_)
         {
             SetMouseVisibleEmscripten(false, true);
-            SetMouseGrabbed(!(cursor && cursor->IsVisible()), suppressEvent);
+            SetMouseGrabbed(
+#ifdef URHO3D_UI
+                !(cursor && cursor->IsVisible())
+#else
+                true
+#endif
+                , suppressEvent);
         }
         else
         {
@@ -886,8 +916,10 @@ void Input::SetMouseMode(MouseMode mode, bool suppressEvent)
             mouseMode_ = mode;
             SDL_Window* const window = graphics_->GetWindow();
 
+#ifdef URHO3D_UI
             auto* const ui = GetSubsystem<UI>();
             Cursor* const cursor = ui->GetCursor();
+#endif
 
             // Handle changing from previous mode
             if (previousMode == MM_ABSOLUTE)
@@ -921,7 +953,12 @@ void Input::SetMouseMode(MouseMode mode, bool suppressEvent)
             }
 
             if (mode != MM_WRAP)
-                SetMouseGrabbed(!(mouseVisible_ || (cursor && cursor->IsVisible())), suppressEvent);
+                SetMouseGrabbed(!
+                (mouseVisible_ 
+#ifdef URHO3D_UI
+                || (cursor && cursor->IsVisible())
+#endif
+                ), suppressEvent);
         }
         else
         {
@@ -1006,6 +1043,7 @@ static void PopulateMouseButtonBindingMap(ea::unordered_map<ea::string, int>& mo
     }
 }
 
+#ifdef URHO3D_UI
 SDL_JoystickID Input::AddScreenJoystick(XMLFile* layoutFile, XMLFile* styleFile)
 {
     static ea::unordered_map<ea::string, int> keyBindingMap;
@@ -1161,11 +1199,13 @@ SDL_JoystickID Input::AddScreenJoystick(XMLFile* layoutFile, XMLFile* styleFile)
 
     state.Initialize(numButtons, numAxes, numHats);
 
+#ifdef URHO3D_UI
     // There could be potentially more than one screen joystick, however they all will be handled by a same handler method
     // So there is no harm to replace the old handler with the new handler in each call to SubscribeToEvent()
     SubscribeToEvent(E_TOUCHBEGIN, URHO3D_HANDLER(Input, HandleScreenJoystickTouch));
     SubscribeToEvent(E_TOUCHMOVE, URHO3D_HANDLER(Input, HandleScreenJoystickTouch));
     SubscribeToEvent(E_TOUCHEND, URHO3D_HANDLER(Input, HandleScreenJoystickTouch));
+#endif
 
     return joystickID;
 }
@@ -1201,6 +1241,7 @@ void Input::SetScreenJoystickVisible(SDL_JoystickID id, bool enable)
             state.screenJoystick_->SetVisible(enable);
     }
 }
+#endif
 
 void Input::SetScreenKeyboardVisible(bool enable)
 {
@@ -1561,11 +1602,13 @@ JoystickState* Input::GetJoystick(SDL_JoystickID id)
     return i != joysticks_.end() ? &(i->second) : nullptr;
 }
 
+#ifdef URHO3D_UI
 bool Input::IsScreenJoystickVisible(SDL_JoystickID id) const
 {
     auto i = joysticks_.find(id);
     return i != joysticks_.end() && i->second.screenJoystick_ && i->second.screenJoystick_->IsVisible();
 }
+#endif
 
 bool Input::GetScreenKeyboardSupport() const
 {
@@ -2572,6 +2615,7 @@ void Input::HandleScreenMode(StringHash eventType, VariantMap& eventData)
     SDL_Window* window = graphics_->GetWindow();
     windowID_ = SDL_GetWindowID(window);
 
+#ifdef URHO3D_UI
     // Resize screen joysticks to new screen size
     for (auto i = joysticks_.begin(); i != joysticks_.end(); ++i)
     {
@@ -2579,6 +2623,7 @@ void Input::HandleScreenMode(StringHash eventType, VariantMap& eventData)
         if (screenjoystick)
             screenjoystick->SetSize(graphics_->GetWidth(), graphics_->GetHeight());
     }
+#endif
 
     if (graphics_->GetFullscreen() || !mouseVisible_)
         focusedThisFrame_ = true;
@@ -2614,6 +2659,7 @@ void Input::HandleEndFrame(StringHash eventType, VariantMap& eventData)
 }
 #endif
 
+#ifdef URHO3D_UI
 void Input::HandleScreenJoystickTouch(StringHash eventType, VariantMap& eventData)
 {
     using namespace TouchBegin;
@@ -2755,6 +2801,7 @@ void Input::HandleScreenJoystickTouch(StringHash eventType, VariantMap& eventDat
     // Handle the fake SDL event to turn it into Urho3D genuine event
     HandleSDLEvent(&evt);
 }
+#endif
 
 IntVector2 Input::SystemToBackbuffer(const IntVector2& value) const
 {

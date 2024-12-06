@@ -44,7 +44,7 @@ endmacro()
 
 define_engine_source_files (Container Core IO Math)
 
-define_engine_source_files (Audio Engine Graphics Input Plugins RenderAPI RenderPipeline Resource Scene Script Shader UI Utility)
+define_engine_source_files (Audio Engine Graphics Input Plugins RenderAPI RenderPipeline Resource Scene Script Shader Utility)
 list (REMOVE_ITEM SOURCE_FILES BindAll.cpp)     # Utility file for BindTool.
 
 if (URHO3D_PARTICLE_GRAPH)
@@ -98,6 +98,14 @@ endif ()
 
 if (URHO3D_SYSTEMUI)
     define_engine_source_files (SystemUI)
+endif ()
+
+if (URHO3D_UI)
+    define_engine_source_files (UI)
+endif ()
+
+if (URHO3D_STATE)
+    define_engine_source_files (STATE)
 endif ()
 
 if (URHO3D_ACTIONS)

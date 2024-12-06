@@ -76,9 +76,11 @@ void MultitouchAdapter::HandleTouchBegin(StringHash /*eventType*/, VariantMap& e
         auto* touchState = input->GetTouch(i);
         if (touchState->touchID_ == touchId)
         {
+#ifdef URHO3D_UI
             // Ignore touches that start over UI elements
             if (touchState->touchedElement_)
                 return;
+#endif
 
             for (auto& activeTouch : touches_)
             {

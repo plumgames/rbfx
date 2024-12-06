@@ -25,6 +25,7 @@
 #include "../Core/Signal.h"
 #include "../Input/DirectionalPadAdapter.h"
 #include "../RmlUI/RmlNavigable.h"
+#include "../IO/Log.h"
 
 #include <RmlUi/Core/Element.h>
 

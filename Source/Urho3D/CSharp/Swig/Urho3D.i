@@ -381,7 +381,7 @@ namespace SDL
 %include "Urho3D/Engine/EngineDefs.h"
 %include "Urho3D/Engine/Engine.h"
 %include "Urho3D/Engine/Application.h"
-%include "Urho3D/Engine/StateManager.h"
+%include "Urho3D/State/StateManager.h"
 %include "Urho3D/Plugins/PluginApplication.h"
 %include "generated/Urho3D/_pre_script.i"
 #if URHO3D_CSHARP

@@ -81,6 +81,7 @@ public:
     /// Return input map attribute.
     ResourceRef GetInputMapAttr() const;
 
+#ifdef URHO3D_UI
     /// Set UI element to filter touch events for movement.
     /// Only touch events originated in the element going to be handled.
     void SetMovementUIElement(UIElement* element);
@@ -91,6 +92,7 @@ public:
     UIElement* GetMovementUIElement() const { return movementUIElement_; }
     /// Get UI element to filter touch events for rotation.
     UIElement* GetRotationUIElement() const { return rotationUIElement_; }
+#endif
 protected:
     /// Handle scene node being assigned at creation.
     void OnNodeSet(Node* previousNode, Node* currentNode) override;
@@ -118,10 +120,12 @@ private:
     /// Component that provides animation states for the model.
     WeakPtr<MoveAndOrbitComponent> component_;
 
+#ifdef URHO3D_UI
     /// UI element to filter touch events.
     WeakPtr<UIElement> movementUIElement_{};
     /// UI element to filter touch events.
     WeakPtr<UIElement> rotationUIElement_{};
+#endif
     /// Is controller subscribed to events.
     bool subscribed_{};
     /// Is ConnectToComponent already called for the current node.

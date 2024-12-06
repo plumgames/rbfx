@@ -32,7 +32,9 @@
 #include "../Input/InputEvents.h"
 #include "../Scene/Node.h"
 #include "../UI/UI.h"
-#include "../Engine/StateManager.h"
+#ifdef URHO3D_STATE
+#include "../State/StateManager.h"
+#endif
 
 namespace Urho3D
 {

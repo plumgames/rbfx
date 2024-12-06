@@ -49,7 +49,11 @@
 #include "../Resource/ResourceCache.h"
 #include "../Resource/XMLFile.h"
 #include "../Scene/Scene.h"
+#ifdef URHO3D_UI
 #include "../UI/UI.h"
+#else
+#include "../Input/Input.h"
+#endif
 
 #include <EASTL/bonus/adaptors.h>
 #include <EASTL/functional.h>
@@ -750,15 +754,17 @@ void Renderer::HandleRenderUpdate(StringHash eventType, VariantMap& eventData)
 
 void Renderer::UpdateMousePositionsForMainViewports()
 {
-    auto* ui = GetSubsystem<UI>();
-
     for (Viewport* viewport : viewports_)
     {
         if (!viewport || !viewport->GetCamera())
             continue;
 
         const IntRect rect = viewport->GetEffectiveRect(backbufferSurface_, false);
-        const IntVector2 mousePosition = ui->GetSystemCursorPosition();
+#ifdef URHO3D_UI
+        const IntVector2 mousePosition = GetSubsystem<UI>()->GetSystemCursorPosition();
+#else
+        const IntVector2 mousePosition = GetSubsystem<Input>()->GetMousePosition();
+#endif
 
         const auto rectPos = rect.Min().ToVector2();
         const auto rectSizeMinusOne = (rect.Size() - IntVector2::ONE).ToVector2();

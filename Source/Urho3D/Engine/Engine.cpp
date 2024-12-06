@@ -37,7 +37,9 @@
 #endif
 #include "../Engine/Engine.h"
 #include "../Engine/EngineDefs.h"
-#include "../Engine/StateManager.h"
+#ifdef URHO3D_STATE
+#include "../State/StateManager.h"
+#endif
 #include "../Graphics/Graphics.h"
 #include "../Graphics/GraphicsEvents.h"
 #include "../RenderAPI/PipelineState.h"
@@ -85,7 +87,9 @@
 #include "../Resource/JSONArchive.h"
 #include "../Scene/Scene.h"
 #include "../Scene/SceneEvents.h"
+#ifdef URHO3D_UI
 #include "../UI/UI.h"
+#endif
 #ifdef URHO3D_RMLUI
 #include "../RmlUI/RmlUI.h"
 #endif
@@ -114,7 +118,6 @@
 #include <emscripten/bind.h>
 #endif
 
-#include "StateManager.h"
 #include "../Core/CommandLine.h"
 
 #include "../DebugNew.h"
@@ -261,9 +264,11 @@ Engine::Engine(Context* context) :
     RegisterGraphicsLibrary(context_);
     // Register object factories for libraries which are not automatically registered along with subsystem creation
     RegisterSceneLibrary(context_);
+#ifdef URHO3D_UI
     // Register UI library object factories before creation of subsystem. This is not done inside subsystem because
     // there may exist multiple instances of UI.
     RegisterUILibrary(context_);
+#endif
 
 #ifdef URHO3D_GLOW
     // Light baker needs only one class so far, so register it directly.
@@ -371,7 +376,9 @@ bool Engine::Initialize(const StringVariantMap& applicationParameters, const Str
     context_->RegisterSubsystem(new Input(context_));
     RegisterInputLibrary(context_);
 
+#ifdef URHO3D_UI
     context_->RegisterSubsystem(new UI(context_));
+#endif
 
 #ifdef URHO3D_RMLUI
     RegisterRmlUILibrary(context_);
@@ -384,7 +391,9 @@ bool Engine::Initialize(const StringVariantMap& applicationParameters, const Str
         context_->RegisterSubsystem(new Graphics(context_));
         context_->RegisterSubsystem(new Renderer(context_));
     }
+#ifdef URHO3D_STATE
     context_->RegisterSubsystem(new StateManager(context_));
+#endif
 #ifdef URHO3D_PARTICLE_GRAPH
     context_->RegisterSubsystem(new ParticleGraphSystem(context_));
 #endif
@@ -721,7 +730,9 @@ void Engine::OnCanvasResize(int width, int height, bool isFullScreen, float dpiS
         "Web canvas resized to {}x{}{} with DPI scale={}", width, height, isFullScreen ? " FullScreen" : " ", dpiScale);
 
     auto input = GetSubsystem<Input>();
+#ifdef URHO3D_UI
     auto ui = GetSubsystem<UI>();
+#endif
     auto graphics = GetSubsystem<Graphics>();
 #ifdef URHO3D_RMLUI
     auto rmlUi = GetSubsystem<RmlUI>();
@@ -738,6 +749,7 @@ void Engine::OnCanvasResize(int width, int height, bool isFullScreen, float dpiS
         mouseMode = input->GetMouseMode();
     }
 
+#ifdef URHO3D_UI
     if (ui)
     {
         ui->SetScale(dpiScale);
@@ -746,6 +758,7 @@ void Engine::OnCanvasResize(int width, int height, bool isFullScreen, float dpiS
         if (Cursor* cursor = ui->GetCursor())
             uiCursorVisible = cursor->IsVisible();
     }
+#endif
 
 #ifdef URHO3D_RMLUI
     if (rmlUi)
@@ -766,6 +779,7 @@ void Engine::OnCanvasResize(int width, int height, bool isFullScreen, float dpiS
         input->SetMouseMode(mouseMode);
     }
 
+#ifdef URHO3D_UI
     if (ui)
     {
         if (Cursor* cursor = ui->GetCursor())
@@ -776,6 +790,7 @@ void Engine::OnCanvasResize(int width, int height, bool isFullScreen, float dpiS
             cursor->SetPosition(ui->ConvertSystemToUI(mousePos));
         }
     }
+#endif
 }
 
 Console* Engine::CreateConsole()
@@ -993,6 +1008,7 @@ void Engine::Render()
 
     GetSubsystem<Renderer>()->Render();
 
+#ifdef URHO3D_UI
     // Render UI after scene is rendered, but only do so if user has not rendered it manually
     // anywhere (for example using renderpath or to a texture).
     graphics->ResetRenderTargets();
@@ -1001,6 +1017,7 @@ void Engine::Render()
         if (!ui->IsRendered() && ui->GetRenderTarget() == nullptr)
             ui->Render();
     }
+#endif
 
     graphics->EndFrame();
 }

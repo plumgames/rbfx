@@ -513,11 +513,16 @@ void ActionMapping::SerializeInBlock(Archive& archive)
         [&](Archive& archive, const char* name, auto& value) { SerializeVector(archive, name, value, "element"); });
 }
 
+#ifdef URHO3D_UI
 float ActionMapping::Evaluate(Input* input, UI* ui, float deadZone, int ignoreJoystickId) const
+#else
+float ActionMapping::Evaluate(Input* input, float deadZone, int ignoreJoystickId) const
+#endif
 {
+#ifdef URHO3D_UI
     const UIElement* elementInFocus = (ui != nullptr) ? ui->GetFocusElement(): nullptr;
-
     if (!elementInFocus)
+#endif
     {
         for (auto& key : keyboardKeys_)
         {
@@ -554,6 +559,7 @@ float ActionMapping::Evaluate(Input* input, UI* ui, float deadZone, int ignoreJo
         return 0.0f;
     }
 
+#ifdef URHO3D_UI
     if (ui != nullptr && !screenButtons_.empty())
     {
         const unsigned numTouches = input->GetNumTouches();
@@ -572,6 +578,7 @@ float ActionMapping::Evaluate(Input* input, UI* ui, float deadZone, int ignoreJo
             }
         }
     }
+#endif
 
     const unsigned numJoysticks = input->GetNumJoysticks();
     float sum = 0.0f;
@@ -805,8 +812,12 @@ float InputMap::Evaluate(const ea::string& action)
     if (iter == actions_.end())
         return 0.0f;
     const auto input = context_->GetSubsystem<Input>();
+#ifdef URHO3D_UI
     const auto ui = context_->GetSubsystem<UI>();
     return iter->second.Evaluate(input, ui, deadZone_, ignoreJoystickId_);
+#else
+    return iter->second.Evaluate(input, deadZone_, ignoreJoystickId_);
+#endif
 }
 
 float InputMap::EvaluateByHash(StringHash actionHash)
@@ -815,8 +826,12 @@ float InputMap::EvaluateByHash(StringHash actionHash)
     if (iter != actions_.end())
         return 0.0f;
     const auto input = context_->GetSubsystem<Input>();
+#ifdef URHO3D_UI
     const auto ui = context_->GetSubsystem<UI>();
     return iter->second.Evaluate(input, ui, deadZone_, ignoreJoystickId_);
+#else
+    return iter->second.Evaluate(input, deadZone_, ignoreJoystickId_);
+#endif
 }
 
 Detail::ActionMapping& InputMap::GetOrAddMapping(const ea::string& action)

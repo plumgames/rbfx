@@ -28,7 +28,9 @@
 #include "../Input/InputEvents.h"
 #include "../Core/CoreEvents.h"
 #include "../Graphics/Graphics.h"
+#ifdef URHO3D_UI
 #include "../UI/UI.h"
+#endif
 
 namespace Urho3D
 {
@@ -194,6 +196,7 @@ void PointerAdapter::HandleTouchBegin(StringHash eventType, VariantMap& args)
 
     const auto* input = GetSubsystem<Input>();
 
+#ifdef URHO3D_UI
     // Start tracking touch
     using namespace TouchBegin;
     auto* touchState = input->GetTouchById(args[P_TOUCHID].GetInt());
@@ -202,6 +205,7 @@ void PointerAdapter::HandleTouchBegin(StringHash eventType, VariantMap& args)
         activeTouchId_ = touchState->touchID_;
         UpdatePointer(IntVector2(args[P_X].GetInt(), args[P_Y].GetInt()).ToVector2(), true, true);
     }
+#endif
 }
 
 void PointerAdapter::HandleTouchMove(StringHash eventType, VariantMap& args)
@@ -305,11 +309,13 @@ void PointerAdapter::UpdatePointer(const Vector2& position, bool press, bool mov
     }
 }
 
+#ifdef URHO3D_UI
 /// Set UI element to filter touch events. Only touch events originated in the element going to be handled.
 void PointerAdapter::SetUIElement(UIElement* element)
 {
     directionAdapter_->SetUIElement(element);
 }
+#endif
 
 void PointerAdapter::SetCursorSpeed(float cursorSpeed)
 {
@@ -323,10 +329,12 @@ void PointerAdapter::SetCursorAcceleration(float cursorAcceleration)
 
 IntVector2 PointerAdapter::GetUIPointerPosition() const
 {
-    const auto ui = GetSubsystem<UI>();
     const auto pos = GetPointerPosition();
+#ifdef URHO3D_UI
+    const auto ui = GetSubsystem<UI>();
     if (ui)
         return ui->ConvertSystemToUI(pos);
+#endif
     return pos;
 }
 

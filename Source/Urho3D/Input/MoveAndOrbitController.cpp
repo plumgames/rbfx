@@ -87,6 +87,7 @@ ResourceRef MoveAndOrbitController::GetInputMapAttr() const
     return GetResourceRef(GetInputMap(), InputMap::GetTypeStatic());
 }
 
+#ifdef URHO3D_UI
 void MoveAndOrbitController::SetMovementUIElement(UIElement* element)
 {
     movementUIElement_ = element;
@@ -96,6 +97,7 @@ void MoveAndOrbitController::SetRotationUIElement(UIElement* element)
 {
     rotationUIElement_ = element;
 }
+#endif
 
 void MoveAndOrbitController::OnNodeSet(Node* previousNode, Node* currentNode)
 {
@@ -250,28 +252,34 @@ void MoveAndOrbitController::EvaluateTouchRects(IntRect& movementRect, IntRect& 
         }
     }
 
+#ifdef URHO3D_UI
     if (movementUIElement_)
     {
         movementRect = movementUIElement_->GetCombinedScreenRect();
     }
     else
+#endif
     {
         movementRect = screenRect;
     }
+#ifdef URHO3D_UI
     if (rotationUIElement_)
     {
         rotationRect = rotationUIElement_->GetCombinedScreenRect();
     }
     else
+#endif
     {
         rotationRect = screenRect;
     }
+#ifdef URHO3D_UI
     if (movementUIElement_ == rotationUIElement_)
     {
         const auto halfSize = IntVector2(movementRect.Width() / 2, movementRect.Height());
         movementRect = IntRect(movementRect.Min(), movementRect.Min() + halfSize);
         rotationRect = IntRect(rotationRect.Min() + IntVector2(halfSize.x_, 0), rotationRect.Max());
     }
+#endif
 }
 
 void MoveAndOrbitController::FindTouchStates(const IntRect& movementRect, const IntRect& rotationRect,
@@ -281,21 +289,25 @@ void MoveAndOrbitController::FindTouchStates(const IntRect& movementRect, const 
     for (unsigned touchIndex = 0; touchIndex < input->GetNumTouches(); ++touchIndex)
     {
         auto touch = input->GetTouch(touchIndex);
+#ifdef URHO3D_UI
         if (movementTouchId_ < 0 && touch->touchedElement_ == movementUIElement_
             && movementRect.Contains(touch->position_))
         {
             movementTouchId_ = touch->touchID_;
             movementTouchOrigin_ = touch->position_;
         }
+#endif
         if (touch->touchID_ == movementTouchId_)
         {
             movementTouch = touch;
         }
+#ifdef URHO3D_UI
         if (rotationTouchId_ < 0 && touch->touchedElement_ == rotationUIElement_
             && rotationRect.Contains(touch->position_))
         {
             rotationTouchId_ = touch->touchID_;
         }
+#endif
         if (touch->touchID_ == rotationTouchId_)
         {
             rotationTouch = touch;

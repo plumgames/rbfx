@@ -22,8 +22,8 @@
 
 
 #include "../CommonUtils.h"
-#include <Urho3D/Engine/StateManager.h>
-#include <Urho3D/Engine/StateManagerEvents.h>
+#include <Urho3D/State/StateManager.h>
+#include <Urho3D/State/StateManagerEvents.h>
 
 namespace
 {

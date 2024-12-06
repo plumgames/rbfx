@@ -23,8 +23,8 @@
 
 #include "../Precompiled.h"
 
-#include "../Engine/StateManager.h"
-#include "../Engine/StateManagerEvents.h"
+#include "../State/StateManager.h"
+#include "../State/StateManagerEvents.h"
 #include "../Core/CoreEvents.h"
 #include "../Core/Thread.h"
 #include "../Graphics/Renderer.h"

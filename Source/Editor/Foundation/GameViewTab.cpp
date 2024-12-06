@@ -24,7 +24,7 @@
 
 #include "../Core/IniHelpers.h"
 
-#include <Urho3D/Engine/StateManager.h>
+#include <Urho3D/State/StateManager.h>
 #include <Urho3D/Graphics/Graphics.h>
 #include <Urho3D/Graphics/GraphicsEvents.h>
 #include <Urho3D/Graphics/Renderer.h>

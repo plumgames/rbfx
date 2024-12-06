@@ -52,8 +52,10 @@ public:
 
     /// Set subscription mask.
     void SetSubscriptionMask(PointerAdapterFlags mask);
+#ifdef URHO3D_UI
     /// Set UI element to filter touch events. Only touch events originated in the element going to be handled.
     void SetUIElement(UIElement* element);
+#endif
     /// Set maximum cursor velocity.
     void SetCursorSpeed(float cursorSpeed);
     /// Set cursor acceleration factor.
@@ -63,8 +65,10 @@ public:
     bool IsEnabled() const { return enabled_; }
     /// Get subscription mask.
     PointerAdapterFlags GetSubscriptionMask() const { return enabledSubscriptions_; }
+#ifdef URHO3D_UI
     /// Get UI element to filter touch events.
     UIElement* GetUIElement() const { return directionAdapter_->GetUIElement(); }
+#endif
     /// Is button down (left mouse button, touch or gamepad A button).
     bool IsButtonDown() const { return pointerPressed_; }
     /// Set maximum cursor velocity.
