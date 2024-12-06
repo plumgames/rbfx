@@ -33,7 +33,7 @@
 #endif
 #endif
 #include "Profiler.h"
-#if URHO3D_PROFILING_BASIC
+#if URHO3D_PROFILING_DEVICE
 #include <Urho3D/Core/Timer.h>
 #include <Urho3D/IO/Log.h>
 #include <EASTL/map.h>
@@ -49,30 +49,32 @@ void SetProfilerThreadName(const char* name)
     tracy::SetThreadName(name);
 #endif
 }
-    
-#ifdef URHO3D_PROFILING_BASIC
+
+#ifdef URHO3D_PROFILING_DEVICE
 struct Entry
 {
     float ms_ = 0;
     unsigned count_ = 0;
-    bool render = false;
-    bool update = false;
+    bool renderScope_ = false;
+    bool updateScope_ = false;
 };
 
-ea::stack<ProfilerBasicSample*> samples_;
+ea::stack<ProfilerDeviceSample*> samples_;
 ea::map<ea::string, Entry> framePrev_;
 ea::map<ea::string, Entry> frameCurr_;
 unsigned frameCount_ = 0;
-bool updateSeen_ = false;
-bool renderSeen_ = false;
+bool updateScopeSeen_ = false;
+bool renderScopeSeen_ = false;
+float updateScopeMs_ = 0;
+float renderScopeMs_ = 0;
 
-struct ProfilerBasicSample::PIMPL
+struct ProfilerDeviceSample::PIMPL
 {
     HiresTimer timer_{};
     ea::string name_{};
     bool ended_ = false;
-    bool update_ = false;
-    bool render_ = false;
+    bool updateScope_ = false;
+    bool renderScope_ = false;
 
     void End()
     {
@@ -83,52 +85,67 @@ struct ProfilerBasicSample::PIMPL
 
         Entry& entry = frameCurr_[name_];
         entry.ms_ += timer_.GetUSec() / 1000.0f;
-        entry.update = update_;
-        entry.render = render_;
+        entry.updateScope_ = updateScope_;
+        entry.renderScope_ = renderScope_;
         ++entry.count_;
         ended_ = true;
     }
 };
 
-ProfilerBasicSample::ProfilerBasicSample(const char* file, int line, const char* func, const char* name)
+ProfilerDeviceSample::ProfilerDeviceSample(const char* file, int line, const char* func, const char* name)
 {
     samples_.push(this);
     pimpl_ = new PIMPL();
     pimpl_->name_ = fmt::format("{}_{}:{}", func, name, line).c_str();
     // pimpl_->name_ = fmt::format("{}:{}_{}_{}", file, line, func, name).c_str();
 
-    if (!updateSeen_ && strcmp(name, "Update") == 0)
+    if (!updateScopeSeen_ && strcmp(name, "Update") == 0)
     {
-        pimpl_->update_ = true;
-        updateSeen_ = true;
+        pimpl_->updateScope_ = true;
+        updateScopeSeen_ = true;
     }
 
-    if (!renderSeen_ && strcmp(name, "Render") == 0)
+    if (!renderScopeSeen_ && strcmp(name, "Render") == 0)
     {
-        pimpl_->render_ = true;
-        renderSeen_ = true;
+        pimpl_->renderScope_ = true;
+        renderScopeSeen_ = true;
     }
 }
 
-ProfilerBasicSample::~ProfilerBasicSample()
+ProfilerDeviceSample::~ProfilerDeviceSample()
 {
     samples_.pop();
     pimpl_->End();
     delete pimpl_;
 }
 
-void ProfilerBasicSample::EndFrame()
+void ProfilerDeviceSample::EndFrame()
 {
-    URHO3D_ASSERT(samples_.size() == 1);
-    samples_.top()->pimpl_->End();
+    if (samples_.size() == 1)
+    {
+        samples_.top()->pimpl_->End();
+    }
     ++frameCount_;
     framePrev_ = frameCurr_;
     frameCurr_.clear();
-    updateSeen_ = false;
-    renderSeen_ = false;
+    updateScopeSeen_ = false;
+    renderScopeSeen_ = false;
+
+    for (auto& pair : framePrev_)
+    {
+        const Entry& e = pair.second;
+        if (e.updateScope_)
+        {
+            updateScopeMs_ = e.ms_;
+        }
+        if (e.renderScope_)
+        {
+            renderScopeMs_ = e.ms_;
+        }
+    }
 }
 
-void ProfilerBasicSample::PrintFrame()
+void ProfilerDeviceSample::PrintFrame()
 {
     ea::vector<ea::pair<ea::string, Entry>> ranked;
     for (auto& pair : framePrev_)
@@ -136,22 +153,11 @@ void ProfilerBasicSample::PrintFrame()
         ranked.push_back(pair);
     }
 
-    float update = 0;
-    float render = 0;
-
     ea::sort(ranked.begin(), ranked.end(),
-        [&update, &render](const ea::pair<ea::string, Entry>& a, const ea::pair<ea::string, Entry>& b)
+        [=](const ea::pair<ea::string, Entry>& a, const ea::pair<ea::string, Entry>& b)
     {
         const Entry& entryA = a.second;
         const Entry& entryB = b.second;
-        if (a.second.update)
-        {
-            update = entryA.ms_;
-        }
-        if (a.second.render)
-        {
-            render = entryA.ms_;
-        }
         return entryA.ms_ > entryB.ms_;
     });
 
@@ -163,10 +169,19 @@ void ProfilerBasicSample::PrintFrame()
         msg += fmt::format("{:.3f}({}) {}\n", entry.ms_, entry.count_, name).c_str();
     }
 
-    URHO3D_LOGDEBUG("***PROFILER FRAME START*** ({}) U:{:.3f} R:{:.3f}", frameCount_, update, render);
+    URHO3D_LOGDEBUG("***PROFILER FRAME START*** ({}) U:{:.3f} R:{:.3f}", frameCount_, updateScopeMs_, renderScopeMs_);
     URHO3D_LOGDEBUG(msg);
     URHO3D_LOGDEBUG("***PROFILER FRAME END*** ({})", frameCount_);
 }
-#endif
 
+float ProfilerDeviceSample::GetFrameUpdateMs()
+{
+    return updateScopeMs_;
 }
+
+float ProfilerDeviceSample::GetFrameRenderMs()
+{
+    return renderScopeMs_;
+}
+#endif
+} // namespace Urho3D

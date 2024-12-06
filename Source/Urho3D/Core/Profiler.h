@@ -26,7 +26,7 @@
 #if URHO3D_PROFILING
 #include <client/TracyLock.hpp>
 #endif
-#ifdef URHO3D_PROFILING_BASIC
+#ifdef URHO3D_PROFILING_DEVICE
 #include <Urho3D/Urho3D.h>
 #endif
 
@@ -37,15 +37,18 @@ static const unsigned PROFILER_COLOR_RESOURCES = 0x006b82;
 
 void SetProfilerThreadName(const char* name);
 
-#ifdef URHO3D_PROFILING_BASIC
-class URHO3D_API ProfilerBasicSample
+#ifdef URHO3D_PROFILING_DEVICE
+class URHO3D_API ProfilerDeviceSample
 {
 public:
-    ProfilerBasicSample(const char* file, int line, const char* func, const char* name);
-    ~ProfilerBasicSample();
+    ProfilerDeviceSample(const char* file, int line, const char* func, const char* name);
+    ~ProfilerDeviceSample();
 
     static void EndFrame();
     static void PrintFrame();
+
+    static float GetFrameUpdateMs();
+    static float GetFrameRenderMs();
 
 private:
     struct PIMPL;
@@ -70,16 +73,16 @@ private:
 #   define URHO3D_PROFILE_MUTEX(name)               Mutex name{}
 #endif
 
-#ifdef URHO3D_PROFILING_BASIC
+#ifdef URHO3D_PROFILING_DEVICE
     #undef URHO3D_PROFILE_FUNCTION
     #undef URHO3D_PROFILE_C
     #undef URHO3D_PROFILE
     #undef URHO3D_PROFILE_FRAME
     #undef URHO3D_PROFILE_ZONENAME
 
-    #define URHO3D_PROFILE_FUNCTION() Urho3D::ProfilerBasicSample pbs_f_##__LINE__(__FILE__, __LINE__, __FUNCTION__, "")
-    #define URHO3D_PROFILE_C(name, color) Urho3D::ProfilerBasicSample pbs_c_##__LINE__(__FILE__, __LINE__, __FUNCTION__, name)
-    #define URHO3D_PROFILE(name) Urho3D::ProfilerBasicSample pbs_##__LINE__(__FILE__, __LINE__, __FUNCTION__, name)
-    #define URHO3D_PROFILE_FRAME() Urho3D::ProfilerBasicSample::EndFrame()
-    #define URHO3D_PROFILE_ZONENAME(txt, len) Urho3D::ProfilerBasicSample pbs_zn_##__LINE__(__FILE__, __LINE__, __FUNCTION__, txt)
+    #define URHO3D_PROFILE_FUNCTION() Urho3D::ProfilerDeviceSample pds_f_##__LINE__(__FILE__, __LINE__, __FUNCTION__, "")
+    #define URHO3D_PROFILE_C(name, color) Urho3D::ProfilerDeviceSample pds_c_##__LINE__(__FILE__, __LINE__, __FUNCTION__, name)
+    #define URHO3D_PROFILE(name) Urho3D::ProfilerDeviceSample pds_##__LINE__(__FILE__, __LINE__, __FUNCTION__, name)
+    #define URHO3D_PROFILE_FRAME() Urho3D::ProfilerDeviceSample::EndFrame()
+    #define URHO3D_PROFILE_ZONENAME(txt, len) Urho3D::ProfilerDeviceSample pds_zn_##__LINE__(__FILE__, __LINE__, __FUNCTION__, txt)
 #endif

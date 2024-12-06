@@ -263,7 +263,7 @@ void Object::SendEvent(StringHash eventType, VariantMap& eventData)
     if (blockEvents_)
         return;
 
-#if URHO3D_PROFILING || URHO3D_PROFILING_BASIC
+#if URHO3D_PROFILING || URHO3D_PROFILING_DEVICE
     URHO3D_PROFILE_C("SendEvent", PROFILER_COLOR_EVENTS);
     const auto& eventName = GetEventNameRegister().GetString(eventType);
     URHO3D_PROFILE_ZONENAME(eventName.c_str(), eventName.length());

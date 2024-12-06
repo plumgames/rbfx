@@ -253,6 +253,8 @@ VariantVector Cursor::GetShapesAttr() const
 
 void Cursor::ApplyOSCursorShape()
 {
+    URHO3D_PROFILE_FUNCTION();
+
     // Mobile platforms do not support applying OS cursor shapes: comment out to avoid log error messages
 #if !defined(__ANDROID__) && !defined(IOS) && !defined(TVOS)
     if (!osShapeDirty_ || !GetSubsystem<Input>()->IsMouseVisible() || GetSubsystem<UI>()->GetCursor() != this)

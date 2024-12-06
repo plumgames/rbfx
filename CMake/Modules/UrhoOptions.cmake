@@ -190,7 +190,7 @@ option                (URHO3D_PHYSICS            "Physics subsystem enabled"    
 cmake_dependent_option(URHO3D_PROFILING          "Profiler support enabled"                              ${URHO3D_ENABLE_ALL} "NOT EMSCRIPTEN;NOT MINGW;NOT UWP"     OFF)
 cmake_dependent_option(URHO3D_PROFILING_FALLBACK "Profiler uses low-precision timer"                     OFF                  "URHO3D_PROFILING"              OFF)
 cmake_dependent_option(URHO3D_PROFILING_SYSTRACE "Profiler systrace support enabled"                     OFF                  "URHO3D_PROFILING"              OFF)
-option                (URHO3D_PROFILING_BASIC    "Profiler (basic) support enabled"                      OFF)
+option                (URHO3D_PROFILING_DEVICE   "Profiler (device only) support enabled"                OFF)
 option                (URHO3D_SYSTEMUI           "Build SystemUI subsystem"                              ${URHO3D_ENABLE_ALL})
 option                (URHO3D_URHO2D             "2D subsystem enabled"                                  ${URHO3D_ENABLE_ALL})
 option                (URHO3D_PHYSICS2D          "2D physics subsystem enabled"                          ${URHO3D_ENABLE_ALL})
@@ -228,7 +228,8 @@ cmake_dependent_option(EMSCRIPTEN_WASM           "Use wasm instead of asm.js"   
 set(EMSCRIPTEN_TOTAL_MEMORY 0 CACHE STRING       "Memory limit in megabytes. Set to 0 for dynamic growth.")
 
 # Graphics configuration
-option                (URHO3D_DEBUG_GRAPHICS     "Enable debug checks in renderer"                       OFF)
+option                (URHO3D_DEBUG_GRAPHICS        "Enable debug checks in renderer"                       OFF)
+option                (URHO3D_DEBUG_GRAPHICS_SCOPES "Enable debug scope markers for graphics debugger"      OFF)
 option                (URHO3D_GRAPHICS_NO_GL     "Disable OpenGL backend in renderer"                    OFF)
 cmake_dependent_option(URHO3D_GRAPHICS_NO_D3D11  "Disable Direct3D11 backend in renderer"                OFF "URHO3D_SHADER_TRANSLATOR" ON)
 cmake_dependent_option(URHO3D_GRAPHICS_NO_D3D12  "Disable Direct3D12 backend in renderer"                OFF "URHO3D_SHADER_TRANSLATOR" ON)

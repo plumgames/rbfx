@@ -1,3 +1,4 @@
+#ifdef URHO3D_DEBUG_GRAPHICS_SCOPES
 // Copyright (c) 2024-2024 the rbfx project.
 // This work is licensed under the terms of the MIT license.
 // For a copy, see <https://opensource.org/licenses/MIT> or the accompanying LICENSE file.
@@ -24,6 +25,7 @@ namespace
 void ConsumeOpenGLError(RenderDevice* renderDevice)
 {
 #if GL_SUPPORTED || GLES_SUPPORTED
+    URHO3D_PROFILE_FUNCTION();
     // Workaround for driver bug.
     if (renderDevice->GetBackend() == RenderBackend::OpenGL)
         (void)glGetError();
@@ -34,14 +36,17 @@ void ConsumeOpenGLError(RenderDevice* renderDevice)
 
 void RenderScope::BeginGroup(ea::string_view name)
 {
+    URHO3D_PROFILE_FUNCTION();
     renderContext_->GetHandle()->BeginDebugGroup(name.data());
     ConsumeOpenGLError(renderContext_->GetRenderDevice());
 }
 
 void RenderScope::EndGroup()
 {
+    URHO3D_PROFILE_FUNCTION();
     renderContext_->GetHandle()->EndDebugGroup();
     ConsumeOpenGLError(renderContext_->GetRenderDevice());
 }
 
 } // namespace Urho3D
+#endif

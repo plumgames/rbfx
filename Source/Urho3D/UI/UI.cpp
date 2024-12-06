@@ -914,6 +914,8 @@ void UI::SetVertexData(VertexBuffer* dest, const ea::vector<float>& vertexData)
     if (vertexData.empty())
         return;
 
+    URHO3D_PROFILE_FUNCTION();
+
     // Update quad geometry into the vertex buffer
     // Resize the vertex buffer first if too small or much too large
     unsigned numVertices = vertexData.size() / UI_VERTEX_SIZE;
@@ -942,6 +944,8 @@ void UI::Render(VertexBuffer* buffer, const ea::vector<UIBatch>& batches, unsign
 {
     if (batches.empty())
         return;
+
+    URHO3D_PROFILE_FUNCTION();
 
     RenderDevice* renderDevice = GetSubsystem<RenderDevice>();
     RenderContext* renderContext = renderDevice->GetRenderContext();
