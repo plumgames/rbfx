@@ -58,7 +58,9 @@
 #include <atomic>
 #include <EASTL/fixed_vector.h>
 #include <RmlUi/Core.h>
+#ifdef URHO3D_RMLUI_DEBUG
 #include <RmlUi/Debugger.h>
+#endif
 
 #include "../DebugNew.h"
 
@@ -477,6 +479,7 @@ Rml::ElementDocument* RmlUI::LoadDocument(const ea::string& path)
     return rmlContext_->LoadDocument(path);
 }
 
+#ifdef URHO3D_RMLUI_DEBUG
 void RmlUI::SetDebuggerVisible(bool visible)
 {
     if (!debuggerInitialized_)
@@ -486,6 +489,7 @@ void RmlUI::SetDebuggerVisible(bool visible)
     }
     Rml::Debugger::SetVisible(visible);
 }
+#endif
 
 bool RmlUI::LoadFont(const ea::string& resourceName, bool fallback)
 {

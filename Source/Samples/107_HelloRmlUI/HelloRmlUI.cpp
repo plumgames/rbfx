@@ -202,6 +202,7 @@ void HelloRmlUI::OnUpdate(StringHash, VariantMap& eventData)
     node->Roll(-6.0f * timeStep * 1.5f);
     node->Pitch(-6.0f * timeStep * 1.5f);
 
+#ifdef URHO3D_RMLUI_DEBUG
     Input* input = GetSubsystem<Input>();
 
     if (input->GetKeyPress(KEY_F9))
@@ -209,4 +210,5 @@ void HelloRmlUI::OnUpdate(StringHash, VariantMap& eventData)
         auto* ui = context_->GetSubsystem<RmlUI>();
         ui->SetDebuggerVisible(!Rml::Debugger::IsVisible());
     }
+#endif
 }

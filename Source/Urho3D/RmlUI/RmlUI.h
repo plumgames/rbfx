@@ -71,8 +71,10 @@ public:
     /// Load a specified rml document. When resource reloader is active, returned pointer will be invalidated when associated resource change triggers reloading a document.
     /// In such cases it is important to subscribe to documentReloaded_ signal and update handle change of document pointer.
     Rml::ElementDocument* LoadDocument(const ea::string& path);
+#ifdef URHO3D_RMLUI_DEBUG
     /// Show or hide RmlUi debugger.
     void SetDebuggerVisible(bool visible);
+#endif
     /// Load a font resource for RmlUi to use.
     /// Set fallback parameter to true if font should be used as a fallback font for unsupported characters.
     bool LoadFont(const ea::string& resourceName, bool fallback = false);
@@ -164,8 +166,10 @@ private:
     WeakPtr<RenderSurface> renderSurface_;
     /// Color used to clear render surface if not rendering into backbuffer.
     Color clearColor_ = Color::TRANSPARENT_BLACK;
+#ifdef URHO3D_RMLUI_DEBUG
     /// Flag indicating RmlUi debugger is already initialized.
     bool debuggerInitialized_ = false;
+#endif
     /// Whether current subsystem is rendering or not.
     bool isRendering_ = true;
     /// Other instances of RmlUI.

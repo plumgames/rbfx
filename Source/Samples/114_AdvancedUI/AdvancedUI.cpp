@@ -202,6 +202,7 @@ void AdvancedUI::InitGame(bool gamePlayed, const ea::string& text)
 
 void AdvancedUI::OnUpdate(StringHash, VariantMap& eventData)
 {
+#ifdef URHO3D_RMLUI_DEBUG
     using namespace Update;
     float timeStep = eventData[P_TIMESTEP].GetFloat();
 
@@ -212,4 +213,5 @@ void AdvancedUI::OnUpdate(StringHash, VariantMap& eventData)
         auto* ui = context_->GetSubsystem<RmlUI>();
         ui->SetDebuggerVisible(!Rml::Debugger::IsVisible());
     }
+#endif
 }

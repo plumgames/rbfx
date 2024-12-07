@@ -24,9 +24,20 @@ project(RmlUi LANGUAGES C CXX VERSION 3.3)
 set(RMLUI_VERSION_SHORT ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR})
 
 
-file(GLOB_RECURSE SOURCE_FILES Include/*.h Source/*.cpp)
+file(GLOB_RECURSE ALL_SOURCE_FILES Include/*.h Source/*.cpp)
+file (GLOB_RECURSE ALL_SOURCE_FILES *.h *.cpp)
 
-file (GLOB_RECURSE SOURCE_FILES *.h *.cpp)
+if (NOT URHO3D_RMLUI_DEBUG)
+    set(SOURCE_FILES "")
+    foreach(FILE ${ALL_SOURCE_FILES})
+        if(NOT FILE MATCHES ".*[\\/]Debugger[\\/].*")
+            list(APPEND SOURCE_FILES ${FILE})
+        endif()
+    endforeach()
+else()
+    set(SOURCE_FILES ${ALL_SOURCE_FILES})
+endif()
+
 add_library(RmlUi STATIC ${SOURCE_FILES})
 target_compile_definitions(RmlUi
     PRIVATE RMLUI_VERSION="${RMLUI_VERSION_SHORT}"
