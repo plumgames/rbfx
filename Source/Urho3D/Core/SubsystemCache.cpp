@@ -25,7 +25,9 @@
 #include "../Core/SubsystemCache.h"
 
 #include "../IO/VirtualFileSystem.h"
+#ifdef URHO3D_AUDIO
 #include "../Audio/Audio.h"
+#endif
 #include "../Engine/Engine.h"
 #include "../Core/WorkQueue.h"
 #include "../Graphics/Graphics.h"

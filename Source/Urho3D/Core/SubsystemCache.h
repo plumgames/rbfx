@@ -48,7 +48,9 @@ using CachedSubsystemList = ea::tuple<
     , class Network
 #endif
     , class Input
+#ifdef URHO3D_AUDIO
     , class Audio
+#endif
 #if URHO3D_UI
     , class UI
 #endif

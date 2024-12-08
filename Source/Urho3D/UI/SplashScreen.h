@@ -23,8 +23,10 @@
 #pragma once
 
 #include "../State/StateManager.h"
+#ifdef URHO3D_AUDIO
 #include "../Audio/SoundSource.h"
 #include "../Audio/Sound.h"
+#endif
 #include "../UI/Sprite.h"
 #include "../Scene/Scene.h"
 

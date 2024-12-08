@@ -22,7 +22,9 @@
 
 #include "../Precompiled.h"
 
+#ifdef URHO3D_AUDIO
 #include "../Audio/Sound.h"
+#endif
 #include "../Core/Context.h"
 #include "../Core/CoreEvents.h"
 #include "../Graphics/Graphics.h"

@@ -22,7 +22,9 @@
 
 #include "../Precompiled.h"
 
+#ifdef URHO3D_AUDIO
 #include "../Audio/Audio.h"
+#endif
 #include "../Core/Context.h"
 #include "../Core/CoreEvents.h"
 #include "../Core/Profiler.h"
@@ -384,8 +386,9 @@ bool Engine::Initialize(const StringVariantMap& applicationParameters, const Str
     RegisterRmlUILibrary(context_);
     context_->RegisterSubsystem(new RmlUI(context_));
 #endif
-
+#ifdef URHO3D_AUDIO
     context_->RegisterSubsystem(new Audio(context_));
+#endif
     if (!headless_)
     {
         context_->RegisterSubsystem(new Graphics(context_));
@@ -540,6 +543,7 @@ bool Engine::Initialize(const StringVariantMap& applicationParameters, const Str
         renderer->SetTextureFilterMode((TextureFilterMode)GetParameter(EP_TEXTURE_FILTER_MODE).GetInt());
         renderer->SetTextureAnisotropy(GetParameter(EP_TEXTURE_ANISOTROPY).GetInt());
 
+#ifdef URHO3D_AUDIO
         if (GetParameter(EP_SOUND).GetBool())
         {
             GetSubsystem<Audio>()->SetMode(
@@ -549,6 +553,7 @@ bool Engine::Initialize(const StringVariantMap& applicationParameters, const Str
                 GetParameter(EP_SOUND_INTERPOLATION).GetBool()
             );
         }
+#endif
 
 #ifdef URHO3D_RMLUI
         const auto rmlUi = GetSubsystem<RmlUI>();
@@ -687,7 +692,9 @@ void Engine::RunFrame()
     // times per frame it would be better to cache the pointers
     auto* time = GetSubsystem<Time>();
     auto* input = GetSubsystem<Input>();
+#ifdef URHO3D_AUDIO
     auto* audio = GetSubsystem<Audio>();
+#endif
 
     {
         URHO3D_PROFILE("DoFrame");
@@ -696,20 +703,24 @@ void Engine::RunFrame()
         // If pause when minimized -mode is in use, stop updates and audio as necessary
         if (pauseMinimized_ && input->IsMinimized())
         {
+#ifdef URHO3D_AUDIO
             if (audio->IsPlaying())
             {
                 audio->Stop();
                 audioPaused_ = true;
             }
+#endif
         }
         else
         {
+#ifdef URHO3D_AUDIO
             // Only unpause when it was paused by the engine
             if (audioPaused_)
             {
                 audio->Play();
                 audioPaused_ = false;
             }
+#endif
 
             Update();
         }
@@ -1320,7 +1331,9 @@ void Engine::PopulateDefaultParameters()
     engineParameters_->DefineVariable(EP_SOUND_BUFFER, 100);
     engineParameters_->DefineVariable(EP_SOUND_INTERPOLATION, true);
     engineParameters_->DefineVariable(EP_SOUND_MIX_RATE, 44100);
+#ifdef URHO3D_AUDIO
     engineParameters_->DefineVariable(EP_SOUND_MODE, SpeakerMode::SPK_AUTO);
+#endif
     engineParameters_->DefineVariable(EP_SYSTEMUI_FLAGS, 0u);
     engineParameters_->DefineVariable(EP_TEXTURE_ANISOTROPY, 4).Overridable();
     engineParameters_->DefineVariable(EP_TEXTURE_FILTER_MODE, FILTER_TRILINEAR).Overridable();

@@ -31,8 +31,10 @@ namespace Urho3D
 {
 
 class Node;
+#ifdef URHO3D_AUDIO
 class Sound;
 class SoundSource;
+#endif
 class RmlUI;
 
 namespace Detail
@@ -74,6 +76,7 @@ private:
     const ea::string group_;
 };
 
+#ifdef URHO3D_AUDIO
 class URHO3D_API SoundEventListener : public Rml::EventListener, public NonCopyable
 {
 public:
@@ -97,6 +100,7 @@ private:
     /// Sound player.
     WeakPtr<SoundSource> soundPlayer_;
 };
+#endif
 
 class URHO3D_API CustomEventListener : public Rml::EventListener, public NonCopyable
 {

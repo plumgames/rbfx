@@ -23,7 +23,9 @@
 
 #include "../Precompiled.h"
 
+#ifdef URHO3D_AUDIO
 #include "Urho3D/Audio/Audio.h"
+#endif
 #include "Urho3D/Core/Context.h"
 #include "Urho3D/Core/CoreEvents.h"
 #include "Urho3D/Core/Mutex.h"
@@ -2576,7 +2578,7 @@ void Input::HandleSDLEvent(void* sdlEvent)
             SendEvent(E_DROPFILE, eventData);
         }
         break;
-
+#ifdef URHO3D_AUDIO
     case SDL_AUDIODEVICEADDED:
         {
             if (evt.adevice.iscapture == SDL_FALSE)
@@ -2596,7 +2598,7 @@ void Input::HandleSDLEvent(void* sdlEvent)
                 GetSubsystem<Audio>()->Close();
         }
         break;
-
+#endif
     case SDL_QUIT:
         SendEvent(E_EXITREQUESTED);
         break;

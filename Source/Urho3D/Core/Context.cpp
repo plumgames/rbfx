@@ -26,7 +26,9 @@
 #include "../Core/Profiler.h"
 #include "../IO/Log.h"
 
+#ifdef URHO3D_AUDIO
 #include "../Audio/Audio.h"
+#endif
 #include "../Engine/Engine.h"
 #include "../Core/WorkQueue.h"
 #include "../Core/Thread.h"

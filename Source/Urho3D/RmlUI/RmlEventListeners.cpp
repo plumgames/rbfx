@@ -24,8 +24,10 @@
 
 #include "../RmlUI/RmlEventListeners.h"
 
+#ifdef URHO3D_AUDIO
 #include "../Audio/Sound.h"
 #include "../Audio/SoundSource.h"
+#endif
 #include "../Core/Context.h"
 #include "../IO/Log.h"
 #include "../Resource/JSONFile.h"
@@ -165,8 +167,10 @@ Rml::EventListener* CreateSingleEventListener(ea::string_view value, Rml::Elemen
 
     if (value.starts_with(navigatePrefix))
         return NavigateEventListener::CreateInstancer(value.substr(navigatePrefix.size()), element);
+#ifdef URHO3D_AUDIO
     else if (value.starts_with(soundPrefix))
         return SoundEventListener::CreateInstancer(value.substr(soundPrefix.size()), element);
+#endif
     else if (value.starts_with(eventPrefix))
         return CustomEventListener::CreateInstancer(value.substr(eventPrefix.size()), element);
     else
@@ -251,6 +255,7 @@ void NavigateEventListener::OnDetach(Rml::Element* element)
     delete this;
 }
 
+#ifdef URHO3D_AUDIO
 Rml::EventListener* SoundEventListener::CreateInstancer(ea::string_view value, Rml::Element* element)
 {
     const auto parsed = ParseSound(value);
@@ -294,6 +299,7 @@ void SoundEventListener::OnDetach(Rml::Element* element)
     (void)element;
     delete this;
 }
+#endif
 
 Rml::EventListener* CustomEventListener::CreateInstancer(ea::string_view value, Rml::Element* element)
 {
