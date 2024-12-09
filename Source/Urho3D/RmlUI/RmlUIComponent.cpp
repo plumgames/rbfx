@@ -1,40 +1,24 @@
-//
-// Copyright (c) 2017-2020 the rbfx project.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
+// Copyright (c) 2017-2024 the rbfx project.
+// This work is licensed under the terms of the MIT license.
+// For a copy, see <https://opensource.org/licenses/MIT> or the accompanying LICENSE file.
 
-#include "../Precompiled.h"
+#include "Urho3D/Precompiled.h"
 
-#include "../RmlUI/RmlUI.h"
+#include "Urho3D/RmlUI/RmlUIComponent.h"
 
-#include "../Core/Context.h"
-#include "../Graphics/Material.h"
-#include "../IO/Log.h"
-#include "../Resource/BinaryFile.h"
-#include "../RmlUI/RmlCanvasComponent.h"
-#include "../RmlUI/RmlNavigationManager.h"
-#include "../RmlUI/RmlUIComponent.h"
-#include "../Scene/Node.h"
-#include "../Scene/Scene.h"
+#include "Urho3D/Core/Context.h"
+#include "Urho3D/Graphics/Material.h"
+#include "Urho3D/IO/Log.h"
+#include "Urho3D/Resource/BinaryFile.h"
+#include "Urho3D/RmlUI/RmlCanvasComponent.h"
+#include "Urho3D/RmlUI/RmlNavigationManager.h"
+#include "Urho3D/RmlUI/RmlUI.h"
+#include "Urho3D/Scene/Node.h"
+#include "Urho3D/Scene/Scene.h"
 
-#include "../DebugNew.h"
+#include <RmlUi/Core/ComputedValues.h>
+
+#include "Urho3D/DebugNew.h"
 
 namespace Urho3D
 {
@@ -44,7 +28,25 @@ namespace
 
 const Rml::String ComponentPtrAttribute = "__RmlUIComponentPtr__";
 
-}
+bool IsElementNavigable(Rml::Element* element)
+{
+    // The element itself should be tab-able
+    if (!element || element->GetComputedValues().tab_index() == Rml::Style::TabIndex::None)
+        return false;
+
+    // Entire element hierarchy should be visible and focusable
+    while (element)
+    {
+        if (!element->IsVisible() || element->GetComputedValues().focus() == Rml::Style::Focus::None)
+            return false;
+
+        element = element->GetParentNode();
+    }
+
+    return true;
+};
+
+} // namespace
 
 RmlUIComponent::RmlUIComponent(Context* context)
     : LogicComponent(context)
@@ -64,12 +66,14 @@ void RmlUIComponent::RegisterObject(Context* context)
 {
     context->AddFactoryReflection<RmlUIComponent>(Category_RmlUI);
 
+    // clang-format off
     URHO3D_ACCESSOR_ATTRIBUTE("Is Enabled", IsEnabled, SetEnabled, bool, true, AM_DEFAULT);
     URHO3D_ACCESSOR_ATTRIBUTE("Resource", GetResource, SetResource, ResourceRef, ResourceRef{BinaryFile::GetTypeStatic()}, AM_DEFAULT);
     URHO3D_ATTRIBUTE("Use Normalized Coordinates", bool, useNormalized_, false, AM_DEFAULT);
     URHO3D_ACCESSOR_ATTRIBUTE("Position", GetPosition, SetPosition, Vector2, Vector2::ZERO, AM_DEFAULT);
     URHO3D_ACCESSOR_ATTRIBUTE("Size", GetSize, SetSize, Vector2, Vector2::ZERO, AM_DEFAULT);
     URHO3D_ATTRIBUTE("Auto Size", bool, autoSize_, true, AM_DEFAULT);
+    // clang-format on
 }
 
 void RmlUIComponent::Update(float timeStep)
@@ -77,6 +81,7 @@ void RmlUIComponent::Update(float timeStep)
     navigationManager_->Update();
     // There should be only a few of RmlUIComponent enabled at a time, so this is not a performance issue.
     UpdateConnectedCanvas();
+    UpdatePendingFocus();
 }
 
 bool RmlUIComponent::BindDataModelProperty(const ea::string& name, GetterFunc getter, SetterFunc setter)
@@ -86,16 +91,14 @@ bool RmlUIComponent::BindDataModelProperty(const ea::string& name, GetterFunc ge
     {
         return false;
     }
-    return constructor->BindFunc(
-        name,
+    return constructor->BindFunc(name,
         [=](Rml::Variant& outputValue)
-        {
+    {
         Variant variant;
         getter(variant);
         ToRmlUi(variant, outputValue);
-        },
-        [=](const Rml::Variant& inputValue)
-        {
+    }, [=](const Rml::Variant& inputValue)
+    {
         Variant variant;
         if (FromRmlUi(inputValue, variant))
         {
@@ -107,31 +110,31 @@ bool RmlUIComponent::BindDataModelProperty(const ea::string& name, GetterFunc ge
 bool RmlUIComponent::BindDataModelVariant(const ea::string& name, Variant* value)
 {
     const auto constructor = ExpectDataModelConstructor();
-    if (!constructor)
+    if (!constructor || !typeRegister_)
     {
         return false;
     }
-    return constructor->BindCustomDataVariable(name, {typeRegister_.GetDefinition<Variant>(), value});
+    return constructor->BindCustomDataVariable(name, {typeRegister_->GetDefinition<Variant>(), value});
 }
 
 bool RmlUIComponent::BindDataModelVariantVector(const ea::string& name, VariantVector* value)
 {
     const auto constructor = ExpectDataModelConstructor();
-    if (!constructor)
+    if (!constructor || !typeRegister_)
     {
         return false;
     }
-    return constructor->BindCustomDataVariable(name, {typeRegister_.GetDefinition<VariantVector>(), value});
+    return constructor->BindCustomDataVariable(name, {typeRegister_->GetDefinition<VariantVector>(), value});
 }
 
 bool RmlUIComponent::BindDataModelVariantMap(const ea::string& name, VariantMap* value)
 {
     const auto constructor = ExpectDataModelConstructor();
-    if (!constructor)
+    if (!constructor || !typeRegister_)
     {
         return false;
     }
-    return constructor->BindCustomDataVariable(name, {typeRegister_.GetDefinition<VariantMap>(), value});
+    return constructor->BindCustomDataVariable(name, {typeRegister_->GetDefinition<VariantMap>(), value});
 }
 
 bool RmlUIComponent::BindDataModelEvent(const ea::string& name, EventFunc eventCallback)
@@ -141,12 +144,10 @@ bool RmlUIComponent::BindDataModelEvent(const ea::string& name, EventFunc eventC
     {
         return false;
     }
-    return constructor->BindEventCallback(
-        name,
-        [=](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& args)
-        {
+    return constructor->BindEventCallback(name, [=](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& args)
+    {
         VariantVector urhoArgs;
-        for (auto& src: args)
+        for (auto& src : args)
         {
             FromRmlUi(src, urhoArgs.push_back());
         }
@@ -162,6 +163,38 @@ Rml::DataModelConstructor* RmlUIComponent::ExpectDataModelConstructor() const
         URHO3D_LOGERROR("BindDataModelProperty can only be executed from OnDataModelInitialized");
     }
     return constructor;
+}
+
+void RmlUIComponent::UpdatePendingFocus()
+{
+    suppressRestoreFocus_ = false;
+
+    if (pendingFocusId_ && document_)
+    {
+        if (Rml::Element* element = document_->GetElementById(*pendingFocusId_))
+        {
+            if (element->Focus(true))
+            {
+                element->ScrollIntoView(Rml::ScrollAlignment::Nearest);
+                suppressRestoreFocus_ = true;
+            }
+        }
+        pendingFocusId_ = ea::nullopt;
+    }
+}
+
+void RmlUIComponent::RestoreFocus()
+{
+    if (document_ && !suppressRestoreFocus_ && !IsElementNavigable(document_->GetFocusLeafNode()))
+    {
+        if (Rml::Element* nextElement = document_->FindNextTabElement(document_, true))
+        {
+            if (nextElement->Focus(true))
+            {
+                nextElement->ScrollIntoView(Rml::ScrollAlignment::Nearest);
+            }
+        }
+    }
 }
 
 void RmlUIComponent::OnSetEnabled()
@@ -344,9 +377,9 @@ void RmlUIComponent::OnUICanvasResized(const RmlCanvasResizedArgs& args)
         // Element is positioned using absolute pixel values. Nothing to adjust.
         return;
 
-    // When using normalized coordinates, element is positioned relative to canvas size. When canvas is resized old positions are no longer
-    // valid. Convert pixel size and position back to normalized coordiantes using old size and reapply them, which will use new canvas size
-    // for calculating new pixel position and size.
+    // When using normalized coordinates, element is positioned relative to canvas size. When canvas is resized old
+    // positions are no longer valid. Convert pixel size and position back to normalized coordiantes using old size and
+    // reapply them, which will use new canvas size for calculating new pixel position and size.
 
     Vector2 pos = ToVector2(document_->GetAbsoluteOffset(Rml::BoxArea::Border));
     Vector2 size = ToVector2(document_->GetBox().GetSize(Rml::BoxArea::Content));
@@ -428,19 +461,34 @@ void RmlUIComponent::DoNavigablePop(Rml::DataModelHandle model, Rml::Event& even
         navigationManager_->PopCursorGroup();
 }
 
+void RmlUIComponent::DoFocusById(Rml::DataModelHandle model, Rml::Event& event, const Rml::VariantList& args)
+{
+    if (args.size() != 2)
+    {
+        URHO3D_LOGWARNING("RmlUIComponent::DoFocusById is called with unexpected arguments");
+        return;
+    }
+
+    const auto& id = args[1].Get<Rml::String>();
+    pendingFocusId_ = id;
+}
+
 void RmlUIComponent::CreateDataModel()
 {
     RmlUI* ui = GetUI();
     Rml::Context* context = ui->GetRmlContext();
 
     dataModelName_ = GetDataModelName();
-    modelConstructor_ = ea::make_unique<Rml::DataModelConstructor>(context->CreateDataModel(dataModelName_, &typeRegister_));
-    RegisterVariantDefinition(&typeRegister_);
+    typeRegister_.emplace();
+    modelConstructor_ =
+        ea::make_unique<Rml::DataModelConstructor>(context->CreateDataModel(dataModelName_, &*typeRegister_));
+    RegisterVariantDefinition(&*typeRegister_);
 
     modelConstructor_->BindFunc(
         "navigable_group", [this](Rml::Variant& result) { result = navigationManager_->GetTopCursorGroup(); });
     modelConstructor_->BindEventCallback("navigable_push", &RmlUIComponent::DoNavigablePush, this);
     modelConstructor_->BindEventCallback("navigable_pop", &RmlUIComponent::DoNavigablePop, this);
+    modelConstructor_->BindEventCallback("focus", &RmlUIComponent::DoFocusById, this);
 }
 
 void RmlUIComponent::RemoveDataModel()
@@ -450,6 +498,7 @@ void RmlUIComponent::RemoveDataModel()
     context->RemoveDataModel(dataModelName_);
 
     dataModel_ = nullptr;
+    typeRegister_ = ea::nullopt;
     dataModelName_.clear();
 }
 
@@ -495,4 +544,4 @@ RmlUIComponent* RmlUIComponent::FromDocument(Rml::ElementDocument* document)
     return nullptr;
 }
 
-}
+} // namespace Urho3D
