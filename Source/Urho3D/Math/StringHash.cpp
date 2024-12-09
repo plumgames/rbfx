@@ -11,6 +11,8 @@
 #include "Urho3D/IO/Log.h"
 #include "Urho3D/Math/MathDefs.h"
 #include "Urho3D/Math/StringHash.h"
+#include "Urho3D/Container/Str.h"
+#include "Urho3D/Core/Format.h"
 
 #include <cstdio>
 

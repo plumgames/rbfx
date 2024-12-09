@@ -349,6 +349,7 @@ bool Engine::Initialize(const StringVariantMap& applicationParameters, const Str
         appPreferencesDir_ = fileSystem->GetAppPreferencesDir(organizationName, applicationName);
     }
 
+#ifdef URHO3D_LOGGING
     // Start logging
     auto* log = GetSubsystem<Log>();
     if (log)
@@ -359,6 +360,7 @@ bool Engine::Initialize(const StringVariantMap& applicationParameters, const Str
         if (!logFileName.empty())
             log->Open(logFileName);
     }
+#endif
 
     // Initialize app preferences directory
     if (!appPreferencesDir_.empty())

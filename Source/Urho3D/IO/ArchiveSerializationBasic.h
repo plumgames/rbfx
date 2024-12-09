@@ -23,6 +23,7 @@
 #pragma once
 
 #include "../Core/TypeTrait.h"
+#include "../Core/StringUtils.h"
 #include "../IO/Archive.h"
 #include "../IO/Log.h"
 #include "../Math/Color.h"

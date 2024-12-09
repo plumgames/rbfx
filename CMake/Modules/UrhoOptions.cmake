@@ -235,6 +235,7 @@ set(EMSCRIPTEN_TOTAL_MEMORY 0 CACHE STRING       "Memory limit in megabytes. Set
 # Graphics configuration
 option                (URHO3D_DEBUG_GRAPHICS        "Enable debug checks in renderer"                       OFF)
 option                (URHO3D_DEBUG_GRAPHICS_SCOPES "Enable debug scope markers for graphics debugger"      OFF)
+option                (URHO3D_DEBUG_GRAPHICS_SCENE  "Enable debug scene graphics"                           ON)
 option                (URHO3D_GRAPHICS_NO_GL     "Disable OpenGL backend in renderer"                    OFF)
 cmake_dependent_option(URHO3D_GRAPHICS_NO_D3D11  "Disable Direct3D11 backend in renderer"                OFF "URHO3D_SHADER_TRANSLATOR" ON)
 cmake_dependent_option(URHO3D_GRAPHICS_NO_D3D12  "Disable Direct3D12 backend in renderer"                OFF "URHO3D_SHADER_TRANSLATOR" ON)

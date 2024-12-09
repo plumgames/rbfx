@@ -717,7 +717,9 @@ void RegisterGraphicsLibrary(Context* context)
     DecalSet::RegisterObject(context);
     Terrain::RegisterObject(context);
     TerrainPatch::RegisterObject(context);
+#ifdef URHO3D_DEBUG_GRAPHICS_SCENE
     DebugRenderer::RegisterObject(context);
+#endif
     Octree::RegisterObject(context);
     OutlineGroup::RegisterObject(context);
     OutlineGroupBinder::RegisterObject(context);

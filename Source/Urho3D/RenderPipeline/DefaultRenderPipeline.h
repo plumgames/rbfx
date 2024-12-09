@@ -65,8 +65,10 @@ public:
     void Render() override;
     const FrameInfo& GetFrameInfo() const override;
     const RenderPipelineStats& GetStats() const override { return stats_; }
+#ifdef URHO3D_DEBUG_GRAPHICS_SCENE
     void DrawDebugGeometries(bool depthTest) override;
     void DrawDebugLights(bool depthTest) override;
+#endif
     /// @}
 
 protected:

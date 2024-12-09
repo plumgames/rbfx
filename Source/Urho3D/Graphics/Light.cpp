@@ -229,6 +229,7 @@ void Light::UpdateBatches(const FrameInfo& frame)
     }
 }
 
+#ifdef URHO3D_DEBUG_GRAPHICS_SCENE
 void Light::DrawDebugGeometry(DebugRenderer* debug, bool depthTest)
 {
     Color color = GetEffectiveColor();
@@ -263,6 +264,7 @@ void Light::DrawDebugGeometry(DebugRenderer* debug, bool depthTest)
         }
     }
 }
+#endif
 
 void Light::SetLightType(LightType type)
 {

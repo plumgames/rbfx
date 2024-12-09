@@ -53,8 +53,10 @@ public:
 
     /// Apply Attributes to the SplinePath.
     void ApplyAttributes() override;
+#ifdef URHO3D_DEBUG_GRAPHICS_SCENE
     /// Draw the Debug Geometry.
     void DrawDebugGeometry(DebugRenderer* debug, bool depthTest) override;
+#endif
 
     /// Add a Node to the SplinePath as a Control Point.
     void AddControlPoint(Node* point, unsigned index = M_MAX_UNSIGNED);

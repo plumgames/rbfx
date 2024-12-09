@@ -304,8 +304,10 @@ public:
     void Update(float timeStep);
     /// Render. Called by Engine.
     void Render();
+#ifdef URHO3D_DEBUG_GRAPHICS_SCENE
     /// Add debug geometry to the debug renderer.
     void DrawDebugGeometry(bool depthTest);
+#endif
     /// Queue a render surface's viewports for rendering. Called by the surface, or by View.
     void QueueRenderSurface(RenderSurface* renderTarget);
     /// Queue a viewport for rendering. Null surface means backbuffer.

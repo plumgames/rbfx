@@ -72,6 +72,7 @@ struct ProfilerDeviceSample::PIMPL
 {
     HiresTimer timer_{};
     ea::string name_{};
+    float durationMs = 0;
     bool ended_ = false;
     bool updateScope_ = false;
     bool renderScope_ = false;
@@ -89,6 +90,7 @@ struct ProfilerDeviceSample::PIMPL
         entry.renderScope_ = renderScope_;
         ++entry.count_;
         ended_ = true;
+        durationMs = entry.ms_;
     }
 };
 
@@ -121,9 +123,12 @@ ProfilerDeviceSample::~ProfilerDeviceSample()
 
 void ProfilerDeviceSample::EndFrame()
 {
+    float frameMs = 0;
     if (samples_.size() == 1)
     {
-        samples_.top()->pimpl_->End();
+        auto& firstFrame = samples_.top();
+        firstFrame->pimpl_->End();
+        frameMs = firstFrame->pimpl_->durationMs;
     }
     ++frameCount_;
     framePrev_ = frameCurr_;
@@ -142,6 +147,13 @@ void ProfilerDeviceSample::EndFrame()
         {
             renderScopeMs_ = e.ms_;
         }
+    }
+
+    const float stallFrameMs = 500;
+    if (frameMs >= stallFrameMs)
+    {
+        URHO3D_LOGWARNING("FRAME SPIKE! ({}ms)", frameMs);
+        PrintFrame();
     }
 }
 

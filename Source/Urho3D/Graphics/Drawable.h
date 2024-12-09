@@ -242,8 +242,10 @@ public:
 
     /// Draw to occlusion buffer. Return true if did not run out of triangles.
     virtual bool DrawOcclusion(OcclusionBuffer* buffer);
+#ifdef URHO3D_DEBUG_GRAPHICS_SCENE
     /// Visualize the component as debug geometry.
     void DrawDebugGeometry(DebugRenderer* debug, bool depthTest) override;
+#endif
 
     /// Set draw distance.
     /// @property

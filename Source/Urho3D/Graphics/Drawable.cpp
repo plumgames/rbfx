@@ -175,11 +175,13 @@ bool Drawable::DrawOcclusion(OcclusionBuffer* buffer)
     return true;
 }
 
+#ifdef URHO3D_DEBUG_GRAPHICS_SCENE
 void Drawable::DrawDebugGeometry(DebugRenderer* debug, bool depthTest)
 {
     if (debug && IsEnabledEffective())
         debug->AddBoundingBox(GetWorldBoundingBox(), 0x7700ff00_argb, depthTest);
 }
+#endif
 
 void Drawable::SetDrawDistance(float distance)
 {

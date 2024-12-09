@@ -47,8 +47,10 @@ public:
     ~GlobalIllumination() override;
     /// Register object factory. Drawable must be registered first.
     static void RegisterObject(Context* context);
+#ifdef URHO3D_DEBUG_GRAPHICS_SCENE
     /// Visualize the component as debug geometry.
     void DrawDebugGeometry(DebugRenderer* debug, bool depthTest) override;
+#endif
 
     /// Reset light probes.
     void ResetLightProbes();

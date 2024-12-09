@@ -25,6 +25,7 @@
 #include "../Engine/ApplicationFlavor.h"
 
 #include "../Core/ProcessUtils.h"
+#include "../Core/Variant.h"
 #include "../IO/Log.h"
 
 #include <EASTL/map.h>

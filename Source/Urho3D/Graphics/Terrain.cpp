@@ -1492,10 +1492,12 @@ void Terrain::UpdatePatchesLightmaps()
     }
 }
 
+#ifdef URHO3D_DEBUG_GRAPHICS_SCENE
 void Terrain::DrawDebugGeometry(DebugRenderer* debug, bool depthTest)
 {
     for (const auto& patch: patches_)
         patch->DrawDebugGeometry(debug, depthTest);
 }
+#endif
 
 }

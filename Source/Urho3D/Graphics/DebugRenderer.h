@@ -1,3 +1,4 @@
+#ifdef URHO3D_DEBUG_GRAPHICS_SCENE
 //
 // Copyright (c) 2008-2022 the Urho3D project.
 //
@@ -221,3 +222,4 @@ private:
 };
 
 }
+#endif

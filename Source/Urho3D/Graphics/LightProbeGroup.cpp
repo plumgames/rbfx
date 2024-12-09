@@ -84,6 +84,7 @@ void LightProbeGroup::RegisterObject(Context* context)
     URHO3D_ACCESSOR_ATTRIBUTE("Baked Data File", GetBakedDataFileRef, SetBakedDataFileRef, ResourceRef, ResourceRef{ BinaryFile::GetTypeStatic() }, AM_DEFAULT | AM_NOEDIT);
 }
 
+#ifdef URHO3D_DEBUG_GRAPHICS_SCENE
 void LightProbeGroup::DrawDebugGeometry(DebugRenderer* debug, bool depthTest)
 {
     UpdateBakedData();
@@ -98,6 +99,7 @@ void LightProbeGroup::DrawDebugGeometry(DebugRenderer* debug, bool depthTest)
         debug->AddSphere(Sphere(worldPosition, 0.1f), static_cast<Color>(bakedData_.ambient_[i]));
     }
 }
+#endif
 
 BoundingBox LightProbeGroup::GetWorldBoundingBox() const
 {

@@ -1,3 +1,4 @@
+#ifdef URHO3D_DEBUG_ASSERT
 //
 // Copyright (c) 2017-2020 the rbfx project.
 //
@@ -49,3 +50,4 @@ void AssertFailure(bool isFatal, ea::string_view expression, ea::string_view mes
 }
 
 } // namespace Urho3D
+#endif

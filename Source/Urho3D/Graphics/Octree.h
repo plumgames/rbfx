@@ -104,9 +104,11 @@ public:
     void SetRootSize(const BoundingBox& box);
     /// Reset octree pointer recursively. Called when the whole octree is being destroyed.
     void ResetOctree();
+#ifdef URHO3D_DEBUG_GRAPHICS_SCENE
     /// Draw bounds to the debug graphics recursively.
     /// @nobind
     void DrawDebugGeometry(DebugRenderer* debug, bool depthTest);
+#endif
 
     /// Return drawable objects by a query, called internally.
     void GetDrawablesInternal(OctreeQuery& query, bool inside) const;
@@ -224,8 +226,10 @@ public:
     /// @nobind
     static void RegisterObject(Context* context);
 
+#ifdef URHO3D_DEBUG_GRAPHICS_SCENE
     /// Visualize the component as debug geometry.
     void DrawDebugGeometry(DebugRenderer* debug, bool depthTest) override;
+#endif
 
     /// Set size and maximum subdivision levels. If octree is not empty, drawable objects will be temporarily moved to the root.
     void SetSize(const BoundingBox& box, unsigned numLevels);

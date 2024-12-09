@@ -95,11 +95,13 @@ void Zone::RegisterObject(Context* context)
     URHO3D_ACCESSOR_ATTRIBUTE("Zone Mask", GetZoneMask, SetZoneMask, unsigned, DEFAULT_ZONEMASK, AM_DEFAULT);
 }
 
+#ifdef URHO3D_DEBUG_GRAPHICS_SCENE
 void Zone::DrawDebugGeometry(DebugRenderer* debug, bool depthTest)
 {
     if (debug && IsEnabledEffective())
         debug->AddBoundingBox(boundingBox_, node_->GetWorldTransform(), Color::GREEN, depthTest);
 }
+#endif
 
 void Zone::SetBoundingBox(const BoundingBox& box)
 {

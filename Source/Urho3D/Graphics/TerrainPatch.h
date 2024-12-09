@@ -59,8 +59,10 @@ public:
     unsigned GetNumOccluderTriangles() override;
     /// Draw to occlusion buffer. Return true if did not run out of triangles.
     bool DrawOcclusion(OcclusionBuffer* buffer) override;
+#ifdef URHO3D_DEBUG_GRAPHICS_SCENE
     /// Visualize the component as debug geometry.
     void DrawDebugGeometry(DebugRenderer* debug, bool depthTest) override;
+#endif
 
     /// Set owner terrain.
     void SetOwner(Terrain* terrain);

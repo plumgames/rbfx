@@ -53,8 +53,10 @@ public:
     void ApplyAttributes() override;
     /// Handle enabled/disabled state change.
     void OnSetEnabled() override;
+#ifdef URHO3D_DEBUG_GRAPHICS_SCENE
     /// Visualize the component as debug geometry.
     void DrawDebugGeometry(DebugRenderer* debug, bool depthTest) override;
+#endif
 
     /// Set patch quads per side. Must be a power of two.
     /// @property

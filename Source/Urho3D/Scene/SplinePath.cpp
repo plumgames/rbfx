@@ -112,6 +112,7 @@ void SplinePath::ApplyAttributes()
     dirty_ = false;
 }
 
+#ifdef URHO3D_DEBUG_GRAPHICS_SCENE
 void SplinePath::DrawDebugGeometry(DebugRenderer* debug, bool /*depthTest*/)
 {
     if (debug && node_ && IsEnabledEffective())
@@ -134,6 +135,7 @@ void SplinePath::DrawDebugGeometry(DebugRenderer* debug, bool /*depthTest*/)
             debug->AddNode(controlledNode_.Get());
     }
 }
+#endif
 
 void SplinePath::AddControlPoint(Node* point, unsigned index)
 {

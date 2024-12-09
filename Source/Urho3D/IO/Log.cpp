@@ -1,3 +1,4 @@
+#ifdef URHO3D_LOGGING
 //
 // Copyright (c) 2008-2022 the Urho3D project.
 //
@@ -545,3 +546,4 @@ void Log::PumpThreadMessages()
 }
 
 }
+#endif

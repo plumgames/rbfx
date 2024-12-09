@@ -507,6 +507,7 @@ void Renderer::Render()
     SendEvent(E_ENDALLVIEWSRENDER);
 }
 
+#ifdef URHO3D_DEBUG_GRAPHICS_SCENE
 void Renderer::DrawDebugGeometry(bool depthTest)
 {
     URHO3D_PROFILE("RendererDrawDebug");
@@ -520,6 +521,7 @@ void Renderer::DrawDebugGeometry(bool depthTest)
         view->DrawDebugLights(depthTest);
     }
 }
+#endif
 
 void Renderer::QueueRenderSurface(RenderSurface* renderTarget)
 {
@@ -605,11 +607,13 @@ void Renderer::UpdateQueuedViewport(unsigned index)
         octree->Update(frame_);
         updatedOctrees_.insert(octree);
 
+#ifdef URHO3D_DEBUG_GRAPHICS_SCENE
         // Set also the view for the debug renderer already here, so that it can use culling
         /// \todo May result in incorrect debug geometry culling if the same scene is drawn from multiple viewports
         auto* debug = scene->GetComponent<DebugRenderer>();
         if (debug && viewport->GetDrawDebug())
             debug->SetView(viewport->GetCamera());
+#endif
     }
 
     // Update view. This may queue further views. View will send update begin/end events once its state is set

@@ -22,6 +22,8 @@
 
 #pragma once
 
+#ifdef URHO3D_DEBUG_ASSERT
+
 #include "../Core/Format.h"
 
 #include <Urho3D/Urho3D.h>
@@ -50,7 +52,6 @@ URHO3D_API void AssertFailure(bool isFatal, ea::string_view expression, ea::stri
 #define URHO3D_ASSERT_IMPL(isFatal, expression, message) \
     (Urho3D::AssertFailure(isFatal, expression, message, __FILE__, __LINE__, __FUNCTION__), false)
 
-#ifdef URHO3D_DEBUG_ASSERT
     /// If expression is false, log error and throw exception. Assert popup is displayed in Debug mode.
     #define URHO3D_ASSERT(expression, ...) \
         ((void)(!(expression) \

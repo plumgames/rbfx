@@ -29,7 +29,9 @@
 namespace Urho3D
 {
 
+#ifdef URHO3D_DEBUG_GRAPHICS_SCENE
 class DebugRenderer;
+#endif
 class Node;
 class Scene;
 
@@ -72,8 +74,10 @@ public:
     bool SaveJSON(JSONValue& dest) const override;
     /// Return the depended on nodes to order network updates.
     virtual void GetDependencyNodes(ea::vector<Node*>& dest);
+#ifdef URHO3D_DEBUG_GRAPHICS_SCENE
     /// Visualize the component as debug geometry.
     virtual void DrawDebugGeometry(DebugRenderer* debug, bool depthTest);
+#endif
 
     /// Return whether the component provides auxiliary data.
     /// Only components directly attached to the Scene can have auxiliary data.

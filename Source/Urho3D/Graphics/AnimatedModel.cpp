@@ -376,6 +376,7 @@ UpdateGeometryType AnimatedModel::GetUpdateGeometryType()
         return UPDATE_NONE;
 }
 
+#ifdef URHO3D_DEBUG_GRAPHICS_SCENE
 void AnimatedModel::DrawDebugGeometry(DebugRenderer* debug, bool depthTest)
 {
     if (debug && IsEnabledEffective())
@@ -384,6 +385,7 @@ void AnimatedModel::DrawDebugGeometry(DebugRenderer* debug, bool depthTest)
         debug->AddSkeleton(skeleton_, Color(0.75f, 0.75f, 0.75f), false);
     }
 }
+#endif
 
 void AnimatedModel::SetModel(Model* model, bool createBones)
 {

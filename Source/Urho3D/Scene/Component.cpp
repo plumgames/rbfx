@@ -108,9 +108,11 @@ void Component::GetDependencyNodes(ea::vector<Node*>& dest)
 {
 }
 
+#ifdef URHO3D_DEBUG_GRAPHICS_SCENE
 void Component::DrawDebugGeometry(DebugRenderer* debug, bool depthTest)
 {
 }
+#endif
 
 void Component::SetEnabled(bool enable)
 {

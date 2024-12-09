@@ -205,11 +205,13 @@ void ReflectionProbeManager::RegisterObject(Context* context)
     URHO3D_ATTRIBUTE("Filter Cubemaps", bool, filterCubemaps_, true, AM_DEFAULT);
 }
 
+#ifdef URHO3D_DEBUG_GRAPHICS_SCENE
 void ReflectionProbeManager::DrawDebugGeometry(DebugRenderer* debug, bool depthTest)
 {
     for (ReflectionProbe* reflectionProbe : GetReflectionProbes())
         reflectionProbe->DrawDebugGeometry(debug, depthTest, true);
 }
+#endif
 
 void ReflectionProbeManager::OnSceneSet(Scene* scene)
 {
@@ -563,6 +565,7 @@ void ReflectionProbe::RegisterObject(Context* context)
     URHO3D_ACCESSOR_ATTRIBUTE("Far Clip", GetFarClip, SetFarClip, float, CubemapRenderingSettings::DefaultFarClip, AM_DEFAULT);
 }
 
+#ifdef URHO3D_DEBUG_GRAPHICS_SCENE
 void ReflectionProbe::DrawDebugGeometry(DebugRenderer* debug, bool depthTest, bool compact)
 {
     if (debug && IsEnabledEffective())
@@ -577,6 +580,7 @@ void ReflectionProbe::DrawDebugGeometry(DebugRenderer* debug, bool depthTest)
 {
     DrawDebugGeometry(debug, depthTest, false);
 }
+#endif
 
 void ReflectionProbe::QueueRender()
 {

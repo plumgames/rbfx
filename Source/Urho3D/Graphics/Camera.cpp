@@ -109,10 +109,12 @@ void Camera::RegisterObject(Context* context)
     URHO3D_ATTRIBUTE("Draw Debug Geometry", bool, drawDebugGeometry_, true, AM_DEFAULT);
 }
 
+#ifdef URHO3D_DEBUG_GRAPHICS_SCENE
 void Camera::DrawDebugGeometry(DebugRenderer* debug, bool depthTest)
 {
     debug->AddFrustum(GetFrustum(), Color::WHITE, depthTest);
 }
+#endif
 
 void Camera::SetNearClip(float nearClip)
 {

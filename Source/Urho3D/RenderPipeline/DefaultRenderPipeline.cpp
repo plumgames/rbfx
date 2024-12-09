@@ -455,6 +455,7 @@ void DefaultRenderPipelineView::Render()
     if (renderPath_)
         renderPath_->Render(state_);
 
+#ifdef URHO3D_DEBUG_GRAPHICS_SCENE
     const bool drawDebugGeometry = settings_.drawDebugGeometry_ && camera->GetDrawDebugGeometry();
     auto debug = fullFrameInfo.scene_->GetComponent<DebugRenderer>();
     if (drawDebugGeometry && debug && debug->IsEnabledEffective() && debug->HasContent())
@@ -463,6 +464,7 @@ void DefaultRenderPipelineView::Render()
         debug->SetView(camera);
         debug->Render();
     }
+#endif
 
     OnRenderEnd(this, frameInfo_);
     SendViewEvent(E_ENDVIEWRENDER);
@@ -481,6 +483,7 @@ void DefaultRenderPipelineView::Render()
     }
 }
 
+#ifdef URHO3D_DEBUG_GRAPHICS_SCENE
 void DefaultRenderPipelineView::DrawDebugGeometries(bool depthTest)
 {
     const FrameInfo& fullFrameInfo = sceneProcessor_->GetFrameInfo();
@@ -500,6 +503,7 @@ void DefaultRenderPipelineView::DrawDebugLights(bool depthTest)
     for (Drawable* light : lights)
         light->DrawDebugGeometry(debug, depthTest);
 }
+#endif
 
 unsigned DefaultRenderPipelineView::RecalculatePipelineStateHash() const
 {

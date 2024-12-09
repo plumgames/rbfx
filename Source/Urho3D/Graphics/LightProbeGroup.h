@@ -139,8 +139,10 @@ public:
     ~LightProbeGroup() override;
     /// Register object factory. Drawable must be registered first.
     static void RegisterObject(Context* context);
+#ifdef URHO3D_DEBUG_GRAPHICS_SCENE
     /// Visualize the component as debug geometry.
     void DrawDebugGeometry(DebugRenderer* debug, bool depthTest) override;
+#endif
 
     /// Collect all light probes from specified groups.
     static void CollectLightProbes(const ea::vector<LightProbeGroup*>& lightProbeGroups,

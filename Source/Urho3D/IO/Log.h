@@ -22,6 +22,7 @@
 
 #pragma once
 
+#ifdef URHO3D_LOGGING
 #include <EASTL/list.h>
 
 #include "../Core/Assert.h"
@@ -29,15 +30,10 @@
 #include "../Core/Mutex.h"
 #include "../Core/Object.h"
 #include "../Core/StringUtils.h"
+#endif
 
 namespace Urho3D
 {
-
-#ifdef _WIN32
-static const char* NULL_DEVICE = "NUL";
-#else
-static const char* NULL_DEVICE = "/dev/null";
-#endif
 
 enum LogLevel
 {
@@ -56,6 +52,14 @@ enum LogLevel
     /// Number of log levels
     MAX_LOGLEVELS,
 };
+
+#ifdef URHO3D_LOGGING
+
+#ifdef _WIN32
+static const char* NULL_DEVICE = "NUL";
+#else
+static const char* NULL_DEVICE = "/dev/null";
+#endif
 
 static const Color LOG_LEVEL_COLORS[] = {
     Color(0.529f, 0.529f, 0.529f),
@@ -206,8 +210,6 @@ private:
     /// Default logger used to log messages from Urho3D library.
     Logger defaultLogger_;
 };
-
-#ifdef URHO3D_LOGGING
 
 #define URHO3D_LOGTRACE(message, ...) Urho3D::Log::GetLogger().Trace(message, ##__VA_ARGS__)
 #define URHO3D_LOGDEBUG(message, ...) Urho3D::Log::GetLogger().Debug(message, ##__VA_ARGS__)

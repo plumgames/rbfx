@@ -207,6 +207,7 @@ bool TerrainPatch::DrawOcclusion(OcclusionBuffer* buffer)
         occlusionGeometry_->GetIndexCount());
 }
 
+#ifdef URHO3D_DEBUG_GRAPHICS_SCENE
 void TerrainPatch::DrawDebugGeometry(DebugRenderer* debug, bool depthTest)
 {
     BaseClassName::DrawDebugGeometry(debug, depthTest);
@@ -232,6 +233,7 @@ void TerrainPatch::DrawDebugGeometry(DebugRenderer* debug, bool depthTest)
     }
 #endif
 }
+#endif
 
 void TerrainPatch::SetOwner(Terrain* terrain)
 {

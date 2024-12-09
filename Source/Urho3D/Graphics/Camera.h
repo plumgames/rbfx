@@ -64,8 +64,10 @@ public:
     /// @nobind
     static void RegisterObject(Context* context);
 
+#ifdef URHO3D_DEBUG_GRAPHICS_SCENE
     /// Visualize the component as debug geometry.
     void DrawDebugGeometry(DebugRenderer* debug, bool depthTest) override;
+#endif
 
     /// Set current mouse position in normalized coordinates.
     void SetMousePosition(const Vector2& pos) { mousePosition_ = pos; }

@@ -86,7 +86,9 @@ public:
     ~ReflectionProbeManager() override;
     static void RegisterObject(Context* context);
 
+#ifdef URHO3D_DEBUG_GRAPHICS_SCENE
     void DrawDebugGeometry(DebugRenderer* debug, bool depthTest) override;
+#endif
 
     /// Mark reflection probe as dirty, i.e. position or dimensions changed.
     void MarkProbeDirty(ReflectionProbe* reflectionProbe);
@@ -181,8 +183,10 @@ public:
     ~ReflectionProbe() override;
     static void RegisterObject(Context* context);
 
+#ifdef URHO3D_DEBUG_GRAPHICS_SCENE
     void DrawDebugGeometry(DebugRenderer* debug, bool depthTest, bool compact);
     void DrawDebugGeometry(DebugRenderer* debug, bool depthTest) override;
+#endif
 
     /// Queue ReflectionProbe to be re-rendered as soon as possible.
     void QueueRender();

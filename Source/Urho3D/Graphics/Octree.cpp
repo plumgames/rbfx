@@ -206,6 +206,7 @@ void Octant::ResetOctree()
     }
 }
 
+#ifdef URHO3D_DEBUG_GRAPHICS_SCENE
 void Octant::DrawDebugGeometry(DebugRenderer* debug, bool depthTest)
 {
     if (debug && debug->IsInside(worldBoundingBox_))
@@ -219,6 +220,7 @@ void Octant::DrawDebugGeometry(DebugRenderer* debug, bool depthTest)
         }
     }
 }
+#endif
 
 void Octant::Initialize(const BoundingBox& box)
 {
@@ -434,6 +436,7 @@ void Octree::RegisterObject(Context* context)
     URHO3D_ATTRIBUTE_EX("Number of Levels", int, numLevels_, UpdateOctreeSize, DEFAULT_OCTREE_LEVELS, AM_DEFAULT);
 }
 
+#ifdef URHO3D_DEBUG_GRAPHICS_SCENE
 void Octree::DrawDebugGeometry(DebugRenderer* debug, bool depthTest)
 {
     if (debug)
@@ -443,6 +446,7 @@ void Octree::DrawDebugGeometry(DebugRenderer* debug, bool depthTest)
         rootOctant_.DrawDebugGeometry(debug, depthTest);
     }
 }
+#endif
 
 void Octree::SetSize(const BoundingBox& box, unsigned numLevels)
 {
@@ -758,11 +762,13 @@ void Octree::QueueNodeTransformUpdate(Node* node, const Transform& transform)
     pendingNodeTransforms_.Emplace(node, transform);
 }
 
+#ifdef URHO3D_DEBUG_GRAPHICS_SCENE
 void Octree::DrawDebugGeometry(bool depthTest)
 {
     auto* debug = GetComponent<DebugRenderer>();
     DrawDebugGeometry(debug, depthTest);
 }
+#endif
 
 void Octree::HandleRenderUpdate(StringHash eventType, VariantMap& eventData)
 {

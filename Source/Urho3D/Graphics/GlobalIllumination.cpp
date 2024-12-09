@@ -50,6 +50,7 @@ void GlobalIllumination::RegisterObject(Context* context)
     URHO3D_ACCESSOR_ATTRIBUTE("Data File", GetFileRef, SetFileRef, ResourceRef, ResourceRef{ BinaryFile::GetTypeStatic() }, AM_DEFAULT | AM_NOEDIT);
 }
 
+#ifdef URHO3D_DEBUG_GRAPHICS_SCENE
 void GlobalIllumination::DrawDebugGeometry(DebugRenderer* debug, bool depthTest)
 {
     thread_local ea::vector<ea::pair<unsigned, unsigned>> edges;
@@ -76,6 +77,7 @@ void GlobalIllumination::DrawDebugGeometry(DebugRenderer* debug, bool depthTest)
         debug->AddLine(startPos, endPos, Color::RED);
     }
 }
+#endif
 
 void GlobalIllumination::ResetLightProbes()
 {
