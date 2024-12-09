@@ -36,7 +36,7 @@ vec4 Sample(vec2 offset)
 void main()
 {
     #define EDGEDETECTION // TODO: Make configurable
-    half cThickness = 1.5; // TODO: make this a uniform
+    half cThickness = 0.5; // TODO: make this a uniform
 
     half3 offset = vec3(0.0, cThickness, -cThickness);
     half4 sample0 = Sample(offset.xx);
