@@ -417,7 +417,31 @@ void AnimationController::RegisterObject(Context* context)
     URHO3D_MIXED_ACCESSOR_ATTRIBUTE("Animations", GetAnimationsAttr, SetAnimationsAttr, VariantVector, Variant::emptyVariantVector, AM_DEFAULT)
         .SetMetadata(AttributeMetadata::VectorStructElements, animationParametersNames);
 
-    URHO3D_ACTION_STATIC_LABEL("Update Pose", UpdatePose, "");
+    URHO3D_ACTION_STATIC_LABEL("Update Pose", UpdatePose, EMPTY_STRING);
+    URHO3D_ATTRIBUTE("Import Directory", ea::string, importDirectory_, EMPTY_STRING, AM_DEFAULT);
+    URHO3D_ACTION_STATIC_LABEL("Import", Import, EMPTY_STRING);
+}
+
+void AnimationController::Import()
+{
+    if (importDirectory_.empty())
+    {
+        return;
+    }
+
+    animations_.clear();
+    revisionDirty_ = true;
+
+    auto* cache = GetSubsystem<ResourceCache>();
+    ea::vector<ea::string> animFileNames;
+    cache->Scan(animFileNames, importDirectory_, "*.ani", ScanFlag::SCAN_FILES);
+    for (const auto& fileName : animFileNames)
+    {
+        auto anim = cache->GetResource<Animation>(Format("{}/{}", importDirectory_, fileName));
+        auto animParams = AnimationParameters(anim);
+        animParams.removeOnCompletion_ = false;
+        AddAnimation(animParams);
+    }
 }
 
 void AnimationController::ApplyAttributes()

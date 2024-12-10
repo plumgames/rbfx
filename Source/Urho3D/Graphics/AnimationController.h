@@ -260,6 +260,8 @@ private:
     void CommitNodeAndAttributeAnimations();
     void SendTriggerEvents();
 
+    void Import();
+
     /// Currently playing animations.
     struct AnimationInstance
     {
@@ -285,6 +287,8 @@ private:
     /// TODO: Revisit allocations?
     ea::unordered_map<Node*, NodeAnimationOutput> animatedNodes_;
     ea::unordered_map<AnimatedAttributeReference, Variant> animatedAttributes_;
+
+    ea::string importDirectory_;
 };
 
 }
