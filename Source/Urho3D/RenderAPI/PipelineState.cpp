@@ -354,6 +354,8 @@ PipelineState::~PipelineState()
 
 void PipelineState::Invalidate()
 {
+    URHO3D_PROFILE_FUNCTION();
+
     DestroyGPU();
 
     if (renderDevice_)
@@ -362,6 +364,8 @@ void PipelineState::Invalidate()
 
 void PipelineState::Restore()
 {
+    URHO3D_PROFILE_FUNCTION();
+
     if (handle_)
         return;
 
@@ -399,6 +403,8 @@ void PipelineState::CreateGPU()
 
 void PipelineState::CreateGPU(const GraphicsPipelineStateDesc& desc)
 {
+    URHO3D_PROFILE_FUNCTION();
+
     static const Diligent::PRIMITIVE_TOPOLOGY primitiveTopology[] = {
         Diligent::PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, // TRIANGLE_LIST
         Diligent::PRIMITIVE_TOPOLOGY_LINE_LIST, // LINE_LIST
@@ -762,6 +768,8 @@ void PipelineState::CreateGPU(const ComputePipelineStateDesc& desc)
 
 void PipelineState::DestroyGPU()
 {
+    URHO3D_PROFILE_FUNCTION();
+
     handle_ = nullptr;
     shaderResourceBinding_ = nullptr;
     reflection_ = nullptr;

@@ -1610,7 +1610,12 @@ Diligent::RefCntAutoPtr<Diligent::ITexture> RenderDevice::ReadTextureToStaging(D
 
 void RenderDevice::Present()
 {
-    swapChain_->Present(windowSettings_.vSync_ ? 1 : 0);
+    URHO3D_PROFILE_FUNCTION();
+
+    {
+        URHO3D_PROFILE("swapChain_Present");
+        swapChain_->Present(windowSettings_.vSync_ ? 1 : 0);
+    }
 
     // If using an external window, check it for size changes, and reset screen mode if necessary
     if (deviceSettings_.externalWindowHandle_ != nullptr)

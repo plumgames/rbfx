@@ -108,6 +108,8 @@ RawTexture* RenderPool::GetPersistentTexture(const RawTextureParams& params, con
 
 void RenderPool::RecycleTextures()
 {
+    URHO3D_PROFILE_FUNCTION();
+
     CleanupOldTextures();
     CleanupTexturesExceedingQuota();
 

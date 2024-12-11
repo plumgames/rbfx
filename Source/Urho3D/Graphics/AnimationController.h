@@ -223,6 +223,8 @@ public:
     /// Return animation parameters attribute.
     VariantVector GetAnimationsAttr() const;
 
+    void Import();
+
 protected:
     /// Handle node being assigned.
     void OnNodeSet(Node* previousNode, Node* currentNode) override;
@@ -259,8 +261,6 @@ private:
 
     void CommitNodeAndAttributeAnimations();
     void SendTriggerEvents();
-
-    void Import();
 
     /// Currently playing animations.
     struct AnimationInstance

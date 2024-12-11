@@ -27,6 +27,7 @@
 #include <Urho3D/SystemUI/ModelInspectorWidget.h>
 #include <Urho3D/SystemUI/SceneWidget.h>
 #include <Urho3D/Graphics/VertexBuffer.h>
+#include <Urho3D/Graphics/Geometry.h>
 
 namespace Urho3D
 {
@@ -74,7 +75,12 @@ public:
         {
             auto& vertexBuffers = model_->GetVertexBuffers();
 
-            if (ui::TreeNode("Vertex Info"))
+            int polyCount = 0;
+            for (int i = 0; i < model_->GetNumGeometries(); ++i)
+            {
+                polyCount += model_->GetGeometry(i, 0)->GetIndexCount() / 3;
+            }
+            if (ui::TreeNode(Format("Vertex Info: {} polys", polyCount).c_str()))
             {
                 for (unsigned vertexBufferIndex = 0; vertexBufferIndex < vertexBuffers.size(); ++vertexBufferIndex)
                 {
