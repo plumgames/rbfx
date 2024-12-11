@@ -434,12 +434,11 @@ void AnimationController::Import()
 
     auto* cache = GetSubsystem<ResourceCache>();
     ea::vector<ea::string> animFileNames;
-    cache->Scan(animFileNames, importDirectory_, "*.ani", ScanFlag::SCAN_FILES);
+    cache->Scan(animFileNames, importDirectory_, "*.ani", ScanFlag::SCAN_FILES | ScanFlag::SCAN_RECURSIVE);
     for (const auto& fileName : animFileNames)
     {
         auto anim = cache->GetResource<Animation>(Format("{}/{}", importDirectory_, fileName));
         auto animParams = AnimationParameters(anim);
-        animParams.removeOnCompletion_ = false;
         AddAnimation(animParams);
     }
 }
