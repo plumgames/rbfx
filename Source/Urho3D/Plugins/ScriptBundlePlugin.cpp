@@ -1,3 +1,4 @@
+#ifdef URHO3D_CSHARP
 //
 // Copyright (c) 2017-2020 the rbfx project.
 //
@@ -78,3 +79,4 @@ void ScriptBundlePlugin::OnFileChanged(const ea::string& name)
 }
 
 }
+#endif

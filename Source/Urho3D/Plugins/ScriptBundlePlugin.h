@@ -1,3 +1,4 @@
+#ifdef URHO3D_CSHARP
 //
 // Copyright (c) 2017-2020 the rbfx project.
 //
@@ -49,3 +50,4 @@ private:
 };
 
 }
+#endif

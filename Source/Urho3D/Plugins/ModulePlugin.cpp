@@ -32,7 +32,9 @@
 #include "../IO/Log.h"
 #include "../IO/VectorBuffer.h"
 #include "../Plugins/PluginManager.h"
+#if URHO3D_CSHARP
 #include "../Script/Script.h"
+#endif
 
 namespace Urho3D
 {

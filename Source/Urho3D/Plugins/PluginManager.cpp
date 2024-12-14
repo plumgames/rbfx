@@ -35,7 +35,9 @@
 #include "../IO/Log.h"
 #include "../IO/MemoryBuffer.h"
 #include "../Plugins/ModulePlugin.h"
+#ifdef URHO3D_CSHARP
 #include "../Plugins/ScriptBundlePlugin.h"
+#endif
 
 #include <EASTL/bonus/adaptors.h>
 #include <EASTL/finally.h>
