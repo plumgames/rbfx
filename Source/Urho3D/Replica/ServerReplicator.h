@@ -191,11 +191,17 @@ private:
     void SendUpdateObjectsReliable(const SharedReplicationState& sharedState);
     void SendUpdateObjectsUnreliable(NetworkFrame currentFrame, const SharedReplicationState& sharedState);
 
+    ea::shared_ptr<VectorBuffer> PopSendBuffer();
+    void PushSendBuffer(ea::shared_ptr<VectorBuffer> buffer);
+
     ea::vector<NetworkObjectRelevance> objectsRelevance_;
     ea::vector<float> objectsRelevanceTimeouts_;
 
     ea::vector<NetworkId> pendingRemovedObjects_;
     ea::vector<ea::pair<NetworkObject*, bool>> pendingUpdatedObjects_;
+
+    ea::stack<ea::shared_ptr<VectorBuffer>> sendBufferCache_;
+    ea::list<ea::shared_ptr<VectorBuffer>> sendBufferQueue_;
 
     VectorBuffer componentBuffer_;
 

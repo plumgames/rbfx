@@ -109,13 +109,13 @@ public:
     template <class T>
     void SendGeneratedMessage(NetworkMessageId messageId, PacketTypeFlags messageType, T generator)
     {
-    #ifdef URHO3D_LOGGING
-        ea::string debugInfo;
-        ea::string* debugInfoPtr = &debugInfo;
-    #else
+    //#ifdef URHO3D_LOGGING
+        //ea::string debugInfo;
+        //ea::string* debugInfoPtr = &debugInfo;
+    //#else
         static const ea::string debugInfo;
         ea::string* debugInfoPtr = nullptr;
-    #endif
+    //#endif
 
         msg_.Clear();
         if (generator(msg_, debugInfoPtr))

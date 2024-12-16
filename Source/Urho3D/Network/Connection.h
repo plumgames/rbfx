@@ -275,9 +275,9 @@ private:
     /// Statistics timer.
     Timer statsTimer_;
     /// Outgoing packet buffer which can contain multiple messages.
-    ea::unordered_map<int, VectorBuffer> outgoingBuffer_;
+    ea::unordered_map<int, ea::vector<VectorBuffer>> outgoingBuffer_;
     /// Outgoing packet size limit.
-    int packedMessageLimit_ = 1024;
+    int packetMessageLimit_ = 1024;
     /// Queued remote events.
     ea::vector<RemoteEvent> remoteEvents_;
     /// @}
@@ -316,7 +316,7 @@ private:
     ea::vector<VectorBuffer> incomingPackets_;
     ea::vector<char> compressedPacketBuffer_;
     ea::vector<char> decompressedPacketBuffer_;
-    unsigned compressedBytesOut_;
+    unsigned compressedBytesOut_{};
     unsigned index_{};
 };
 

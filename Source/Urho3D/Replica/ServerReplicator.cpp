@@ -414,37 +414,66 @@ void ClientReplicationState::SendRemoveObjects()
     });
 }
 
+ea::shared_ptr<VectorBuffer> ClientReplicationState::PopSendBuffer()
+{
+    if (sendBufferCache_.empty())
+    {
+        sendBufferCache_.push(ea::make_shared<VectorBuffer>());
+    }
+
+    auto buffer = sendBufferCache_.top();
+    sendBufferCache_.pop();
+    return buffer;
+}
+
+void ClientReplicationState::PushSendBuffer(ea::shared_ptr<VectorBuffer> buffer)
+{
+    buffer->Clear();
+    sendBufferCache_.push(buffer);
+}
+
 void ClientReplicationState::SendAddObjects()
 {
-    connection_->SendGeneratedMessage(MSG_ADD_OBJECTS, PacketType::ReliableOrdered,
-        [&](VectorBuffer& msg, ea::string* debugInfo)
+    for (const auto& [networkObject, isSnapshot] : pendingUpdatedObjects_)
     {
-        msg.WriteInt64(static_cast<long long>(GetCurrentFrame()));
+        if (!isSnapshot)
+            continue;
 
-        bool sendMessage = false;
-        for (const auto& [networkObject, isSnapshot] : pendingUpdatedObjects_)
+        ea::shared_ptr<VectorBuffer> msg = PopSendBuffer();
+
+        msg->WriteUInt(static_cast<unsigned>(networkObject->GetNetworkId()));
+        msg->WriteStringHash(networkObject->GetType());
+        msg->WriteVLE(networkObject->GetOwnerConnectionId());
+
+        componentBuffer_.Clear();
+        networkObject->WriteSnapshot(GetCurrentFrame(), componentBuffer_);
+        msg->WriteBuffer(componentBuffer_.GetBuffer());
+
+        sendBufferQueue_.push_back(msg);
+    }
+
+    while (!sendBufferQueue_.empty())
+    {
+        connection_->SendGeneratedMessage(MSG_ADD_OBJECTS, PacketType::ReliableOrdered,
+            [&](VectorBuffer& msg, ea::string* debugInfo)
         {
-            if (!isSnapshot)
-                continue;
+            msg.WriteInt64(static_cast<long long>(GetCurrentFrame()));
 
-            sendMessage = true;
-            msg.WriteUInt(static_cast<unsigned>(networkObject->GetNetworkId()));
-            msg.WriteStringHash(networkObject->GetType());
-            msg.WriteVLE(networkObject->GetOwnerConnectionId());
-
-            componentBuffer_.Clear();
-            networkObject->WriteSnapshot(GetCurrentFrame(), componentBuffer_);
-            msg.WriteBuffer(componentBuffer_.GetBuffer());
-
-            if (debugInfo)
+            const int maxCount = 5;
+            int count = 0;
+            while (!sendBufferQueue_.empty() && count < maxCount)
             {
-                if (!debugInfo->empty())
-                    debugInfo->append(", ");
-                debugInfo->append(ToString(networkObject->GetNetworkId()));
+                auto itr = sendBufferQueue_.begin();
+                auto buffer = *itr;
+                msg.Write(&buffer->GetBuffer()[0], buffer->GetSize());
+
+                PushSendBuffer(buffer);
+                sendBufferQueue_.erase(itr);
+                ++count;
             }
-        }
-        return sendMessage;
-    });
+            return true;
+        });
+    }
 }
 
 void ClientReplicationState::SendUpdateObjectsReliable(const SharedReplicationState& sharedState)
@@ -486,6 +515,60 @@ void ClientReplicationState::SendUpdateObjectsReliable(const SharedReplicationSt
 void ClientReplicationState::SendUpdateObjectsUnreliable(
     NetworkFrame currentFrame, const SharedReplicationState& sharedState)
 {
+    for (const auto& [networkObject, isSnapshot] : pendingUpdatedObjects_)
+    {
+        // Skip redundant updates, both if update is empty or if snapshot was already sent
+        const unsigned index = GetIndex(networkObject->GetNetworkId());
+        if (isSnapshot)
+            continue;
+
+        const auto updateSpan = sharedState.GetUnreliableUpdateByIndex(index);
+        if (!updateSpan)
+            continue;
+
+        const NetworkObjectRelevance relevance = objectsRelevance_[index];
+        URHO3D_ASSERT(relevance != NetworkObjectRelevance::Irrelevant);
+        if (relevance == NetworkObjectRelevance::NoUpdates)
+            continue;
+
+        if (static_cast<long long>(currentFrame) % static_cast<unsigned>(relevance) != 0)
+            continue;
+
+        ea::shared_ptr<VectorBuffer> msg = PopSendBuffer();
+
+        msg->WriteUInt(static_cast<unsigned>(networkObject->GetNetworkId()));
+        msg->WriteStringHash(networkObject->GetType());
+
+        msg->WriteVLE(updateSpan->size());
+        msg->Write(updateSpan->data(), updateSpan->size());
+
+        sendBufferQueue_.push_back(msg);
+    }
+
+     while (!sendBufferQueue_.empty())
+    {
+        connection_->SendGeneratedMessage(MSG_UPDATE_OBJECTS_UNRELIABLE, PacketType::UnreliableUnordered,
+            [&](VectorBuffer& msg, ea::string* debugInfo)
+            {
+                msg.WriteInt64(static_cast<long long>(GetCurrentFrame()));
+
+                const int maxCount = 15;
+                int count = 0;
+                while (!sendBufferQueue_.empty() && count < maxCount)
+                {
+                    auto itr = sendBufferQueue_.begin();
+                    auto buffer = *itr;
+                    msg.Write(&buffer->GetBuffer()[0], buffer->GetSize());
+
+                    PushSendBuffer(buffer);
+                    sendBufferQueue_.erase(itr);
+                    ++count;
+                }
+                return true;
+            });
+    }
+
+    /*
     connection_->SendGeneratedMessage(MSG_UPDATE_OBJECTS_UNRELIABLE, PacketType::UnreliableUnordered,
         [&](VectorBuffer& msg, ea::string* debugInfo)
     {
@@ -528,6 +611,7 @@ void ClientReplicationState::SendUpdateObjectsUnreliable(
         }
         return sendMessage;
     });
+    */
 }
 
 void ClientReplicationState::UpdateNetworkObjects(SharedReplicationState& sharedState)
