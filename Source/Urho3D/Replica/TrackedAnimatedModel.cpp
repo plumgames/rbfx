@@ -1,3 +1,4 @@
+#ifdef URHO3D_NETWORK_BEHAVIOR_ALL
 //
 // Copyright (c) 2017-2020 the rbfx project.
 //
@@ -152,3 +153,4 @@ void TrackedAnimatedModel::ProcessTemporalRayQuery(const NetworkTime& time, cons
 }
 
 }
+#endif

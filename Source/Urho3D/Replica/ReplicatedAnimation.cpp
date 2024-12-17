@@ -1,3 +1,4 @@
+#ifdef URHO3D_NETWORK_BEHAVIOR_ALL
 //
 // Copyright (c) 2017-2020 the rbfx project.
 //
@@ -276,3 +277,4 @@ void ReplicatedAnimation::Update(float replicaTimeStep, float inputTimeStep)
 }
 
 }
+#endif

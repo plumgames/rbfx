@@ -598,12 +598,14 @@ void RegisterNetworkLibrary(Context* context)
     BehaviorNetworkObject::RegisterObject(context);
 
     NetworkBehavior::RegisterObject(context);
+    FilteredByDistance::RegisterObject(context);
+#ifdef URHO3D_NETWORK_BEHAVIOR_ALL
     ReplicatedAnimation::RegisterObject(context);
     ReplicatedTransform::RegisterObject(context);
     TrackedAnimatedModel::RegisterObject(context);
-    FilteredByDistance::RegisterObject(context);
 #ifdef URHO3D_PHYSICS
     PredictedKinematicController::RegisterObject(context);
+#endif
 #endif
 
     Connection::RegisterObject(context);
