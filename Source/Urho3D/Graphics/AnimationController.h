@@ -224,6 +224,7 @@ public:
     VariantVector GetAnimationsAttr() const;
 
     void Import();
+    ea::vector<AnimationParameters> GetImportAnimationParams() const;
 
 protected:
     /// Handle node being assigned.

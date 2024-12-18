@@ -422,6 +422,23 @@ void AnimationController::RegisterObject(Context* context)
     URHO3D_ACTION_STATIC_LABEL("Import", Import, EMPTY_STRING);
 }
 
+ea::vector<AnimationParameters> AnimationController::GetImportAnimationParams() const
+{
+    ea::vector<AnimationParameters> result;
+
+    auto* cache = GetSubsystem<ResourceCache>();
+    ea::vector<ea::string> animFileNames;
+    cache->Scan(animFileNames, importDirectory_, "*.ani", ScanFlag::SCAN_FILES | ScanFlag::SCAN_RECURSIVE);
+    for (const auto& fileName : animFileNames)
+    {
+        auto anim = cache->GetResource<Animation>(Format("{}/{}", importDirectory_, fileName));
+        auto animParams = AnimationParameters(anim);
+        result.push_back(animParams);
+    }
+
+    return result;
+}
+
 void AnimationController::Import()
 {
     if (importDirectory_.empty())
@@ -432,13 +449,8 @@ void AnimationController::Import()
     animations_.clear();
     revisionDirty_ = true;
 
-    auto* cache = GetSubsystem<ResourceCache>();
-    ea::vector<ea::string> animFileNames;
-    cache->Scan(animFileNames, importDirectory_, "*.ani", ScanFlag::SCAN_FILES | ScanFlag::SCAN_RECURSIVE);
-    for (const auto& fileName : animFileNames)
+    for (const auto& animParams : GetImportAnimationParams())
     {
-        auto anim = cache->GetResource<Animation>(Format("{}/{}", importDirectory_, fileName));
-        auto animParams = AnimationParameters(anim);
         AddAnimation(animParams);
     }
 }
