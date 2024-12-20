@@ -39,4 +39,12 @@ enum PacketType : uint16_t
 URHO3D_FLAGSET(PacketType, PacketTypeFlags);
 //static_assert(sizeof(PacketType) == sizeof(NetworkMessageId));
 
+enum PacketTargetType : uint8_t
+{
+    Default,
+    RelaySelf,
+    RelayOthers,
+    RelayAll
+};
+
 }

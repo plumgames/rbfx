@@ -151,7 +151,7 @@ public:
     /// @}
 
 private:
-    void InitializeTransportCreateFuncs();
+    void NotifyRelayListeners(const VectorBuffer& args);
 
     /// Event handlers.
     /// @{
@@ -166,7 +166,7 @@ private:
     /// Properties that need connection reset to apply
     /// @{
     unsigned updateFps_{30};
-    unsigned pingIntervalMs_{250};
+    unsigned pingIntervalMs_{7500};
     unsigned maxPingMs_{10000};
     unsigned clockBufferSize_{40};
     unsigned pingBufferSize_{10};

@@ -82,6 +82,14 @@ Network::~Network()
     URHO3D_ASSERT(connectionsToServer_.empty());
 }
 
+void Network::NotifyRelayListeners(const VectorBuffer& args)
+{
+    using namespace NetworkRelayMessage;
+    auto map = GetEventDataMap();
+    map[P_DATA] = args;
+    SendEvent(E_NETWORKRELAYMESSAGE, map);
+}
+
 void Network::OnClientConnected(Connection* connection)
 {
     connection->Initialize();
@@ -95,6 +103,29 @@ void Network::OnClientConnected(Connection* connection)
     VariantMap& eventData = GetEventDataMap();
     eventData[P_CONNECTION] = connection;
     connection->SendEvent(E_CLIENTCONNECTED, eventData);
+
+    connection->onRelayMessage_ = [=](PacketTargetType targetType, PacketType type, const VectorBuffer& encoded, const VectorBuffer& decoded)
+    {
+        switch (targetType)
+        {
+        case PacketTargetType::RelaySelf:
+            connection->SendDataRaw(type, encoded);
+            break;
+        case PacketTargetType::RelayAll:
+        case PacketTargetType::RelayOthers:
+            for (auto pair : clientConnections_)
+            {
+                auto otherConnection = pair.second;
+                if (targetType == PacketTargetType::RelayAll || otherConnection != connection)
+                {
+                    otherConnection->SendDataRaw(type, encoded);
+                }
+            }
+            break;
+        }
+
+        NotifyRelayListeners(decoded);
+    };
 
     if (serverMaxConnections_ <= clientConnections_.size())
     {
@@ -193,6 +224,10 @@ void Network::OnConnectedToServer(Connection* connection)
 {
     connection->Initialize();
     connection->SetConnectPending(false);
+    connection->onRelayMessage_ = [=](PacketTargetType, PacketType, const VectorBuffer&, const VectorBuffer& decoded)
+    {
+        NotifyRelayListeners(decoded);
+    };
 
     URHO3D_LOGINFO("Connected to server!");
 

@@ -81,7 +81,27 @@ Connection::Connection(Context* context, NetworkConnection* connection)
         connection->onMessage_ = [this](ea::string_view msg)
         {
             MutexLock lock(packetQueueLock_);
-            incomingPackets_.emplace_back(VectorBuffer(msg.data(), msg.size()));
+            VectorBuffer encoded(msg.data(), msg.size());
+            const PacketTargetType targetType = (PacketTargetType)encoded.ReadUByte();
+            const PacketType type = (PacketType)encoded.ReadUByte();
+            VectorBuffer decoded(msg.data() + encoded.GetPosition(), msg.size() - encoded.GetPosition());
+            encoded.Seek(0);
+
+            if (targetType == PacketTargetType::Default)
+            {
+                incomingPackets_.emplace_back(decoded);
+            }
+            else if (onRelayMessage_)
+            {
+                WeakPtr<Connection> weakRef(this);
+                worKQueue_->CallFromMainThread([weakRef, targetType, type, encoded, decoded](unsigned)
+                {
+                    if (auto strongRef = weakRef.Lock())
+                    {
+                        strongRef->onRelayMessage_(targetType, type, encoded, decoded);
+                    }
+                });
+            }
         };
     }
 }
@@ -95,6 +115,7 @@ Connection::~Connection()
 
 void Connection::Initialize()
 {
+    worKQueue_ = GetSubsystem<WorkQueue>();
     auto network = GetSubsystem<Network>();
     clock_ = ea::make_unique<ClockSynchronizer>(network->GetPingIntervalMs(), network->GetMaxPingIntervalMs(),
         network->GetClockBufferSize(), network->GetPingBufferSize());
@@ -294,6 +315,28 @@ void Connection::SendPackages()
     }
 }
 
+void Connection::SendData(PacketTargetType targetType, PacketTypeFlags type, const VectorBuffer& buffer)
+{
+    if (!transportConnection_)
+    {
+        return;
+    }
+    sendDataBuffer_.Clear();
+    sendDataBuffer_.WriteUByte(targetType);
+    sendDataBuffer_.WriteUByte(type);
+    sendDataBuffer_.Write(buffer.GetData(), buffer.GetSize());
+    SendDataRaw(type, sendDataBuffer_);
+}
+
+void Connection::SendDataRaw(PacketTypeFlags type, const VectorBuffer& buffer)
+{
+    if (!transportConnection_)
+    {
+        return;
+    }
+    transportConnection_->SendMessage({(const char*)buffer.GetData(), buffer.GetSize()}, type);
+}
+
 void Connection::SendBuffer(PacketTypeFlags type, VectorBuffer& buffer)
 {
     if (buffer.GetSize() < 1)
@@ -305,7 +348,7 @@ void Connection::SendBuffer(PacketTypeFlags type, VectorBuffer& buffer)
         bytesCounterOutgoing_.AddSample(buffer.GetSize());
         bytesCounterOutgoingWithoutCompression_.AddSample(buffer.GetSize() + compressedBytesOut_);
         compressedBytesOut_ = 0;
-        transportConnection_->SendMessage({(const char*)buffer.GetData(), buffer.GetSize()}, type);
+        SendData(PacketTargetType::Default, type, buffer);
     }
     buffer.Clear();
 }

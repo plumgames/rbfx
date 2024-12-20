@@ -149,6 +149,10 @@ public:
     void SendBuffer(PacketTypeFlags type, VectorBuffer& buffer);
     /// Send out all buffered messages
     void SendAllBuffers();
+
+    void SendDataRaw(PacketTypeFlags type, const VectorBuffer& buffer);
+    void SendData(PacketTargetType targetType, PacketTypeFlags type, const VectorBuffer& buffer);
+
     /// Process a message from the server or client. Called by Network.
     bool ProcessMessage(MemoryBuffer& buffer);
     /// Return client identity.
@@ -228,6 +232,8 @@ public:
 
     /// Identity map.
     VariantMap identity_;
+
+    ea::function<void(PacketTargetType, PacketType, const VectorBuffer& encoded, const VectorBuffer& decoded)> onRelayMessage_;
 
 private:
     /// Handle scene loaded event.
@@ -311,6 +317,9 @@ private:
     bool logStatistics_ = false;
     /// @}
 
+    VectorBuffer sendDataBuffer_;
+
+    SharedPtr<WorkQueue> worKQueue_;
     SharedPtr<NetworkConnection> transportConnection_;
     Mutex packetQueueLock_;
     ea::vector<VectorBuffer> incomingPackets_;

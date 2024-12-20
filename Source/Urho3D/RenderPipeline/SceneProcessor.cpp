@@ -443,8 +443,12 @@ template <class T>
 void SceneProcessor::RenderBatchesInternal(ea::string_view debugName, Camera* camera, const PipelineBatchGroup<T>& batchGroup,
     ea::span<const ShaderResourceDesc> globalResources, ea::span<const ShaderParameterDesc> cameraParameters, unsigned instanceMultiplier)
 {
+#ifdef URHO3D_PROFILING_DEVICE
     const char* debugNameStr = &debugName[0];
     URHO3D_PROFILE(debugNameStr);
+#else
+    URHO3D_PROFILE("RenderBatchesInternal");
+#endif
 
     if (RenderPipelineDebugger::IsSnapshotInProgress(debugger_))
         debugger_->BeginPass(debugName);

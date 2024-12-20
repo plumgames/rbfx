@@ -80,6 +80,11 @@ URHO3D_EVENT(E_NETWORKMESSAGE, NetworkMessage)
     URHO3D_PARAM(P_DATA, Data);                    // Buffer
 }
 
+URHO3D_EVENT(E_NETWORKRELAYMESSAGE, NetworkRelayMessage)
+{
+    URHO3D_PARAM(P_DATA, Data); // VectorBuffer
+}
+
 /// Incoming network messages are processed on the client or server.
 URHO3D_EVENT(E_NETWORKINPUTPROCESSED, NetworkInputProcessed)
 {
