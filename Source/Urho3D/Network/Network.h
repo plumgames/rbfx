@@ -151,7 +151,7 @@ public:
     /// @}
 
 private:
-    void NotifyRelayListeners(const VectorBuffer& args);
+    void NotifyRelayListeners(PacketTargetType target, const VectorBuffer& args);
 
     /// Event handlers.
     /// @{
