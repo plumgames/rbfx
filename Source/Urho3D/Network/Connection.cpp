@@ -93,8 +93,9 @@ Connection::Connection(Context* context, NetworkConnection* connection)
             }
             else if (onRelayMessage_)
             {
+                const unsigned recvAt = Time::GetSystemTime();
                 WeakPtr<Connection> weakRef(this);
-                worKQueue_->CallFromMainThread([weakRef, targetType, type, encoded, decoded](unsigned)
+                worKQueue_->CallFromMainThread([weakRef, recvAt, targetType, type, encoded, decoded](unsigned)
                 {
                     if (auto c = weakRef.Lock())
                     {
@@ -102,7 +103,7 @@ Connection::Connection(Context* context, NetworkConnection* connection)
                         c->bytesCounterIncoming_.AddSample(encoded.GetSize());
                         c->bytesCounterIncomingWithoutCompression_.AddSample(encoded.GetSize());
 
-                        c->onRelayMessage_(targetType, type, encoded, decoded);
+                        c->onRelayMessage_(targetType, type, encoded, decoded, recvAt);
                     }
                 });
             }

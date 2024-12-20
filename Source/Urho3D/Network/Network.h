@@ -151,7 +151,7 @@ public:
     /// @}
 
 private:
-    void NotifyRelayListeners(PacketTargetType target, const VectorBuffer& args);
+    void NotifyRelayListeners(Connection* connection, PacketTargetType target, const VectorBuffer& args, unsigned recvAt);
 
     /// Event handlers.
     /// @{

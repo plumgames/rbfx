@@ -42,7 +42,7 @@ URHO3D_FLAGSET(PacketType, PacketTypeFlags);
 enum PacketTargetType : uint8_t
 {
     Default,
-    RelaySelf,
+    Custom,
     RelayOthers,
     RelayAll
 };

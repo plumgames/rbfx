@@ -83,7 +83,9 @@ URHO3D_EVENT(E_NETWORKMESSAGE, NetworkMessage)
 URHO3D_EVENT(E_NETWORKRELAYMESSAGE, NetworkRelayMessage)
 {
     URHO3D_PARAM(P_TARGET, Target); // PacketTargetType
+    URHO3D_PARAM(P_RECVAT, RecvAt); // unsigned: Time::GetSystemTime()
     URHO3D_PARAM(P_DATA, Data); // VectorBuffer
+    URHO3D_PARAM(P_CONNECTION, Connection); // Connection Ptr
 }
 
 /// Incoming network messages are processed on the client or server.

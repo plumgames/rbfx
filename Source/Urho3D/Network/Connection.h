@@ -233,7 +233,7 @@ public:
     /// Identity map.
     VariantMap identity_;
 
-    ea::function<void(PacketTargetType, PacketType, const VectorBuffer& encoded, const VectorBuffer& decoded)> onRelayMessage_;
+    ea::function<void(PacketTargetType, PacketType, const VectorBuffer& encoded, const VectorBuffer& decoded, unsigned recvAt)> onRelayMessage_;
 
 private:
     /// Handle scene loaded event.
