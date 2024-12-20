@@ -96,9 +96,13 @@ Connection::Connection(Context* context, NetworkConnection* connection)
                 WeakPtr<Connection> weakRef(this);
                 worKQueue_->CallFromMainThread([weakRef, targetType, type, encoded, decoded](unsigned)
                 {
-                    if (auto strongRef = weakRef.Lock())
+                    if (auto c = weakRef.Lock())
                     {
-                        strongRef->onRelayMessage_(targetType, type, encoded, decoded);
+                        c->packetCounterIncoming_.AddSample(1);
+                        c->bytesCounterIncoming_.AddSample(encoded.GetSize());
+                        c->bytesCounterIncomingWithoutCompression_.AddSample(encoded.GetSize());
+
+                        c->onRelayMessage_(targetType, type, encoded, decoded);
                     }
                 });
             }
@@ -325,6 +329,14 @@ void Connection::SendData(PacketTargetType targetType, PacketTypeFlags type, con
     sendDataBuffer_.WriteUByte(targetType);
     sendDataBuffer_.WriteUByte(type);
     sendDataBuffer_.Write(buffer.GetData(), buffer.GetSize());
+
+    if (targetType != PacketTargetType::Default)
+    {
+        packetCounterOutgoing_.AddSample(1);
+        bytesCounterOutgoing_.AddSample(sendDataBuffer_.GetSize());
+        bytesCounterOutgoingWithoutCompression_.AddSample(sendDataBuffer_.GetSize());
+    }
+
     SendDataRaw(type, sendDataBuffer_);
 }
 
