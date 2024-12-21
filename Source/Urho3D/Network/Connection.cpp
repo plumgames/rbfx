@@ -323,6 +323,8 @@ void Connection::SendPackages()
 
 void Connection::SendData(PacketTargetType targetType, PacketTypeFlags type, const VectorBuffer& buffer)
 {
+    URHO3D_PROFILE_FUNCTION();
+
     if (!transportConnection_)
     {
         return;
