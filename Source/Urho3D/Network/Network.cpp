@@ -85,6 +85,8 @@ Network::~Network()
 void Network::NotifyRelayListeners(
     Connection* connection, PacketTargetType target, const VectorBuffer& args, unsigned recvAt)
 {
+    URHO3D_PROFILE_FUNCTION();
+
     using namespace NetworkRelayMessage;
     auto eventData = GetEventDataMap();
     eventData[P_DATA] = args;
