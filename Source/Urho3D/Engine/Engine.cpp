@@ -360,6 +360,20 @@ bool Engine::Initialize(const StringVariantMap& applicationParameters, const Str
         if (!logFileName.empty())
             log->Open(logFileName);
     }
+
+    URHO3D_LOGDEBUG("APP PARAMS ({}) START", applicationParameters.size());
+    for (auto pair : applicationParameters)
+    {
+        URHO3D_LOGDEBUG("{}: {}", pair.first, pair.second.ToString());
+    }
+    URHO3D_LOGDEBUG("APP PARAMS ({}) END", applicationParameters.size());
+
+    URHO3D_LOGDEBUG("CLI PARAMS ({}) START", commandLineParameters.size());
+    for (auto pair : commandLineParameters)
+    {
+        URHO3D_LOGDEBUG("{}: {}", pair.first, pair.second.ToString());
+    }
+    URHO3D_LOGDEBUG("CLI PARAMS ({}) END", commandLineParameters.size());
 #endif
 
     // Initialize app preferences directory
