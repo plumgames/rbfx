@@ -196,7 +196,12 @@ HttpRequest::HttpRequest(
     // Start the worker thread to actually create the connection and read the response data.
     Run();
 #else
+#ifndef URHO3D_THREADING
+    // Turned off threading but still need http requests to work
+    thread_ = ea::make_unique<std::thread>([=]() { ThreadFunction(); });
+#else
     URHO3D_LOGERROR("HTTP request will not execute as threading is disabled");
+#endif
 #endif  // URHO3D_PLATFORM_WEB
 }
 
@@ -208,6 +213,9 @@ HttpRequest::~HttpRequest()
         emscripten_fetch_close((emscripten_fetch_t*)requestHandle_);
         requestHandle_ = nullptr;
     }
+#else
+    thread_->join();
+    thread_ = nullptr;
 #endif
     Stop();
 }

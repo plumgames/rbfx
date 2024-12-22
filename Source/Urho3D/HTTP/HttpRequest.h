@@ -33,6 +33,10 @@
 #include <Urho3D/IO/VectorBuffer.h>
 #include <Urho3D/Core/URL.h>
 
+#if !defined(URHO3D_PLATFORM_WEB) && !defined(URHO3D_THREADING)
+#include <thread>
+#endif
+
 namespace Urho3D
 {
 
@@ -116,6 +120,10 @@ private:
     void* requestHandle_ = nullptr;
     ea::vector<const char*> requestHeaders_;
     ea::vector<ea::string> requestHeadersStr_;
+#endif
+
+#if !defined(URHO3D_PLATFORM_WEB) && !defined(URHO3D_THREADING)
+    ea::unique_ptr<std::thread> thread_;
 #endif
 };
 
