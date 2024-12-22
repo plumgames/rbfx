@@ -92,6 +92,8 @@ private:
     /// Return or create internal alias:// mount point.
     MountedAliasRoot* GetOrCreateAliasRoot();
 
+    void AddMountPoint(SharedPtr<MountPoint> mp);
+
     /// Mutex for thread-safe access to the mount points.
     mutable Mutex mountMutex_;
     /// File system mount points. It is expected to have small number of mount points.

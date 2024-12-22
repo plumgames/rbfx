@@ -39,7 +39,7 @@ MountedAliasRoot* VirtualFileSystem::GetOrCreateAliasRoot()
     if (!aliasMountPoint_)
     {
         aliasMountPoint_ = MakeShared<MountedAliasRoot>(context_);
-        mountPoints_.push_back(aliasMountPoint_);
+        AddMountPoint(aliasMountPoint_);
     }
 
     return aliasMountPoint_;
@@ -121,7 +121,7 @@ void VirtualFileSystem::Mount(MountPoint* mountPoint)
     {
         return;
     }
-    mountPoints_.push_back(pointPtr);
+    AddMountPoint(pointPtr);
 
     mountPoint->SetWatching(isWatching_);
 
@@ -198,6 +198,7 @@ void VirtualFileSystem::Unmount(MountPoint* mountPoint)
     const auto i = mountPoints_.find(pointPtr);
     if (i != mountPoints_.end())
     {
+        URHO3D_LOGDEBUG("Unmount {}", (*i)->GetName());
         // Erase the slow way because order of the mount points matters.
         mountPoints_.erase(i);
     }
@@ -382,6 +383,12 @@ bool VirtualFileSystem::Exists(const FileIdentifier& fileName) const
             return true;
     }
     return false;
+}
+
+void VirtualFileSystem::AddMountPoint(SharedPtr<MountPoint> mp)
+{
+    URHO3D_LOGDEBUG("Mount {}", mp->GetName());
+    mountPoints_.push_back(mp);
 }
 
 MountPointGuard::MountPointGuard(MountPoint* mountPoint)
