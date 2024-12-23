@@ -12,12 +12,15 @@ WebSocketClient::WebSocketClient(Context* context)
     : Object(context)
 {
     ws_ = ea::make_unique<WebSocket>();
-    ws_->onAvailable([=]() { onAvailable_(); });
     ws_->onOpen([=]() { onOpen_(); });
     ws_->onClosed([=]() { onClosed_(); });
     ws_->onError([=](std::string error) { onError_(error.c_str()); });
     ws_->onMessage(
-        [=](binary msg) { onMessageBinary_(VectorBuffer(msg.data(), msg.size())); },
+        [=](binary msg) 
+        { 
+            VectorBuffer buffer(msg.data(), msg.size());
+            onMessageBinary_(buffer); 
+        },
         [=](std::string msg) { onMessageString_(msg.c_str()); }
     );
     ws_->onBufferedAmountLow([=]() { URHO3D_LOGWARNING("OnWSBufferedAmountLow");});

@@ -29,7 +29,6 @@ public:
     bool IsOpen() const;
     bool IsClosed() const;
 
-    ea::function<void()> onAvailable_;
     ea::function<void()> onOpen_;
     ea::function<void()> onClosed_;
     ea::function<void(ea::string)> onError_;
