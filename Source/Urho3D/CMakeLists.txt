@@ -84,6 +84,10 @@ if (URHO3D_HTTP)
     define_engine_source_files (HTTP)
 endif ()
 
+if (URHO3D_WEBSOCKET)
+    define_engine_source_files (WebSocket)
+endif ()
+
 if (URHO3D_LAN)
     define_engine_source_files (LAN)
 endif ()

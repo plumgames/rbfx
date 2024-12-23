@@ -144,7 +144,7 @@ if (URHO3D_SYSTEMUI)
 endif ()
 
 if (NOT WEB)
-    if (URHO3D_HTTP OR URHO3D_NETWORK)
+    if (URHO3D_HTTP OR URHO3D_NETWORK OR URHO3D_WEBSOCKET)
         add_subdirectory(openssl)
     endif()
     if (URHO3D_HTTP)

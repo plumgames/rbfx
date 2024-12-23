@@ -186,6 +186,7 @@ option                (URHO3D_NETWORK            "Networking subsystem enabled" 
 option                (URHO3D_NETWORK_WEBRTC     "Networking subsystem WebRTC transport enabled"         ${URHO3D_ENABLE_ALL})
 option                (URHO3D_NETWORK_BEHAVIOR_ALL "Networking behaviours all OR FilterByDistance only"  ${URHO3D_ENABLE_ALL})
 option                (URHO3D_HTTP               "HTTP client enabled"                                   ${URHO3D_ENABLE_ALL})
+option                (URHO3D_WEBSOCKET          "WebSocket client enabled"                              OFF)
 option                (URHO3D_LAN                "LAN discovery enabled"                                 ${URHO3D_ENABLE_ALL})
 option                (URHO3D_PHYSICS            "Physics subsystem enabled"                             ${URHO3D_ENABLE_ALL})
 cmake_dependent_option(URHO3D_PROFILING          "Profiler support enabled"                              ${URHO3D_ENABLE_ALL} "NOT EMSCRIPTEN;NOT MINGW;NOT UWP"     OFF)
