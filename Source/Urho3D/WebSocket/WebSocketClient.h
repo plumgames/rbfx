@@ -13,6 +13,7 @@ using namespace rtc;
 
 namespace Urho3D
 {
+class WorkQueue;
 
 class URHO3D_API WebSocketClient : public Object
 {
@@ -36,6 +37,7 @@ public:
     ea::function<void(VectorBuffer&)> onMessageBinary_;
 private:
     ea::unique_ptr<WebSocket> ws_;
+    SharedPtr<WorkQueue> workQueue_;
 };
 
 }

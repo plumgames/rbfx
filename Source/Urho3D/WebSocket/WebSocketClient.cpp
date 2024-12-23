@@ -3,27 +3,36 @@
 #include <Urho3D/WebSocket/WebSocketClient.h>
 #include <Urho3D/IO/VectorBuffer.h>
 #include <Urho3D/IO/Log.h>
+#include <Urho3D/Core/WorkQueue.h>
 
 #include <rtc/websocket.hpp>
 
 namespace Urho3D
 {
 WebSocketClient::WebSocketClient(Context* context)
-    : Object(context)
+    : BaseClassName(context)
 {
     ws_ = ea::make_unique<WebSocket>();
-    ws_->onOpen([=]() { onOpen_(); });
-    ws_->onClosed([=]() { onClosed_(); });
-    ws_->onError([=](std::string error) { onError_(error.c_str()); });
+    ws_->onOpen([=]() { workQueue_->PostTaskForMainThread([=]() { onOpen_(); }); });
+    ws_->onClosed([=]() { workQueue_->PostTaskForMainThread([=]() { onClosed_(); }); });
+    ws_->onError([=](std::string error) { workQueue_->PostTaskForMainThread([=]() { onError_(error.c_str()); }); });
     ws_->onMessage(
         [=](binary msg) 
-        { 
+        {
+        workQueue_->PostTaskForMainThread(
+            [=]()
+        {
             VectorBuffer buffer(msg.data(), msg.size());
-            onMessageBinary_(buffer); 
+            onMessageBinary_(buffer);
+        });
         },
-        [=](std::string msg) { onMessageString_(msg.c_str()); }
+        [=](std::string msg) { workQueue_->PostTaskForMainThread([=]() { onMessageString_(msg.c_str()); }); }
     );
-    ws_->onBufferedAmountLow([=]() { URHO3D_LOGWARNING("OnWSBufferedAmountLow");});
+    ws_->onBufferedAmountLow(
+        [=]()
+    {
+        workQueue_->PostTaskForMainThread([=]() { URHO3D_LOGWARNING("OnWSBufferedAmountLow"); });
+    });
 }
 
 WebSocketClient::~WebSocketClient()
