@@ -12,6 +12,8 @@ namespace Urho3D
 WebSocketClient::WebSocketClient(Context* context)
     : BaseClassName(context)
 {
+    workQueue_ = GetSubsystem<WorkQueue>();
+
     ws_ = ea::make_unique<WebSocket>();
     ws_->onOpen([=]() { workQueue_->PostTaskForMainThread([=]() { onOpen_(); }); });
     ws_->onClosed([=]() { workQueue_->PostTaskForMainThread([=]() { onClosed_(); }); });
