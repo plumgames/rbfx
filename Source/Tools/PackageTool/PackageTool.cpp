@@ -63,6 +63,7 @@ unsigned blockSize_ = COMPRESSED_BLOCK_SIZE;
 ea::string ignoreExtensions_[] = {
     ".bak",
     ".rule"
+    ".user.json"
 };
 
 int main(int argc, char** argv);
