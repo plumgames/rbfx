@@ -148,13 +148,13 @@ void DebugHud::RenderNetworkUI(float left_offset)
     const auto connectionsToClients = network->GetClientConnections();
     unsigned serverConnectionCount = connectionsToClients.size();
 
-    if (serverConnectionCount > 0)
+    if (network->IsServerRunning())
     {
         ui::Text("[Server]");
         ui::SetCursorPosX(left_offset);
-        ui::Text("PacketsIn %d (%dpc)", serverPacketsIn, serverPacketsIn / serverConnectionCount);
+        ui::Text("PacketsIn %d (%dpc)", serverPacketsIn, serverPacketsIn / Max(serverConnectionCount, 1));
         ui::SetCursorPosX(left_offset);
-        ui::Text("PacketsOut %d (%dpc)", serverPacketsOut, serverPacketsOut / serverConnectionCount);
+        ui::Text("PacketsOut %d (%dpc)", serverPacketsOut, serverPacketsOut / Max(serverConnectionCount, 1));
         ui::SetCursorPosX(left_offset);
         ui::Text("BytesIn %d (%dpp)", serverBytesIn, serverBytesIn / Max(serverPacketsIn, 1));
         ui::SetCursorPosX(left_offset);

@@ -36,6 +36,7 @@ public:
     ea::function<void(const ea::string&)> onMessageString_;
     ea::function<void(VectorBuffer&)> onMessageBinary_;
 private:
+    ea::string url_;
     ea::unique_ptr<WebSocket> ws_;
     SharedPtr<WorkQueue> workQueue_;
 };

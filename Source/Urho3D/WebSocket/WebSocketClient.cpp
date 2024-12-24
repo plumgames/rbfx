@@ -15,9 +15,30 @@ WebSocketClient::WebSocketClient(Context* context)
     workQueue_ = GetSubsystem<WorkQueue>();
 
     ws_ = ea::make_unique<WebSocket>();
-    ws_->onOpen([=]() { workQueue_->PostTaskForMainThread([=]() { onOpen_(); }); });
-    ws_->onClosed([=]() { workQueue_->PostTaskForMainThread([=]() { onClosed_(); }); });
-    ws_->onError([=](std::string error) { workQueue_->PostTaskForMainThread([=]() { onError_(error.c_str()); }); });
+    ws_->onOpen([=]()
+    {
+        workQueue_->PostTaskForMainThread([=]()
+        {
+            URHO3D_LOGDEBUG("<- OPENED {}", url_);
+            onOpen_();
+        });
+    });
+    ws_->onClosed([=]()
+    {
+        workQueue_->PostTaskForMainThread([=]()
+        {
+            URHO3D_LOGDEBUG("<- CLOSED {}", url_);
+            onClosed_();
+        });
+    });
+    ws_->onError([=](std::string error)
+    {
+        workQueue_->PostTaskForMainThread([=]()
+        {
+            URHO3D_LOGDEBUG("<- ERROR {} {}", url_, error);
+            onError_(error.c_str());
+        });
+    });
     ws_->onMessage(
         [=](binary msg) 
         {
@@ -43,7 +64,9 @@ WebSocketClient::~WebSocketClient()
 
 void WebSocketClient::Open(const ea::string& url)
 {
-    ws_->open(url.c_str());
+    url_ = url;
+    URHO3D_LOGDEBUG("=> {}", url_);
+    ws_->open(url_.c_str());
 }
 
 void WebSocketClient::Close()
