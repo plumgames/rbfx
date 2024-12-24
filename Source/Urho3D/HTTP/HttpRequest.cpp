@@ -198,6 +198,7 @@ HttpRequest::HttpRequest(
 #else
 #ifndef URHO3D_THREADING
     // Turned off threading but still need http requests to work
+    shouldRun_ = true;
     thread_ = ea::make_unique<std::thread>([=]() { ThreadFunction(); });
 #else
     URHO3D_LOGERROR("HTTP request will not execute as threading is disabled");
@@ -315,6 +316,7 @@ unsigned HttpRequest::Read(void* dest, unsigned size)
 
 unsigned HttpRequest::Seek(unsigned position)
 {
+    readPosition_ = position;
     return 0;
 }
 
