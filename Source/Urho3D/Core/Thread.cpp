@@ -198,24 +198,24 @@ void Thread::SetMainThread()
 
 ThreadID Thread::GetCurrentThreadID()
 {
-#ifdef URHO3D_THREADING
+//#ifdef URHO3D_THREADING
 #ifdef _WIN32
     return GetCurrentThreadId();
 #else
     return pthread_self();
 #endif
-#else
-    return ThreadID();
-#endif // URHO3D_THREADING
+//#else
+//    return ThreadID();
+///#endif // URHO3D_THREADING
 }
 
 bool Thread::IsMainThread()
 {
-#ifdef URHO3D_THREADING
+//#ifdef URHO3D_THREADING
     return GetCurrentThreadID() == mainThreadID;
-#else
+//#else
     return true;
-#endif // URHO3D_THREADING
+//#endif // URHO3D_THREADING
 }
 
 void Thread::SetName(const ea::string& name)

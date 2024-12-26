@@ -80,7 +80,6 @@ Connection::Connection(Context* context, NetworkConnection* connection)
     {
         connection->onMessage_ = [this](ea::string_view msg)
         {
-            URHO3D_PROFILE("Connection_onMessage_");
             MutexLock lock(packetQueueLock_);
             VectorBuffer encoded(msg.data(), msg.size());
             const PacketTargetType targetType = (PacketTargetType)encoded.ReadUByte();

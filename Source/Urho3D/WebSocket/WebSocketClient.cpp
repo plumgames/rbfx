@@ -14,48 +14,74 @@ WebSocketClient::WebSocketClient(Context* context)
 {
     workQueue_ = GetSubsystem<WorkQueue>();
 
+    WeakPtr<WebSocketClient> self(this);
+
     ws_ = ea::make_unique<WebSocket>();
-    ws_->onOpen([=]()
+    ws_->onOpen(
+        [=]()
     {
-        workQueue_->PostTaskForMainThread([=]()
-        {
-            URHO3D_LOGDEBUG("<- OPENED {}", url_);
-            onOpen_();
-        });
-    });
-    ws_->onClosed([=]()
-    {
-        workQueue_->PostTaskForMainThread([=]()
-        {
-            URHO3D_LOGDEBUG("<- CLOSED {}", url_);
-            onClosed_();
-        });
-    });
-    ws_->onError([=](std::string error)
-    {
-        workQueue_->PostTaskForMainThread([=]()
-        {
-            URHO3D_LOGDEBUG("<- ERROR {} {}", url_, error);
-            onError_(error.c_str());
-        });
-    });
-    ws_->onMessage(
-        [=](binary msg) 
-        {
         workQueue_->PostTaskForMainThread(
             [=]()
         {
-            VectorBuffer buffer(msg.data(), msg.size());
-            onMessageBinary_(buffer);
+            if (!self.Expired())
+            {
+                URHO3D_LOGDEBUG("<- OPENED {}", url_);
+                onOpen_();
+            }
         });
-        },
-        [=](std::string msg) { workQueue_->PostTaskForMainThread([=]() { onMessageString_(msg.c_str()); }); }
-    );
-    ws_->onBufferedAmountLow(
+    });
+    ws_->onClosed(
         [=]()
     {
-        workQueue_->PostTaskForMainThread([=]() { URHO3D_LOGWARNING("OnWSBufferedAmountLow"); });
+        workQueue_->PostTaskForMainThread(
+            [=]()
+        {
+            if (!self.Expired())
+            {
+                URHO3D_LOGDEBUG("<- CLOSED");
+                onClosed_();
+            }
+        });
     });
+    ws_->onError(
+        [=](std::string error)
+    {
+        workQueue_->PostTaskForMainThread(
+            [=]()
+        {
+            if (!self.Expired())
+            {
+                URHO3D_LOGDEBUG("<- ERROR {} {}", url_, error);
+                onError_(error.c_str());
+            }
+        });
+    });
+    ws_->onMessage(
+        [=](binary msg)
+    {
+        workQueue_->PostTaskForMainThread(
+            [=]()
+        {
+            if (!self.Expired())
+            {
+                VectorBuffer buffer(msg.data(), msg.size());
+                onMessageBinary_(buffer);
+            }
+        });
+    },
+        [=](std::string msg)
+    {
+        workQueue_->PostTaskForMainThread(
+            [=]()
+        {
+            if (!self.Expired())
+            {
+                onMessageString_(msg.c_str());
+            }
+        });
+    });
+    ws_->onBufferedAmountLow(
+        [=]() { workQueue_->PostTaskForMainThread([=]() { URHO3D_LOGWARNING("OnWSBufferedAmountLow"); }); });
 }
 
 WebSocketClient::~WebSocketClient()

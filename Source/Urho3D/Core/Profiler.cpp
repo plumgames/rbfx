@@ -35,6 +35,7 @@
 #include "Profiler.h"
 #if URHO3D_PROFILING_DEVICE
 #include <Urho3D/Core/Timer.h>
+#include <Urho3D/Core/Thread.h>
 #include <Urho3D/IO/Log.h>
 #include <EASTL/map.h>
 #include <EASTL/string.h>
@@ -79,6 +80,8 @@ struct ProfilerDeviceSample::PIMPL
 
     void End()
     {
+        URHO3D_ASSERT(Thread::IsMainThread());
+
         if (ended_)
         {
             return;
@@ -96,6 +99,8 @@ struct ProfilerDeviceSample::PIMPL
 
 ProfilerDeviceSample::ProfilerDeviceSample(const char* file, int line, const char* func, const char* name)
 {
+    URHO3D_ASSERT(Thread::IsMainThread());
+
     samples_.push(this);
     pimpl_ = new PIMPL();
     pimpl_->name_ = fmt::format("{}_{}:{}", func, name, line).c_str();
@@ -123,6 +128,8 @@ ProfilerDeviceSample::~ProfilerDeviceSample()
 
 void ProfilerDeviceSample::EndFrame()
 {
+    URHO3D_ASSERT(Thread::IsMainThread());
+
     float frameMs = 0;
     if (samples_.size() == 1)
     {
@@ -159,6 +166,8 @@ void ProfilerDeviceSample::EndFrame()
 
 void ProfilerDeviceSample::PrintFrame()
 {
+    URHO3D_ASSERT(Thread::IsMainThread());
+
     ea::vector<ea::pair<ea::string, Entry>> ranked;
     for (auto& pair : framePrev_)
     {
