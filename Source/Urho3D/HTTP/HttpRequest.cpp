@@ -101,8 +101,8 @@ HttpRequest::HttpRequest(
         request->state_ = HTTP_CLOSED;
         if (fetch->numBytes > 0)
         {
-            request->readBuffer_.Resize(fetch->numBytes - 1);
-            request->readBuffer_.SetData(fetch->data, fetch->numBytes - 1);
+            request->readBuffer_.Resize(fetch->numBytes);
+            request->readBuffer_.SetData(fetch->data, fetch->numBytes);
         }
         request->requestHandle_ = nullptr;
         request->statusCode_ = fetch->status;
