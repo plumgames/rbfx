@@ -107,12 +107,16 @@ private:
     unsigned serverBytesInWOC = 0;
     unsigned serverBytesOutWOC = 0;
 
-    unsigned clientPacketsIn = 0;
-    unsigned clientPacketsOut = 0;
-    unsigned clientBytesIn = 0;
-    unsigned clientBytesOut = 0;
-    unsigned clientBytesInWOC = 0;
-    unsigned clientBytesOutWOC = 0;
+    struct ClientStats
+    {
+        unsigned clientPacketsIn = 0;
+        unsigned clientPacketsOut = 0;
+        unsigned clientBytesIn = 0;
+        unsigned clientBytesOut = 0;
+        unsigned clientBytesInWOC = 0;
+        unsigned clientBytesOutWOC = 0;
+    };
+    ea::map<int, ClientStats> clientStats_;
 
     Timer packetCounterTimer_;
 };

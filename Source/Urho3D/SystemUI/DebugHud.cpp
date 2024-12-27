@@ -144,7 +144,6 @@ void SampleConnection(const Connection* connection, unsigned& packetsIn, unsigne
 void DebugHud::RenderNetworkUI(float left_offset)
 {
     const auto* network = GetSubsystem<Network>();
-    auto* connectionToServer = network->GetServerConnection();
     const auto connectionsToClients = network->GetClientConnections();
     unsigned serverConnectionCount = connectionsToClients.size();
 
@@ -169,19 +168,21 @@ void DebugHud::RenderNetworkUI(float left_offset)
     int i = 0;
     while (auto* connectionToServer = network->GetServerConnection(i))
     {
+        ClientStats& stats = clientStats_[i];
+
         ui::Text("[Client(%d)]", i);
         ui::SetCursorPosX(left_offset);
-        ui::Text("PacketsIn %d", clientPacketsIn);
+        ui::Text("PacketsIn %d", stats.clientPacketsIn);
         ui::SetCursorPosX(left_offset);
-        ui::Text("PacketsOut %d", clientPacketsOut);
+        ui::Text("PacketsOut %d", stats.clientPacketsOut);
         ui::SetCursorPosX(left_offset);
-        ui::Text("BytesIn %d (%dpp)", clientBytesIn, clientBytesIn / Max(1, clientPacketsIn));
+        ui::Text("BytesIn %d (%dpp)", stats.clientBytesIn, stats.clientBytesIn / Max(1, stats.clientPacketsIn));
         ui::SetCursorPosX(left_offset);
-        ui::Text("BytesInWOC %d (%dpp)", clientBytesInWOC, clientBytesInWOC / Max(1, clientPacketsIn));
+        ui::Text("BytesInWOC %d (%dpp)", stats.clientBytesInWOC, stats.clientBytesInWOC / Max(1, stats.clientPacketsIn));
         ui::SetCursorPosX(left_offset);
-        ui::Text("BytesOut %d (%dpp)", clientBytesOut, clientBytesOut / Max(1, clientPacketsOut));
+        ui::Text("BytesOut %d (%dpp)", stats.clientBytesOut, stats.clientBytesOut / Max(1, stats.clientPacketsOut));
         ui::SetCursorPosX(left_offset);
-        ui::Text("BytesOutWOC %d (%dpp)", clientBytesOutWOC, clientBytesOutWOC / Max(1, clientPacketsOut));
+        ui::Text("BytesOutWOC %d (%dpp)", stats.clientBytesOutWOC, stats.clientBytesOutWOC / Max(1, stats.clientPacketsOut));
         ui::SetCursorPosX(left_offset);
 
         ++i;
@@ -199,19 +200,23 @@ void DebugHud::RenderNetworkUI(float left_offset)
     serverBytesOutWOC = 0;
     serverBytesInWOC = 0;
 
-    clientPacketsIn = 0;
-    clientPacketsOut = 0;
-    clientBytesIn = 0;
-    clientBytesOut = 0;
-    clientBytesInWOC = 0;
-    clientBytesOutWOC = 0;
-
     packetCounterTimer_.Reset();
 
-    if (connectionToServer)
+    i = 0;
+    while (auto* connectionToServer = network->GetServerConnection(i))
     {
-        SampleConnection(connectionToServer, clientPacketsIn, clientPacketsOut, clientBytesIn, clientBytesOut,
-            clientBytesInWOC, clientBytesOutWOC);
+        ClientStats& stats = clientStats_[i];
+
+        stats.clientPacketsIn = 0;
+        stats.clientPacketsOut = 0;
+        stats.clientBytesIn = 0;
+        stats.clientBytesOut = 0;
+        stats.clientBytesInWOC = 0;
+        stats.clientBytesOutWOC = 0;
+
+        SampleConnection(connectionToServer, stats.clientPacketsIn, stats.clientPacketsOut, stats.clientBytesIn,
+            stats.clientBytesOut, stats.clientBytesInWOC, stats.clientBytesOutWOC);
+        ++i;
     }
 
     if (serverConnectionCount > 0)
