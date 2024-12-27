@@ -38,7 +38,7 @@ WebSocketClient::WebSocketClient(Context* context)
         {
             if (!self.Expired())
             {
-                URHO3D_LOGDEBUG("<- CLOSED");
+                URHO3D_LOGDEBUG("<- CLOSED {}", url_);
                 onClosed_();
             }
         });
