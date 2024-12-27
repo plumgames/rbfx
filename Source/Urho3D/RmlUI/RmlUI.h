@@ -74,6 +74,8 @@ public:
 #ifdef URHO3D_RMLUI_DEBUG
     /// Show or hide RmlUi debugger.
     void SetDebuggerVisible(bool visible);
+    /// Return whether RmlUi debugger is visible.
+    bool IsDebuggerVisible() const;
 #endif
     /// Load a font resource for RmlUi to use.
     /// Set fallback parameter to true if font should be used as a fallback font for unsupported characters.

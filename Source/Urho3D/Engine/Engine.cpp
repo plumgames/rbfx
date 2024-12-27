@@ -44,6 +44,7 @@
 #endif
 #include "../Graphics/Graphics.h"
 #include "../Graphics/GraphicsEvents.h"
+#include "../Graphics/Texture2D.h"
 #include "../RenderAPI/PipelineState.h"
 #include "../RenderAPI/RenderAPIUtils.h"
 #include "../RenderAPI/RenderDevice.h"

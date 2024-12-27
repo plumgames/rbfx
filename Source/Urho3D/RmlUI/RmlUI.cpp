@@ -491,6 +491,11 @@ void RmlUI::SetDebuggerVisible(bool visible)
     }
     Rml::Debugger::SetVisible(visible);
 }
+
+bool RmlUI::IsDebuggerVisible() const
+{
+    return Rml::Debugger::IsVisible();
+}
 #endif
 
 bool RmlUI::LoadFont(const ea::string& resourceName, bool fallback)
