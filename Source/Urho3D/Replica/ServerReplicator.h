@@ -38,6 +38,7 @@
 #include <EASTL/optional.h>
 #include <EASTL/vector.h>
 #include <EASTL/stack.h>
+#include <EASTL/list.h>
 #include <EASTL/bonus/ring_buffer.h>
 
 namespace Urho3D

@@ -40,20 +40,24 @@ namespace
     template <typename T>
     void LogSpan(LogLevel level, unsigned numParticles, const SparseSpan<T>& span)
     {
+#ifdef URHO3D_LOGGING
         for (unsigned i=0; i<numParticles;++i)
         {
             Variant v{span[i]};
             Urho3D::Log::GetLogger().Write(level, v.ToString());
         }
+#endif
     }
 
     template <typename T> struct LogPin
     {
         void operator()(const UpdateContext& context, const ParticleGraphPin& pin0)
         {
+#ifdef URHO3D_LOGGING
             const unsigned numParticles = context.indices_.size();
 
             LogSpan<T>(LOG_INFO, numParticles, context.GetSpan<T>(pin0.GetMemoryReference()));
+#endif
         }
     };
 
