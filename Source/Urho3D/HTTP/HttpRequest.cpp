@@ -287,6 +287,10 @@ void HttpRequest::ThreadFunction()
         memcpy(readBuffer_.GetModifiableData() + writePos, readBuffer, bytesRead);
     }
 
+    if (const mg_response_info* response = mg_get_response_info(connection))
+    {
+        statusCode_ = response->status_code;
+    }
     // Close the connection
     const struct mg_response_info* request_info = mg_get_response_info(connection);
     if (request_info) {
@@ -298,11 +302,6 @@ void HttpRequest::ThreadFunction()
         state_ = HTTP_CLOSED;
     }
 #endif  // URHO3D_PLATFORM_WEB
-}
-
-int HttpRequest::GetStatusCode() const
-{
-    return statusCode_;
 }
 
 unsigned HttpRequest::Read(void* dest, unsigned size)
@@ -342,6 +341,11 @@ unsigned HttpRequest::GetAvailableSize() const
 {
     MutexLock lock(mutex_);
     return readBuffer_.GetSize() - readPosition_;
+}
+
+int HttpRequest::GetStatusCode() const
+{
+    return statusCode_;
 }
 
 }

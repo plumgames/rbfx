@@ -83,11 +83,7 @@ void HttpRequestDemo::Update(float timeStep)
     {
         const ea::string verb = "GET";
         const ea::vector<ea::string> headers = {"hello: world"};
-#ifdef URHO3D_SSL
-        httpRequest_ = MakeShared<HttpRequest>("https://api.ipify.org/?format=json", verb, headers);
-#else
-        httpRequest_ = MakeShared<HttpRequest>("http://httpbin.org/ip", verb, headers);
-#endif
+        httpRequest_ = MakeShared<HttpRequest>("https://httpbin.org/ip", verb, headers);
     }
     else
     {
@@ -99,7 +95,7 @@ void HttpRequestDemo::Update(float timeStep)
         {
             text_->SetText("An error has occurred: " + httpRequest_->GetError());
             UnsubscribeFromEvent(E_UPDATE);
-            URHO3D_LOGERRORF("HttpRequest error: %s", httpRequest_->GetError().c_str());
+            URHO3D_LOGERRORF("HttpRequest error: %s (%d)", httpRequest_->GetError().c_str(), httpRequest_->GetStatusCode());
         }
         else if (httpRequest_->GetState() == Urho3D::HTTP_OPEN)
             text_->SetText("Processing...");
@@ -107,15 +103,12 @@ void HttpRequestDemo::Update(float timeStep)
         {
             message_ = httpRequest_->ReadString();
 
+            URHO3D_LOGINFOF("HttpRequest success: %s (%d)", message_.c_str(), httpRequest_->GetStatusCode());
+
             SharedPtr<JSONFile> json(new JSONFile(context_));
             json->FromString(message_);
 
-#ifdef URHO3D_SSL
-            JSONValue val = json->GetRoot().Get("ip");
-#else
-            JSONValue val = json->GetRoot().Get("origin");
-#endif
-
+            const JSONValue val = json->GetRoot().Get("origin");
             if (val.IsNull())
                 text_->SetText("Invalid JSON response retrieved!");
             else
