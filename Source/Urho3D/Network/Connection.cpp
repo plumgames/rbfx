@@ -131,32 +131,41 @@ void Connection::RegisterObject(Context* context)
     context->AddFactoryReflection<Connection>();
 }
 
-void Connection::SendMessageInternal(NetworkMessageId messageId, const unsigned char* dataOriginal, unsigned numBytesOriginal, PacketTypeFlags packetType)
+Connection::Payload Connection::Pack(const unsigned char* dataOriginal, unsigned numBytesOriginal)
 {
-    URHO3D_ASSERT(messageId <= MSG_MAX);
+    Payload payload{};
 
     const int numBytesCompressed = LZ4_compress_default(
         (char*)dataOriginal, compressedPacketBuffer_.data(), numBytesOriginal, packetMessageLimit_);
 
-    char* data = (char*)dataOriginal;
-    unsigned numBytes = numBytesOriginal;
+    payload.data_ = (char*)dataOriginal;
+    payload.numBytes_ = numBytesOriginal;
 
-    const bool compressed = numBytesCompressed > 0 && numBytesCompressed < numBytesOriginal;
-    if (compressed)
+    payload.compressed_ = numBytesCompressed > 0 && numBytesCompressed < numBytesOriginal;
+    if (payload.compressed_)
     {
-        data = compressedPacketBuffer_.data();
-        numBytes = numBytesCompressed;
+        payload.data_ = compressedPacketBuffer_.data();
+        payload.numBytes_ = numBytesCompressed;
         compressedBytesOut_ += numBytesOriginal - numBytesCompressed;
     }
 
-    URHO3D_ASSERT(numBytes <= packetMessageLimit_);
-    URHO3D_ASSERT((data == nullptr && numBytes == 0) || (data != nullptr && numBytes > 0));
+    URHO3D_ASSERT(payload.numBytes_ <= packetMessageLimit_);
+    URHO3D_ASSERT((payload.data_ == nullptr && payload.numBytes_ == 0) || (payload.data_ != nullptr && payload.numBytes_ > 0));
+
+    return payload;
+}
+
+void Connection::SendMessageInternal(NetworkMessageId messageId, const unsigned char* dataOriginal, unsigned numBytesOriginal, PacketTypeFlags packetType)
+{
+    URHO3D_ASSERT(messageId <= MSG_MAX);
+
+    const auto payload = Pack(dataOriginal, numBytesOriginal);
 
     VectorBuffer* outgoingBufferWithCapacity = nullptr;
     for (auto& outgoingBuffer : outgoingBuffer_[packetType])
     {
         const auto remainderBytes = packetMessageLimit_ - outgoingBuffer.GetSize();
-        if (remainderBytes <= numBytes)
+        if (remainderBytes <= payload.numBytes_)
         {
             outgoingBufferWithCapacity = &outgoingBuffer;
             break;
@@ -171,15 +180,15 @@ void Connection::SendMessageInternal(NetworkMessageId messageId, const unsigned 
 
     VectorBuffer& buffer = *outgoingBufferWithCapacity;
 
-    if (buffer.GetSize() + numBytes >= packetMessageLimit_)
+    if (buffer.GetSize() + payload.numBytes_ >= packetMessageLimit_)
         SendBuffer(packetType);
 
-    const unsigned compressedValue = compressed ? 1 : 0;
+    const unsigned compressedValue = payload.compressed_ ? 1 : 0;
     buffer.WriteVLE(compressedValue);
     buffer.WriteUShort(messageId);
-    buffer.WriteUShort(numBytes);
-    if (numBytes)
-        buffer.Write(data, numBytes);
+    buffer.WriteUShort(payload.numBytes_);
+    if (payload.numBytes_)
+        buffer.Write(payload.data_, payload.numBytes_);
 }
 
 void Connection::SendRemoteEvent(StringHash eventType, bool inOrder, const VariantMap& eventData)
@@ -328,16 +337,27 @@ void Connection::SendData(PacketTargetType targetType, PacketTypeFlags type, con
     {
         return;
     }
+
+    Payload payload{};
+    payload.data_ = (char*)buffer.GetData();
+    payload.numBytes_ = buffer.GetSize();
+
+    if (targetType != PacketTargetType::Default)
+    {
+        compressedBytesOut_ = 0;
+        //payload = Pack(buffer.GetData(), buffer.GetSize());
+    }
+
     sendDataBuffer_.Clear();
     sendDataBuffer_.WriteUByte(targetType);
     sendDataBuffer_.WriteUByte(type);
-    sendDataBuffer_.Write(buffer.GetData(), buffer.GetSize());
+    sendDataBuffer_.Write(payload.data_, payload.numBytes_);
 
     if (targetType != PacketTargetType::Default)
     {
         packetCounterOutgoing_.AddSample(1);
         bytesCounterOutgoing_.AddSample(sendDataBuffer_.GetSize());
-        bytesCounterOutgoingWithoutCompression_.AddSample(sendDataBuffer_.GetSize());
+        bytesCounterOutgoingWithoutCompression_.AddSample(sendDataBuffer_.GetSize() + compressedBytesOut_);
     }
 
     SendDataRaw(type, sendDataBuffer_);

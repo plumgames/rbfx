@@ -269,6 +269,14 @@ private:
     /// Handles queued packets. Should only be called from main thread.
     void ProcessPackets();
 
+    struct Payload
+    {
+        unsigned numBytes_ = 0;
+        char* data_ = nullptr;
+        bool compressed_ = false;
+    };
+    Payload Pack(const unsigned char* dataOriginal, unsigned numBytesOriginal);
+
     /// Packet handling.
     /// @{
     /// Packet count in the last second.
