@@ -215,8 +215,10 @@ HttpRequest::~HttpRequest()
         requestHandle_ = nullptr;
     }
 #else
+#ifndef URHO3D_THREADING
     thread_->join();
     thread_ = nullptr;
+#endif
 #endif
     Stop();
 }
