@@ -24,6 +24,7 @@
 
 #include "../Core/Context.h"
 #include "../Core/Profiler.h"
+#include "../Core/VariantCurve.h"
 #include "../Graphics/DrawableEvents.h"
 #include "../Graphics/ParticleEffect.h"
 #include "../Graphics/ParticleEmitter.h"
@@ -210,6 +211,8 @@ void ParticleEmitter::Update(const FrameInfo& frame)
             // Rotation
             billboard.rotation_ += lastTimeStep_ * particle.rotationSpeed_;
 
+            const float normalizedTime = particle.timer_ / particle.timeToLive_;
+
             // Scaling
             float sizeAdd = effect_->GetSizeAdd();
             float sizeMul = effect_->GetSizeMul();
@@ -223,6 +226,12 @@ void ParticleEmitter::Update(const FrameInfo& frame)
                 billboard.size_ = particle.size_ * particle.scale_;
             }
 
+            if (auto sizeCurve = effect_->GetSizeCurve())
+            {
+                particle.scale_ = sizeCurve->Sample(normalizedTime).GetFloat();
+                billboard.size_ = particle.size_ * particle.scale_;
+            }
+
             // Color interpolation
             unsigned& index = particle.colorIndex_;
             const ea::vector<ColorFrame>& colorFrames_ = effect_->GetColorFrames();
@@ -230,11 +239,11 @@ void ParticleEmitter::Update(const FrameInfo& frame)
             {
                 if (index < colorFrames_.size() - 1)
                 {
-                    if (particle.timer_ >= colorFrames_[index + 1].time_)
+                    if (normalizedTime >= colorFrames_[index + 1].time_)
                         ++index;
                 }
                 if (index < colorFrames_.size() - 1)
-                    billboard.color_ = colorFrames_[index].Interpolate(colorFrames_[index + 1], particle.timer_);
+                    billboard.color_ = colorFrames_[index].Interpolate(colorFrames_[index + 1], normalizedTime);
                 else
                     billboard.color_ = colorFrames_[index].color_;
             }
@@ -535,7 +544,8 @@ bool ParticleEmitter::EmitNewParticle()
     billboard.size_ = particles_[index].size_;
     const ea::vector<TextureFrame>& textureFrames_ = effect_->GetTextureFrames();
     billboard.uv_ = textureFrames_.size() ? textureFrames_[0].uv_ : Rect::POSITIVE;
-    billboard.rotation_ = effect_->GetRandomRotation();
+    const float t = effect_->GetRandomRotationActiveTime() ? periodTimer_ / effect_->GetActiveTime() : Random(1.0f); 
+    billboard.rotation_ = effect_->GetRandomRotation(t);
     const ea::vector<ColorFrame>& colorFrames_ = effect_->GetColorFrames();
     billboard.color_ = colorFrames_.size() ? colorFrames_[0].color_ : Color();
     billboard.enabled_ = true;

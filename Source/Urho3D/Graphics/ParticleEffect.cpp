@@ -24,6 +24,7 @@
 
 #include "../Core/Context.h"
 #include "../Core/StringUtils.h"
+#include "../Core/VariantCurve.h"
 #include "../Graphics/Material.h"
 #include "../Graphics/ParticleEffect.h"
 #include "../Graphics/BillboardSet.h"
@@ -83,10 +84,12 @@ ParticleEffect::ParticleEffect(Context* context) :
     velocityMax_(DEFAULT_VELOCITY),
     rotationMin_(0.0f),
     rotationMax_(0.0f),
+    rotationActiveTime_(false),
     rotationSpeedMin_(0.0f),
     rotationSpeedMax_(0.0f),
     sizeAdd_(0.0f),
     sizeMul_(1.0f),
+    sizeCurve_(nullptr),
     faceCameraMode_(FC_ROTATE_XYZ)
 {
 }
@@ -158,10 +161,12 @@ bool ParticleEffect::Load(const XMLElement& source)
     velocityMax_ = DEFAULT_VELOCITY;
     rotationMin_ = 0.0f;
     rotationMax_ = 0.0f;
+    rotationActiveTime_ = false;
     rotationSpeedMin_ = 0.0f;
     rotationSpeedMax_ = 0.0f;
     sizeAdd_ = 0.0f;
     sizeMul_ = 1.0f;
+    sizeCurve_ = nullptr;
     colorFrames_.clear();
     textureFrames_.clear();
     faceCameraMode_ = FC_ROTATE_XYZ;
@@ -261,7 +266,11 @@ bool ParticleEffect::Load(const XMLElement& source)
         GetFloatMinMax(source.GetChild("velocity"), velocityMin_, velocityMax_);
 
     if (source.HasChild("rotation"))
-        GetFloatMinMax(source.GetChild("rotation"), rotationMin_, rotationMax_);
+    {
+        const auto& element = source.GetChild("rotation");
+        GetFloatMinMax(element, rotationMin_, rotationMax_);
+        rotationActiveTime_ = element.GetBool("activetime");
+    }
 
     if (source.HasChild("rotationspeed"))
         GetFloatMinMax(source.GetChild("rotationspeed"), rotationSpeedMin_, rotationSpeedMax_);
@@ -279,6 +288,28 @@ bool ParticleEffect::Load(const XMLElement& source)
             sizeAdd_ = deltaElem.GetFloat("add");
         if (deltaElem.HasAttribute("mul"))
             sizeMul_ = deltaElem.GetFloat("mul");
+
+        if (deltaElem.HasChild("curve"))
+        {
+            sizeCurve_ = ea::make_shared<VariantCurve>();
+            sizeCurve_->interpolation_ = KeyFrameInterpolation::Linear;
+
+            auto curveElem = deltaElem.GetChild("curve");
+            auto key = curveElem.GetChild("k");
+
+            while (!key.GetName().empty())
+            {
+                float time = key.GetFloat("t");
+                float value = key.GetFloat("v");
+                VariantCurvePoint point = {};
+                point.time_ = time;
+                point.value_ = value;
+                sizeCurve_->AddKeyFrame(point);
+                key = key.GetNext();
+            }
+
+            sizeCurve_->Commit();
+        }
     }
 
     if (source.HasChild("color"))
@@ -764,10 +795,12 @@ SharedPtr<ParticleEffect> ParticleEffect::Clone(const ea::string& cloneName) con
     ret->velocityMax_ = velocityMax_;
     ret->rotationMin_ = rotationMin_;
     ret->rotationMax_ = rotationMax_;
+    ret->rotationActiveTime_ = rotationActiveTime_;
     ret->rotationSpeedMin_ = rotationSpeedMin_;
     ret->rotationSpeedMax_ = rotationSpeedMax_;
     ret->sizeAdd_ = sizeAdd_;
     ret->sizeMul_ = sizeMul_;
+    ret->sizeCurve_ = sizeCurve_;
     ret->colorFrames_ = colorFrames_;
     ret->textureFrames_ = textureFrames_;
     ret->faceCameraMode_ = faceCameraMode_;
@@ -813,9 +846,14 @@ float ParticleEffect::GetRandomRotationSpeed() const
     return Lerp(rotationSpeedMin_, rotationSpeedMax_, Random(1.0f));
 }
 
-float ParticleEffect::GetRandomRotation() const
+float ParticleEffect::GetRandomRotation(float t) const
 {
-    return Lerp(rotationMin_, rotationMax_, Random(1.0f));
+    return Lerp(rotationMin_, rotationMax_, t);
+}
+
+bool ParticleEffect::GetRandomRotationActiveTime() const
+{
+    return rotationActiveTime_;
 }
 
 void ParticleEffect::GetFloatMinMax(const XMLElement& element, float& minValue, float& maxValue)

@@ -393,6 +393,8 @@ public:
     /// @property
     float GetSizeMul() const { return sizeMul_; }
 
+    ea::shared_ptr<VariantCurve> GetSizeCurve() const { return sizeCurve_; }
+
     /// Return all color animation frames.
     const ea::vector<ColorFrame>& GetColorFrames() const { return colorFrames_; }
 
@@ -428,7 +430,8 @@ public:
     /// Return random rotationspeed.
     float GetRandomRotationSpeed() const;
     /// Return random rotation.
-    float GetRandomRotation() const;
+    float GetRandomRotation(float t) const;
+    bool GetRandomRotationActiveTime() const;
 
 private:
     /// Read a float range from an XML element.
@@ -490,6 +493,8 @@ private:
     float rotationMin_;
     /// Particle rotation angle maximum.
     float rotationMax_;
+    /// Particle rotation is relative to the normalized active time of the emitter
+    bool rotationActiveTime_;
     /// Particle rotation speed minimum.
     float rotationSpeedMin_;
     /// Particle rotation speed maximum.
@@ -498,6 +503,8 @@ private:
     float sizeAdd_;
     /// Particle size multiplicative parameter.
     float sizeMul_;
+    /// Particle size over time curve.
+    ea::shared_ptr<VariantCurve> sizeCurve_;
     /// Particle color animation frames.
     ea::vector<ColorFrame> colorFrames_;
     /// Texture animation frames.
