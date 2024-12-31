@@ -519,6 +519,11 @@ bool ParticleEmitter::EmitNewParticle()
         break;
     }
 
+    if (effect_->GetEmitterFromBase())
+    {
+        startPos.y_ = Max(0.0f, startPos.y_);
+    }
+
     particle.size_ = effect_->GetRandomSize();
     particle.timer_ = 0.0f;
     particle.timeToLive_ = effect_->GetRandomTimeToLive();

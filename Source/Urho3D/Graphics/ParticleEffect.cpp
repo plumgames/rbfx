@@ -68,6 +68,7 @@ ParticleEffect::ParticleEffect(Context* context) :
     animationLodBias_(0.0f),
     emitterType_(EMITTER_SPHERE),
     emitterSize_(Vector3::ZERO),
+    emitterFromBase_(false),
     directionMin_(DEFAULT_DIRECTION_MIN),
     directionMax_(DEFAULT_DIRECTION_MAX),
     constantForce_(Vector3::ZERO),
@@ -145,6 +146,7 @@ bool ParticleEffect::Load(const XMLElement& source)
     animationLodBias_ = 0.0f;
     emitterType_ = EMITTER_SPHERE;
     emitterSize_ = Vector3::ZERO;
+    emitterFromBase_ = false;
     directionMin_ = DEFAULT_DIRECTION_MIN;
     directionMax_ = DEFAULT_DIRECTION_MAX;
     constantForce_ = Vector3::ZERO;
@@ -224,6 +226,9 @@ bool ParticleEffect::Load(const XMLElement& source)
 
     if (source.HasChild("emitterradius"))
         emitterSize_.x_ = emitterSize_.y_ = emitterSize_.z_ = source.GetChild("emitterradius").GetFloat("value");
+
+    if (source.HasChild("emitterfrombase"))
+        emitterFromBase_ = source.GetChild("emitterfrombase").GetBool("value");
 
     if (source.HasChild("direction"))
         GetVector3MinMax(source.GetChild("direction"), directionMin_, directionMax_);
@@ -779,6 +784,7 @@ SharedPtr<ParticleEffect> ParticleEffect::Clone(const ea::string& cloneName) con
     ret->animationLodBias_ = animationLodBias_;
     ret->emitterType_ = emitterType_;
     ret->emitterSize_ = emitterSize_;
+    ret->emitterFromBase_ = emitterFromBase_;
     ret->directionMin_ = directionMin_;
     ret->directionMax_ = directionMax_;
     ret->constantForce_ = constantForce_;

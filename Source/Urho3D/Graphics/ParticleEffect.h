@@ -313,6 +313,8 @@ public:
     /// @property
     const Vector3& GetEmitterSize() const { return emitterSize_; }
 
+    bool GetEmitterFromBase() const { return emitterFromBase_; }
+
     /// Return negative direction limit.
     /// @property
     const Vector3& GetMinDirection() const { return directionMin_; }
@@ -461,6 +463,8 @@ private:
     EmitterType emitterType_;
     /// Emitter size.
     Vector3 emitterSize_;
+    /// Emitter start point y >= 0.
+    bool emitterFromBase_;
     /// Particle direction minimum.
     Vector3 directionMin_;
     /// Particle direction maximum.
