@@ -921,6 +921,8 @@ void ResourceCache::Scan(ea::vector<ea::string>& result, const ea::string& pathN
                 result.emplace_back(TrimPathPrefix(resource->GetName(), pathName));
         }
     }
+
+    ea::sort(result.begin(), result.end());
 }
 
 ea::string ResourceCache::PrintResources(const ea::string& typeName) const
