@@ -268,6 +268,11 @@ void Viewport::AllocateView()
     if (autoRenderPipeline_ && renderPipeline_ && renderPipeline_->GetScene() != scene_)
         renderPipeline_ = nullptr;
 
+    if (!renderPipeline_ && camera_)
+    {
+        renderPipeline_ = camera_->GetNode()->GetDerivedComponent<RenderPipeline>();
+    }
+
     if (!renderPipeline_ && scene_)
     {
         renderPipeline_ = scene_->GetDerivedComponent<RenderPipeline>();
