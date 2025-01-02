@@ -317,6 +317,14 @@ void PluginManager::StopApplication()
     stopPending_ = true;
 }
 
+void PluginManager::QuitApplication()
+{
+    if (quitApplication_)
+        quitApplication_();
+    else
+        GetSubsystem<Engine>()->Exit();
+}
+
 void PluginManager::SetPluginsLoaded(const StringVector& plugins)
 {
     loadedPlugins_ = plugins;
