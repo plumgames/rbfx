@@ -112,6 +112,8 @@ public:
     const RenderDeviceStats& GetRenderStats() const { return renderStats_; };
     void SetHandleScreenMode(bool enable) { handleScreenMode_ = enable; }
 
+    void RenderLast();
+
     /// Emitted when mouse input is detected. Should be used for translating mouse coordinates when UI is rendered on 3D objects. Takes 2D screen coordinates as input, they may be modified by subscribers.
     Signal<void(IntVector2&)> mouseMoveEvent_;
     /// Emitted when a window document owned by this subsystem is closed.

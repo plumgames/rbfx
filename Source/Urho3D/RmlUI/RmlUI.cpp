@@ -449,6 +449,12 @@ RmlUI::RmlUI(Context* context, const char* name)
     SubscribeToEvent(E_FILECHANGED, &RmlUI::HandleResourceReloaded);
 }
 
+void RmlUI::RenderLast()
+{
+    UnsubscribeFromEvent(E_ENDALLVIEWSRENDER);
+    SubscribeToEvent(E_ENDALLVIEWSRENDER, &RmlUI::HandleEndAllViewsRender);
+}
+
 RmlUI::~RmlUI()
 {
     if (auto* ui = GetSubsystem<RmlUI>())
