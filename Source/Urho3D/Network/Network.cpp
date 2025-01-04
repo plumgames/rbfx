@@ -631,6 +631,11 @@ void Network::SendNetworkUpdateEvent(StringHash eventType, bool isServer)
     SendEvent(eventType, eventData);
 }
 
+SharedPtr<NetworkServer> Network::GetServerTransport() const
+{
+    return transportServer_;
+}
+
 void RegisterNetworkLibrary(Context* context)
 {
     NetworkObjectRegistry::RegisterObject(context);

@@ -150,6 +150,8 @@ public:
     void OnDisconnectedFromServer(Connection* connection);
     /// @}
 
+    SharedPtr<NetworkServer> GetServerTransport() const;
+
 private:
     void NotifyRelayListeners(Connection* connection, PacketTargetType target, const VectorBuffer& args, unsigned recvAt);
 
