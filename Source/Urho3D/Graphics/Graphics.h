@@ -113,7 +113,7 @@ public:
     bool SetDefaultWindowModes(const WindowSettings& commonSettings);
     /// Set default window modes. Deprecated. Return true if successful.
     bool SetMode(int width, int height, bool fullscreen, bool borderless, bool resizable,
-        bool highDPI, bool vsync, bool tripleBuffer, int multiSample, int monitor, int refreshRate);
+        bool highDPI, int vsync, bool tripleBuffer, int multiSample, int monitor, int refreshRate);
     /// Set screen resolution only. Deprecated. Return true if successful.
     bool SetMode(int width, int height);
 
@@ -197,7 +197,7 @@ public:
 
     /// Return whether vertical sync is on.
     /// @property
-    bool GetVSync() const { return GetWindowSettings().vSync_; }
+    int GetVSync() const { return GetWindowSettings().vSync_; }
 
     /// Return refresh rate when using vsync in fullscreen
     int GetRefreshRate() const { return GetWindowSettings().refreshRate_; }

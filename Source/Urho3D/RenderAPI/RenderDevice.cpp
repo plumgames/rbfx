@@ -847,7 +847,7 @@ void RenderDevice::InitializeWindow()
         if (SDL_GL_GetAttribute(SDL_GL_FRAMEBUFFER_SRGB_CAPABLE, &effectiveSRGB) == 0)
             windowSettings_.sRGB_ = effectiveSRGB != 0;
 
-        SDL_GL_SetSwapInterval(windowSettings_.vSync_ ? 1 : 0);
+        SDL_GL_SetSwapInterval(windowSettings_.vSync_);
     }
     else
     {
@@ -1306,7 +1306,7 @@ void RenderDevice::UpdateWindowSettings(const WindowSettings& settings)
         oldSettings.vSync_ = newSettings.vSync_;
 
         if (deviceSettings_.backend_ == RenderBackend::OpenGL)
-            SDL_GL_SetSwapInterval(windowSettings_.vSync_ ? 1 : 0);
+            SDL_GL_SetSwapInterval(windowSettings_.vSync_);
     }
 }
 
@@ -1614,7 +1614,7 @@ void RenderDevice::Present()
 
     {
         URHO3D_PROFILE("swapChain_Present");
-        swapChain_->Present(windowSettings_.vSync_ ? 1 : 0);
+        swapChain_->Present(windowSettings_.vSync_);
     }
 
     // If using an external window, check it for size changes, and reset screen mode if necessary

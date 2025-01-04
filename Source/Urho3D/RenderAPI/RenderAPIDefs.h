@@ -121,7 +121,7 @@ struct URHO3D_API WindowSettings
     int monitor_{};
 
     /// Whether to enable vertical synchronization.
-    bool vSync_{};
+    int vSync_{};
     /// Refresh rate. 0 to pick automatically.
     int refreshRate_{};
     /// Multi-sampling level.

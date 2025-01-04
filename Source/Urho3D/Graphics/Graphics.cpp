@@ -305,7 +305,7 @@ bool Graphics::SetDefaultWindowModes(const WindowSettings& commonSettings)
 }
 
 bool Graphics::SetMode(int width, int height, bool fullscreen, bool borderless, bool resizable,
-    bool /*highDPI*/, bool vsync, bool /*tripleBuffer*/, int multiSample, int monitor, int refreshRate)
+    bool /*highDPI*/, int vsync, bool /*tripleBuffer*/, int multiSample, int monitor, int refreshRate)
 {
     WindowSettings params;
     params.size_ = {width, height};

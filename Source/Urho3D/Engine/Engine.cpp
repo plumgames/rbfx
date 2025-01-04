@@ -502,7 +502,7 @@ bool Engine::Initialize(const StringVariantMap& applicationParameters, const Str
         else if (GetParameter(EP_BORDERLESS).GetBool())
             windowSettings.mode_ = WindowMode::Borderless;
         windowSettings.resizable_ = GetParameter(EP_WINDOW_RESIZABLE).GetBool();
-        windowSettings.vSync_ = GetParameter(EP_VSYNC).GetBool();
+        windowSettings.vSync_ = GetParameter(EP_VSYNC).GetInt();
         windowSettings.multiSample_ = GetParameter(EP_MULTI_SAMPLE).GetInt();
         windowSettings.monitor_ = GetParameter(EP_MONITOR).GetInt();
         windowSettings.refreshRate_ = GetParameter(EP_REFRESH_RATE).GetInt();
@@ -522,7 +522,7 @@ bool Engine::Initialize(const StringVariantMap& applicationParameters, const Str
             graphicsSettings.vulkan_.deviceExtensions_ = tweaks.vulkanDeviceExtensions_;
             graphicsSettings.adapterId_ = tweaks.adapterId_;
 
-            windowSettings.vSync_ = false;
+            windowSettings.vSync_ = 0;
             if (tweaks.orientation_)
                 windowSettings.orientations_ = {*tweaks.orientation_};
         }
@@ -698,16 +698,31 @@ void Engine::InitializeVirtualFileSystem(bool enableResourceRootFile)
 void Engine::RunFrame()
 {
     URHO3D_PROFILE("RunFrame");
+
+    auto gfx = GetSubsystem<Graphics>();
+
     {
         assert(initialized_);
 
         // If not headless, and the graphics subsystem no longer has a window open, assume we should exit
-        if (!headless_ && !GetSubsystem<Graphics>()->IsInitialized())
+        if (!headless_ && !gfx->IsInitialized())
             exiting_ = true;
 
         if (exiting_)
             return;
     }
+
+#ifdef __EMSCRIPTEN__
+    {
+        int mode{};
+        int vsync{};
+        emscripten_get_main_loop_timing(&mode, &vsync);
+        if (vsync != gfx->GetVSync())
+        {
+            emscripten_set_main_loop_timing(mode, gfx->GetVSync());
+        }
+    }
+#endif
 
     // Note: there is a minimal performance cost to looking up subsystems (uses a hashmap); if they would be looked up several
     // times per frame it would be better to cache the pointers
@@ -1198,7 +1213,7 @@ void Engine::DefineParameters(CLI::App& commandLine, StringVariantMap& enginePar
     addFlag("--noip", EP_SOUND_INTERPOLATION, false, "Disable sound interpolation");
     addOptionInt("--speakermode", EP_SOUND_MODE, "Force sound speaker output mode (default is automatic)");
     addFlag("--nothreads", EP_WORKER_THREADS, false, "Disable multithreading");
-    addFlag("-v,--vsync", EP_VSYNC, true, "Enable vsync");
+    addFlag("-v,--vsync", EP_VSYNC, 1, "Vsync Vblank #");
     addFlag("-w,--windowed", EP_BORDERLESS, false, "Windowed mode");
     addFlag("-f,--full-screen", EP_FULL_SCREEN, true, "Full screen mode");
     addFlag("--borderless", EP_BORDERLESS, true, "Borderless window mode");
@@ -1364,7 +1379,7 @@ void Engine::PopulateDefaultParameters()
     engineParameters_->DefineVariable(EP_TWEAK_D3D12, ToJSONString(d3d12Tweaks).value_or(""));
     engineParameters_->DefineVariable(EP_TWEAK_VULKAN, ToJSONString(vulkanTweaks).value_or(""));
     engineParameters_->DefineVariable(EP_VALIDATE_SHADERS, false);
-    engineParameters_->DefineVariable(EP_VSYNC, false).Overridable();
+    engineParameters_->DefineVariable(EP_VSYNC, 0).Overridable();
     engineParameters_->DefineVariable(EP_WINDOW_HEIGHT, 0); //.Overridable();
     engineParameters_->DefineVariable(EP_WINDOW_ICON, EMPTY_STRING);
     engineParameters_->DefineVariable(EP_WINDOW_MAXIMIZE, true).Overridable();
