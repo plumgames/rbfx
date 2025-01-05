@@ -41,8 +41,10 @@ public:
     /// @nobind
     static void RegisterObject(Context* context);
 
+#ifdef URHO3D_DEBUG_GRAPHICS_SCENE
     /// Visualize the component as debug geometry.
     void DrawDebugGeometry(DebugRenderer* debug, bool depthTest) override;
+#endif
     /// Update sound source.
     void Update(float timeStep) override;
 

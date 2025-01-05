@@ -68,6 +68,7 @@ void SoundSource3D::RegisterObject(Context* context)
     URHO3D_ATTRIBUTE("Rolloff Factor", float, rolloffFactor_, DEFAULT_ROLLOFF, AM_DEFAULT);
 }
 
+#ifdef URHO3D_DEBUG_GRAPHICS_SCENE
 void SoundSource3D::DrawDebugGeometry(DebugRenderer* debug, bool depthTest)
 {
     if (!debug || !node_ || !IsEnabledEffective())
@@ -92,6 +93,7 @@ void SoundSource3D::DrawDebugGeometry(DebugRenderer* debug, bool depthTest)
         debug->AddSphere(Sphere(worldPosition, farDistance_), OUTER_COLOR, depthTest);
     }
 }
+#endif
 
 void SoundSource3D::Update(float timeStep)
 {
