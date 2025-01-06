@@ -35,6 +35,7 @@
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten/emscripten.h>
+#include "../Core/Timer.h"
 #endif
 
 #include <cstdio>
@@ -414,6 +415,14 @@ void File::Close()
 #ifdef __EMSCRIPTEN__
         if (mode_ & FILE_WRITE)
         {
+            const int currentFrame = GetSubsystem<Time>()->GetFrameNumber();
+            static int syncFsFrame = 0;
+            if (syncFsFrame == currentFrame)
+            {
+                return;
+            }
+            syncFsFrame = currentFrame;
+
             MAIN_THREAD_EM_ASM(
                 FS.syncfs(function (err) {
                     if (err) {
