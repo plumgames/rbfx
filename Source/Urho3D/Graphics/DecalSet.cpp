@@ -1,3 +1,4 @@
+#ifdef URHO3D_DECALS
 //
 // Copyright (c) 2008-2022 the Urho3D project.
 //
@@ -1171,3 +1172,4 @@ void DecalSet::HandleScenePostUpdate(StringHash eventType, VariantMap& eventData
 }
 
 }
+#endif
