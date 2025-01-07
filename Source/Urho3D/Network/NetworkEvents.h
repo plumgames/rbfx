@@ -27,6 +27,10 @@
 namespace Urho3D
 {
 
+URHO3D_EVENT(E_SERVERSTOPPED, ServerStopped)
+{
+}
+
 /// Server connection established.
 URHO3D_EVENT(E_SERVERCONNECTED, ServerConnected)
 {
@@ -35,11 +39,13 @@ URHO3D_EVENT(E_SERVERCONNECTED, ServerConnected)
 /// Server connection disconnected.
 URHO3D_EVENT(E_SERVERDISCONNECTED, ServerDisconnected)
 {
+    URHO3D_PARAM(P_CONNECTION, Connection); // Connection pointer
 }
 
 /// Server connection failed.
 URHO3D_EVENT(E_CONNECTFAILED, ConnectFailed)
 {
+    URHO3D_PARAM(P_CONNECTION, Connection); // Connection pointer
 }
 
 /// Server connection failed because its already connected or tries to connect already.

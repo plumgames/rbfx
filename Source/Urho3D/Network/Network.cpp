@@ -260,12 +260,18 @@ void Network::OnDisconnectedFromServer(Connection* connection)
     if (!failedConnect)
     {
         URHO3D_LOGINFO("Disconnected from server");
-        SendEvent(E_SERVERDISCONNECTED);
+        auto& eventMap = GetEventDataMap();
+        using namespace ServerDisconnected;
+        eventMap[P_CONNECTION] = connection;
+        SendEvent(E_SERVERDISCONNECTED, eventMap);
     }
     else
     {
         URHO3D_LOGERROR("Failed to connect to server");
-        SendEvent(E_CONNECTFAILED);
+        auto& eventMap = GetEventDataMap();
+        using namespace ConnectFailed;
+        eventMap[P_CONNECTION] = connection;
+        SendEvent(E_CONNECTFAILED, eventMap);
     }
 }
 
@@ -541,6 +547,15 @@ ea::string Network::GetDebugInfo() const
 void Network::Update(float timeStep)
 {
     URHO3D_PROFILE("UpdateNetwork");
+
+    const bool isServerRunning = IsServerRunning();
+
+    if (!isServerRunning && wasServerRunning_)
+    {
+        SendEvent(E_SERVERSTOPPED);
+    }
+
+    wasServerRunning_ = isServerRunning;
 
     // Check if periodic update should happen now
     updateAcc_ += timeStep;

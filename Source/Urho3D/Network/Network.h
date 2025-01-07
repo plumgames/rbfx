@@ -193,6 +193,8 @@ private:
     /// Actual server, which accepts connections.
     SharedPtr<NetworkServer> transportServer_;
 
+    bool wasServerRunning_{};
+
     CreateServerCallback createServer_;
     CreateConnectionCallback createConnection_;
 };
