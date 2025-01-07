@@ -718,8 +718,10 @@ void RegisterGraphicsLibrary(Context* context)
     RibbonTrail::RegisterObject(context);
     CustomGeometry::RegisterObject(context);
     DecalSet::RegisterObject(context);
+#ifdef URHO3D_TERRAIN
     Terrain::RegisterObject(context);
     TerrainPatch::RegisterObject(context);
+#endif
 #ifdef URHO3D_DEBUG_GRAPHICS_SCENE
     DebugRenderer::RegisterObject(context);
 #endif
