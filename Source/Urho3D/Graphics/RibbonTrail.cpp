@@ -1,3 +1,4 @@
+#ifdef URHO3D_RIBBONS
 //
 // Copyright (c) 2008-2022 the Urho3D project.
 // Copyright (c) 2023-2023 the rbfx project.
@@ -912,3 +913,4 @@ ResourceRef RibbonTrail::GetMaterialAttr() const
 }
 
 }
+#endif

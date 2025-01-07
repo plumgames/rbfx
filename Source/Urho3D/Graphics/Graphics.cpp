@@ -715,7 +715,9 @@ void RegisterGraphicsLibrary(Context* context)
     BillboardSet::RegisterObject(context);
     ParticleEffect::RegisterObject(context);
     ParticleEmitter::RegisterObject(context);
+#ifdef URHO3D_RIBBONS
     RibbonTrail::RegisterObject(context);
+#endif
     CustomGeometry::RegisterObject(context);
 #ifdef URHO3D_DECALS
     DecalSet::RegisterObject(context);
