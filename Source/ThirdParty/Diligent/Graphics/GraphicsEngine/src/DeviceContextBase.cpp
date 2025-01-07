@@ -38,6 +38,7 @@ namespace Diligent
 
 #else
 
+#ifndef EMSCRIPTEN
 #    define CHECK_PARAMETER(Expr, ...)          \
         do                                      \
         {                                       \
@@ -47,7 +48,9 @@ namespace Diligent
                 return false;                   \
             }                                   \
         } while (false)
-
+#else
+#    define CHECK_PARAMETER(Expr, ...) 
+#endif
 #endif
 
 bool VerifyDrawAttribs(const DrawAttribs& Attribs)
