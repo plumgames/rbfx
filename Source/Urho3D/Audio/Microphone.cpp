@@ -1,3 +1,4 @@
+#ifdef URHO3D_MICROPHONE
 //
 // Copyright (c) 2017-2020 the rbfx project.
 //
@@ -200,3 +201,4 @@ void Microphone::Unlink()
 }
 
 }
+#endif

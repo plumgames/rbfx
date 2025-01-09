@@ -1,3 +1,4 @@
+#ifdef URHO3D_IK
 //
 // Copyright (c) 2017-2020 the rbfx project.
 //
@@ -255,3 +256,4 @@ U SolveBisect(const T& f, U minValue, U maxValue, U tolerance, unsigned maxItera
 }
 
 }
+#endif

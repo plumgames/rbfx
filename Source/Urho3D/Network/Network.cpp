@@ -36,12 +36,16 @@
 #include "../Network/Network.h"
 #include "../Network/NetworkEvents.h"
 #include "../Network/Protocol.h"
+#ifdef URHO3D_NETWORK_EVENT
 #include "../Network/Transport/Event/EventConnection.h"
 #include "../Network/Transport/Event/EventServer.h"
+#endif
 #ifdef URHO3D_NETWORK_WEBRTC
 #include "../Network/Transport/WebRTC/WebRTCConnection.h"
 #include "../Network/Transport/WebRTC/WebRTCServer.h"
 #endif
+#include "../Network/Transport/NetworkServer.h"
+#include "../Network/Transport/NetworkConnection.h"
 #include "../Replica/BehaviorNetworkObject.h"
 #include "../Replica/FilteredByDistance.h"
 #include "../Replica/NetworkObject.h"
@@ -448,14 +452,18 @@ void Network::SendPackageToClients(Scene* scene, PackageFile* package)
 
 void Network::SetTransportDefault()
 {
+#ifdef URHO3D_NETWORK_EVENT
     SetTransportEvent();
+#endif
 }
 
+#ifdef URHO3D_NETWORK_EVENT
 void Network::SetTransportEvent()
 {
     createServer_ = [](Context* context) { return MakeShared<EventServer>(context); };
     createConnection_ = [](Context* context) { return MakeShared<EventConnection>(context); };
 }
+#endif
 
 #ifdef URHO3D_NETWORK_WEBRTC
 void Network::SetTransportWebRTC()
@@ -672,8 +680,10 @@ void RegisterNetworkLibrary(Context* context)
 #endif
 
     Connection::RegisterObject(context);
+#ifdef URHO3D_NETWORK_EVENT
     EventConnection::RegisterObject(context);
     EventServer::RegisterObject(context);
+#endif
 #ifdef URHO3D_NETWORK_WEBRTC
     WebRTCConnection::RegisterObject(context);
     WebRTCServer::RegisterObject(context);

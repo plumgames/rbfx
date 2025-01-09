@@ -35,6 +35,7 @@ URHO3D_EVENT(E_SOUNDFINISHED, SoundFinished)
     URHO3D_PARAM(P_SOUND, Sound);                   // Sound pointer
 }
 
+#ifdef URHO3D_MICROPHONE
 URHO3D_EVENT(E_RECORDINGUPDATED, RecordingUpdated)
 {
     URHO3D_PARAM(P_MICROPHONE, Microphone);         // Microphone pointer
@@ -53,5 +54,6 @@ URHO3D_EVENT(E_RECORDINGENDED, RecordingEnded)
     URHO3D_PARAM(P_DATALENGTH, DataLength);         // int
     URHO3D_PARAM(P_CLEARDATA, ClearData);           // bool
 }
+#endif
 
 }

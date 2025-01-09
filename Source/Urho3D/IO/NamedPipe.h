@@ -1,3 +1,4 @@
+#ifdef URHO3D_NAMED_PIPE
 //
 // Copyright (c) 2008-2022 the Urho3D project.
 //
@@ -81,3 +82,4 @@ private:
 };
 
 }
+#endif

@@ -23,7 +23,9 @@
 #include "../Precompiled.h"
 
 #include "../Audio/Audio.h"
-#include "../Audio/Microphone.h"
+#ifdef URHO3D_MICROPHONE
+    #include "../Audio/Microphone.h"
+#endif
 #include "../Audio/Sound.h"
 #include "../Audio/SoundListener.h"
 #include "../Audio/SoundSource3D.h"
@@ -38,7 +40,7 @@
 #include "../DebugNew.h"
 
 #ifdef _MSC_VER
-#pragma warning(disable:6293)
+    #pragma warning(disable : 6293)
 #endif
 
 namespace Urho3D
@@ -88,8 +90,8 @@ static const char* SPEAKER_MODE_NAMES[] = {
     "5.1 Surround",
 };
 
-Audio::Audio(Context* context) :
-    Object(context)
+Audio::Audio(Context* context)
+    : Object(context)
 {
     context_->RequireSDL(SDL_INIT_AUDIO);
 
@@ -130,10 +132,14 @@ bool Audio::SetMode(int bufferLengthMSec, int mixRate, SpeakerMode speakerMode, 
     if (Abs((int)desired.samples / 2 - bufferSamples) < Abs((int)desired.samples - bufferSamples))
         desired.samples /= 2;
 
-        // Intentionally disallow format change so that the obtained format will always be the desired format, even though that format
-    // is not matching the device format, however in doing it will enable the SDL's internal audio stream with audio conversion
+    // Intentionally disallow format change so that the obtained format will always be the desired format, even though
+    // that format
+    // is not matching the device format, however in doing it will enable the SDL's internal audio stream with audio
+    // conversion
 
-    auto TryOpenAudioDevice = [](const SDL_AudioSpec& desired, SDL_AudioSpec& obtained, bool canChangeChannels) -> unsigned {
+    auto TryOpenAudioDevice = [](const SDL_AudioSpec& desired, SDL_AudioSpec& obtained,
+                                  bool canChangeChannels) -> unsigned
+    {
         int allowedChanges = SDL_AUDIO_ALLOW_ANY_CHANGE & ~SDL_AUDIO_ALLOW_FORMAT_CHANGE;
         if (!canChangeChannels)
             allowedChanges &= ~SDL_AUDIO_ALLOW_CHANNELS_CHANGE;
@@ -203,8 +209,8 @@ bool Audio::SetMode(int bufferLengthMSec, int mixRate, SpeakerMode speakerMode, 
     interpolation_ = interpolation;
     clipBuffer_.reset(new int[fragmentSize_ * AUDIO_NUM_CHANNELS[speakerMode_]]);
 
-    URHO3D_LOGINFO("Set audio mode " + ea::to_string(mixRate_) + " Hz " + SPEAKER_MODE_NAMES[speakerMode_] + " " +
-            (interpolation_ ? "interpolated" : ""));
+    URHO3D_LOGINFO("Set audio mode " + ea::to_string(mixRate_) + " Hz " + SPEAKER_MODE_NAMES[speakerMode_] + " "
+        + (interpolation_ ? "interpolated" : ""));
 
     return Play();
 }
@@ -226,6 +232,7 @@ void Audio::Update(float timeStep)
 
     UpdateInternal(timeStep);
 
+#ifdef URHO3D_MICROPHONE
     for (int i = 0; i < microphones_.size(); ++i)
     {
         if (auto mic = microphones_[i].Lock())
@@ -238,6 +245,7 @@ void Audio::Update(float timeStep)
             --i;
         }
     }
+#endif
 }
 
 bool Audio::Play()
@@ -451,6 +459,7 @@ void Audio::UpdateInternal(float timeStep)
     }
 }
 
+    #ifdef URHO3D_MICROPHONE
 StringVector Audio::EnumerateMicrophones() const
 {
     StringVector ret;
@@ -481,7 +490,8 @@ void SDL_audioRecordingCallback(void* userdata, Uint8* stream, int len)
     mic->Update(stream, len);
 }
 
-SharedPtr<Microphone> Audio::CreateMicrophone(const ea::string& name, bool forSpeechRecog, unsigned wantedFreq, unsigned silenceLevelLimit)
+SharedPtr<Microphone> Audio::CreateMicrophone(
+    const ea::string& name, bool forSpeechRecog, unsigned wantedFreq, unsigned silenceLevelLimit)
 {
     const int recordingDeviceCt = SDL_GetNumAudioDevices(SDL_TRUE);
 
@@ -513,10 +523,7 @@ SharedPtr<Microphone> Audio::CreateMicrophone(const ea::string& name, bool forSp
             // but for speech the models aren't trained for that (ie. Sphinx/PocketSphinx), need to check DeepSpeech
             // as well as size sent over network.
             static const int FREQ_COUNT = 3;
-            int recordingFreq[][FREQ_COUNT] = {
-                { 44100, 22050, 16000 },
-                { 16000, 22050, 44100 }
-            };
+            int recordingFreq[][FREQ_COUNT] = {{44100, 22050, 16000}, {16000, 22050, 44100}};
 
             int iters = wantedFreq == 0 ? FREQ_COUNT : 1;
             for (int i = 0; i < iters; ++i)
@@ -568,6 +575,7 @@ void Audio::CloseMicrophoneForLoss(unsigned which)
         }
     }
 }
+    #endif
 
 void RegisterAudioLibrary(Context* context)
 {
@@ -576,5 +584,4 @@ void RegisterAudioLibrary(Context* context)
     SoundSource3D::RegisterObject(context);
     SoundListener::RegisterObject(context);
 }
-
 }

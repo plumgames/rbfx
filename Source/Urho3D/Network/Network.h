@@ -107,8 +107,10 @@ public:
 
     /// Use the default transport
     void SetTransportDefault();
+#ifdef URHO3D_NETWORK_EVENT
     /// Use the event transport
     void SetTransportEvent();
+#endif
 #ifdef URHO3D_NETWORK_WEBRTC
     /// Use the WebRTC transport
     void SetTransportWebRTC();

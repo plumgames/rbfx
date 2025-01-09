@@ -1,3 +1,4 @@
+#ifdef URHO3D_FREEFLY
 //
 // Copyright (c) 2022-2022 the rbfx project.
 //
@@ -468,3 +469,4 @@ void FreeFlyController::Update(float timeStep)
 }
 
 } // namespace Urho3D
+#endif

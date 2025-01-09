@@ -33,7 +33,9 @@ namespace Urho3D
 {
 
 class AudioImpl;
+#ifdef URHO3D_MICROPHONE
 class Microphone;
+#endif
 class Sound;
 class SoundListener;
 class SoundSource;
@@ -135,12 +137,14 @@ public:
     /// Mix sound sources into the buffer.
     void MixOutput(void* dest, unsigned samples);
 
+#ifdef URHO3D_MICROPHONE
     /// Returns a pretty-name list of all attached microphones.
     StringVector EnumerateMicrophones() const;
     /// Constructs a microphone from a pretty-name (found via EnumerateMicrophones()).
     SharedPtr<Microphone> CreateMicrophone(const ea::string& name, bool forSpeechRecog, unsigned wantedFreq, unsigned silenceLevelLimit = 0);
     /// Disables a microphone that has been lost.
     void CloseMicrophoneForLoss(unsigned which);
+#endif
 
 private:
     /// Handle render update event.
@@ -178,8 +182,10 @@ private:
     ea::vector<SoundSource*> soundSources_;
     /// Sound listener.
     WeakPtr<SoundListener> listener_;
+#ifdef URHO3D_MICROPHONE
     /// List of microphones being tracked.
     ea::vector< WeakPtr<Microphone> > microphones_;
+#endif
 };
 
 /// Register Audio library objects.

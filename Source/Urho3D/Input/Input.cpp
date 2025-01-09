@@ -36,7 +36,9 @@
 #include "Urho3D/Graphics/Graphics.h"
 #include "Urho3D/Graphics/GraphicsEvents.h"
 #include "Urho3D/Input/DirectionalPadAdapter.h"
+#ifdef URHO3D_FREEFLY
 #include "Urho3D/Input/FreeFlyController.h"
+#endif
 #include "Urho3D/Input/Input.h"
 #include "Urho3D/Input/InputMap.h"
 #include "Urho3D/Input/MoveAndOrbitComponent.h"
@@ -2593,7 +2595,11 @@ void Input::HandleSDLEvent(void* sdlEvent)
     case SDL_AUDIODEVICEREMOVED:
         {
             if (evt.adevice.iscapture)
+            {
+#ifdef URHO3D_MICROPHONE
                 GetSubsystem<Audio>()->CloseMicrophoneForLoss(evt.adevice.which);
+#endif
+            }
             else
                 GetSubsystem<Audio>()->Close();
         }
@@ -2842,7 +2848,9 @@ IntVector2 Input::GetBackbufferSize() const
 void RegisterInputLibrary(Context* context)
 {
     InputMap::RegisterObject(context);
+#ifdef URHO3D_FREEFLY
     FreeFlyController::RegisterObject(context);
+#endif
     MoveAndOrbitComponent::RegisterObject(context);
     MoveAndOrbitController::RegisterObject(context);
     context->AddFactoryReflection<PointerAdapter>();

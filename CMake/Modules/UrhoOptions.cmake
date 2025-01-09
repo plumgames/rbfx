@@ -188,6 +188,7 @@ option                (URHO3D_LOGGING            "Enable logging subsystem"     
 option                (URHO3D_NAVIGATION         "Navigation subsystem enabled"                          ${URHO3D_ENABLE_ALL})
 option                (URHO3D_NETWORK            "Networking subsystem enabled"                          ${URHO3D_ENABLE_ALL})
 option                (URHO3D_NETWORK_WEBRTC     "Networking subsystem WebRTC transport enabled"         ${URHO3D_ENABLE_ALL})
+option                (URHO3D_NETWORK_EVENT      "Networking subsystem event transport enabled"          ${URHO3D_ENABLE_ALL})
 option                (URHO3D_NETWORK_BEHAVIOR_ALL "Networking behaviours all OR FilterByDistance only"  ${URHO3D_ENABLE_ALL})
 option                (URHO3D_HTTP               "HTTP client enabled"                                   ${URHO3D_ENABLE_ALL})
 option                (URHO3D_WEBSOCKET          "WebSocket client enabled"                              OFF)
@@ -213,6 +214,9 @@ option                (URHO3D_PARTICLE_GRAPH     "Particle Graph Effects"       
 option                (URHO3D_ACTIONS            "Tweening actions"                                      ${URHO3D_ENABLE_ALL})
 option                (URHO3D_SHADER_TRANSLATOR  "Enable shader translation from universal GLSL shaders to other GAPI via glslang and SPIRV-Cross" ${URHO3D_ENABLE_ALL})
 option                (URHO3D_SHADER_OPTIMIZER   "Enable shader optimization via SPIRV-Tools"            ${URHO3D_ENABLE_ALL})
+option                (URHO3D_FREEFLY            "Input FreeFlyController"                               ${URHO3D_ENABLE_ALL})
+option                (URHO3D_NAMED_PIPE         "Named pipe"                                            ${URHO3D_ENABLE_ALL})
+option                (URHO3D_MICROPHONE         "Microphone"                                            ${URHO3D_ENABLE_ALL})
 
 # User should extend AndroidManifest.xml and attach libopenxr_loader.so to the application.
 # See https://developer.oculus.com/documentation/native/android/mobile-openxr/ for details.
