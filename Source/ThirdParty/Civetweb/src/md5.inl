@@ -131,6 +131,7 @@ MD5_STATIC void md5_finish(md5_state_t *pms, md5_byte_t digest[16]);
  */
 
 #if !defined(MD5_STATIC)
+#include <stdint.h>
 #include <string.h>
 #endif
 
@@ -211,7 +212,7 @@ static void
 md5_process(md5_state_t *pms, const md5_byte_t *data /*[64]*/)
 {
 	md5_word_t a = pms->abcd[0], b = pms->abcd[1], c = pms->abcd[2],
-			d = pms->abcd[3];
+	           d = pms->abcd[3];
 	md5_word_t t;
 #if BYTE_ORDER > 0
 	/* Define storage only for big-endian CPUs. */
@@ -239,7 +240,7 @@ md5_process(md5_state_t *pms, const md5_byte_t *data /*[64]*/)
 			 * On little-endian machines, we can process properly aligned
 			 * data without copying it.
 			 */
-			if (!((data - (const md5_byte_t *)0) & 3)) {
+			if (!(((uintptr_t)data) & 3)) {
 				/* data are properly aligned, a direct assignment is possible */
 				/* cast through a (void *) should avoid a compiler warning,
 				   see
@@ -272,8 +273,8 @@ md5_process(md5_state_t *pms, const md5_byte_t *data /*[64]*/)
 #endif
 			for (i = 0; i < 16; ++i, xp += 4)
 				xbuf[i] = (md5_word_t)(xp[0]) + (md5_word_t)(xp[1] << 8)
-						  + (md5_word_t)(xp[2] << 16)
-						  + (md5_word_t)(xp[3] << 24);
+				          + (md5_word_t)(xp[2] << 16)
+				          + (md5_word_t)(xp[3] << 24);
 		}
 #endif
 	}
@@ -285,8 +286,8 @@ md5_process(md5_state_t *pms, const md5_byte_t *data /*[64]*/)
    a = b + ((a + F(b,c,d) + X[k] + T[i]) <<< s). */
 #define F(x, y, z) (((x) & (y)) | (~(x) & (z)))
 #define SET(a, b, c, d, k, s, Ti)                                              \
-	t = a + F(b, c, d) + X[k] + Ti;                                            \
-	a = ROTATE_LEFT(t, s) + b
+	t = (a) + F(b, c, d) + X[k] + (Ti);                                        \
+	(a) = ROTATE_LEFT(t, s) + (b)
 
 	/* Do the following 16 operations. */
 	SET(a, b, c, d, 0, 7, T1);
@@ -312,8 +313,8 @@ md5_process(md5_state_t *pms, const md5_byte_t *data /*[64]*/)
 	 a = b + ((a + G(b,c,d) + X[k] + T[i]) <<< s). */
 #define G(x, y, z) (((x) & (z)) | ((y) & ~(z)))
 #define SET(a, b, c, d, k, s, Ti)                                              \
-	t = a + G(b, c, d) + X[k] + Ti;                                            \
-	a = ROTATE_LEFT(t, s) + b
+	t = (a) + G(b, c, d) + X[k] + (Ti);                                        \
+	(a) = ROTATE_LEFT(t, s) + (b)
 
 	/* Do the following 16 operations. */
 	SET(a, b, c, d, 1, 5, T17);
@@ -339,8 +340,8 @@ md5_process(md5_state_t *pms, const md5_byte_t *data /*[64]*/)
 	 a = b + ((a + H(b,c,d) + X[k] + T[i]) <<< s). */
 #define H(x, y, z) ((x) ^ (y) ^ (z))
 #define SET(a, b, c, d, k, s, Ti)                                              \
-	t = a + H(b, c, d) + X[k] + Ti;                                            \
-	a = ROTATE_LEFT(t, s) + b
+	t = (a) + H(b, c, d) + X[k] + (Ti);                                        \
+	(a) = ROTATE_LEFT(t, s) + b
 
 	/* Do the following 16 operations. */
 	SET(a, b, c, d, 5, 4, T33);
@@ -366,8 +367,8 @@ md5_process(md5_state_t *pms, const md5_byte_t *data /*[64]*/)
 	 a = b + ((a + I(b,c,d) + X[k] + T[i]) <<< s). */
 #define I(x, y, z) ((y) ^ ((x) | ~(z)))
 #define SET(a, b, c, d, k, s, Ti)                                              \
-	t = a + I(b, c, d) + X[k] + Ti;                                            \
-	a = ROTATE_LEFT(t, s) + b
+	t = (a) + I(b, c, d) + X[k] + (Ti);                                        \
+	(a) = ROTATE_LEFT(t, s) + (b)
 
 	/* Do the following 16 operations. */
 	SET(a, b, c, d, 0, 6, T49);
@@ -449,10 +450,10 @@ MD5_STATIC void
 md5_finish(md5_state_t *pms, md5_byte_t digest[16])
 {
 	static const md5_byte_t pad[64] = {0x80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-									   0,    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-									   0,    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-									   0,    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-									   0,    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+	                                   0,    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	                                   0,    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	                                   0,    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	                                   0,    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 	md5_byte_t data[8];
 	int i;
 

@@ -29,7 +29,7 @@ target_include_directories(Civetweb
 
 # Define preprocessor macros
 # Always disable Common Gateway Interface
-target_compile_definitions(Civetweb PRIVATE -DNO_CGI -DNO_FILES -DNO_CACHING)
+target_compile_definitions(Civetweb PRIVATE -DNO_CGI -DNO_FILES -DNO_CACHING -DSSLLIB=1 -DCRYPTOLIB=1 -DOPENSSL_API_1_1)
 if (WIN32)
     include (CheckStructHasMember)
     check_struct_has_member (struct\ timespec tv_sec time.h HAVE_STRUCT_TIMESPEC_TV_SEC)
@@ -53,7 +53,7 @@ target_compile_definitions(Civetweb PRIVATE -DNO_SSL_DL)
 target_link_libraries(Civetweb PRIVATE ssl crypto)
 
 # TODO: This needs a better detection.
-target_compile_definitions(Civetweb PRIVATE -DHAVE_POLL=1)
+#target_compile_definitions(Civetweb PRIVATE -DHAVE_POLL=1)
 
 if (BUILD_SHARED_LIBS)
     target_compile_definitions(Civetweb PRIVATE -DCIVETWEB_DLL_EXPORTS PUBLIC -DCIVETWEB_DLL_IMPORTS)
