@@ -109,7 +109,7 @@ HttpRequest::HttpRequest(
 
         if (emscripten_fetch_response_headers_t* headers = emscripten_fetch_get_response_headers(fetch))
         {
-            int headersCount = emscripten_fetch_response_headers_count(headers);
+            int headersCount = emscripten_fetch_get_response_headers_length(headers);
             for (int i = 0; i < headersCount; i++)
             {
                 const char* key = emscripten_fetch_response_headers_get_name(headers, i);
