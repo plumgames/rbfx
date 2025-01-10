@@ -25,6 +25,7 @@
 #pragma once
 
 #include <EASTL/shared_array.h>
+#include <EASTL/map.h>
 
 #include <Urho3D/Core/Mutex.h>
 #include <Urho3D/Container/RefCounted.h>

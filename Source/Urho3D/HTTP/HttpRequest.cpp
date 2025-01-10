@@ -107,6 +107,17 @@ HttpRequest::HttpRequest(
         request->requestHandle_ = nullptr;
         request->statusCode_ = fetch->status;
 
+        if (emscripten_fetch_response_headers_t* headers = emscripten_fetch_get_response_headers(fetch))
+        {
+            int headersCount = emscripten_fetch_response_headers_count(headers);
+            for (int i = 0; i < headersCount; i++)
+            {
+                const char* key = emscripten_fetch_response_headers_get_name(headers, i);
+                const char* value = emscripten_fetch_response_headers_get_value(headers, i);
+                responseHeaders_[key] = value;
+            }
+        }
+
         emscripten_fetch_close(fetch);
     };
 
@@ -241,6 +252,8 @@ void HttpRequest::ThreadFunction()
             headersStr += header + "\r\n";
     }
 
+    headersStr = headersStr.trimmed();
+
     // Initiate the connection. This may block due to DNS query
     mg_connection* connection = nullptr;
 
@@ -292,11 +305,12 @@ void HttpRequest::ThreadFunction()
     if (const mg_response_info* response = mg_get_response_info(connection))
     {
         statusCode_ = response->status_code;
-        for(int i=0;i<response->num_headers;i++){
+        for (int i = 0; i < response->num_headers; i++)
+        {
             responseHeaders_[response->http_headers[i].name] = response->http_headers[i].value;
         }
-
     }
+
     // Close the connection
     const struct mg_response_info* request_info = mg_get_response_info(connection);
     if (request_info) {
@@ -353,6 +367,7 @@ int HttpRequest::GetStatusCode() const
 {
     return statusCode_;
 }
+
 ea::map<ea::string,ea::string> HttpRequest::GetResponseHeaders() const
 {
     return responseHeaders_;
@@ -361,8 +376,10 @@ ea::map<ea::string,ea::string> HttpRequest::GetResponseHeaders() const
 ea::optional<ea::string> HttpRequest::GetResponseHeader(ea::string headerName) const
 {
     ea::optional<ea::string> result = ea::nullopt;
-    if(responseHeaders_.find(headerName)!=responseHeaders_.end())
+    if (responseHeaders_.find(headerName) != responseHeaders_.end())
+    {
         result = responseHeaders_.at(headerName);
+    }
     return result;
 }
 
