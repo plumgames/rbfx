@@ -82,7 +82,7 @@ HttpRequest::HttpRequest(
     // Size of response is unknown, so just set maximum value. The position will also be changed
     // to maximum value once the request is done, signaling end for Deserializer::IsEof().
     size_ = M_MAX_UNSIGNED;
-    URHO3D_LOGDEBUG("HTTP {} request to URL {} {} {}", verb_, url_.ToString(), ea::string::joined(headers, ","), postData);
+    //URHO3D_LOGDEBUG("HTTP {} request to URL {} {} {}", verb_, url_.ToString(), ea::string::joined(headers, ","), postData);
 #if defined(URHO3D_PLATFORM_WEB)
     emscripten_fetch_attr_t attr;
     emscripten_fetch_attr_init(&attr);
