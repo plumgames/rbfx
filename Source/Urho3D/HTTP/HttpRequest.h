@@ -101,6 +101,10 @@ public:
     ea::map<ea::string,ea::string> GetResponseHeaders() const;
     ///Return response header by name
     ea::optional<ea::string> GetResponseHeader(ea::string) const;
+
+    int GetDownloadedSize() const;
+    int GetTotalDownloadSize() const;
+
 private:
     /// URL.
     URL url_;
@@ -124,6 +128,8 @@ private:
     int statusCode_ = 0;
     /// HTTP response headers
     ea::map<ea::string,ea::string> responseHeaders_;
+    int downloadedSize_ = 0;
+    int totalDownloadSize_ = 0;
 #ifdef URHO3D_PLATFORM_WEB
     /// HTTP request handle.
     void* requestHandle_ = nullptr;

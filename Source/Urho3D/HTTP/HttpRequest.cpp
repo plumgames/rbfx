@@ -107,25 +107,6 @@ HttpRequest::HttpRequest(
         request->requestHandle_ = nullptr;
         request->statusCode_ = fetch->status;
 
-        // https://www.beuc.net/python-emscripten/python/artifact/deb78b352ce0bdb2
-        if (int headersLength = emscripten_fetch_get_response_headers_length(fetch))
-        {
-            ea::vector<char> headersString(headersLength + 1);
-            emscripten_fetch_get_response_headers(fetch, headersString.data() , headersLength + 1);
-            
-            char** unpackedHeaders = emscripten_fetch_unpack_response_headers(headersString.data());
-            int i = 0;
-            while (unpackedHeaders[i] != nullptr)
-            {
-                ea::string key = unpackedHeaders[i];
-                ++i;
-                ea::string value = unpackedHeaders[i];
-                request->responseHeaders_[key] = value;
-            }
-
-            emscripten_fetch_free_unpacked_response_headers(unpackedHeaders);
-        }
-
         emscripten_fetch_close(fetch);
     };
 
@@ -147,14 +128,56 @@ HttpRequest::HttpRequest(
         emscripten_fetch_close(fetch);
     };
 
-    attr.onprogress = [](emscripten_fetch_t * fetch)
+    attr.onprogress = [](emscripten_fetch_t* fetch)
     {
         LogFetch("HTTP OnFetchProgress", fetch);
+
+        HttpRequest* request = static_cast<HttpRequest*>(fetch->userData);
+        MutexLock lock(request->mutex_);
+
+        request->downloadedSize_ = fetch->dataOffset;
+        if (request->totalDownloadSize_ == 0 && fetch->totalBytes > 0)
+        {
+            request->totalDownloadSize_ = fetch->totalBytes;
+        }
     };
 
-    attr.onreadystatechange = [](emscripten_fetch_t * fetch)
+    attr.onreadystatechange = [](emscripten_fetch_t* fetch)
     {
         LogFetch("HTTP OnFetchReadyStateChange", fetch);
+
+        const int HEADERS_RECEIVED = 2;
+        if (fetch->readyState != HEADERS_RECEIVED)
+        {
+            return;
+        }
+
+        HttpRequest* request = static_cast<HttpRequest*>(fetch->userData);
+        MutexLock lock(request->mutex_);
+
+        // https://www.beuc.net/python-emscripten/python/artifact/deb78b352ce0bdb2
+        if (int headersLength = emscripten_fetch_get_response_headers_length(fetch))
+        {
+            ea::vector<char> headersString(headersLength + 1);
+            emscripten_fetch_get_response_headers(fetch, headersString.data(), headersLength + 1);
+
+            char** unpackedHeaders = emscripten_fetch_unpack_response_headers(headersString.data());
+            int i = 0;
+            while (unpackedHeaders[i] != nullptr)
+            {
+                ea::string key = unpackedHeaders[i];
+                ++i;
+                ea::string value = unpackedHeaders[i];
+                request->responseHeaders_[key] = value;
+
+                if (request->totalDownloadSize_ == 0 && key == "Content-Length" || key == "content-length")
+                {
+                    request->totalDownloadSize_ = std::stoi(value.c_str());
+                }
+            }
+
+            emscripten_fetch_free_unpacked_response_headers(unpackedHeaders);
+        }
     };
 
     if (!headers_.empty())
@@ -391,6 +414,13 @@ ea::optional<ea::string> HttpRequest::GetResponseHeader(ea::string headerName) c
     return result;
 }
 
+int HttpRequest::GetDownloadedSize() const
+{
+    return downloadedSize_;
 }
 
-
+int HttpRequest::GetTotalDownloadSize() const
+{
+    return totalDownloadSize_;
+} 
+}
