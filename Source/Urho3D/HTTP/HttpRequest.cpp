@@ -107,15 +107,23 @@ HttpRequest::HttpRequest(
         request->requestHandle_ = nullptr;
         request->statusCode_ = fetch->status;
 
-        if (emscripten_fetch_response_headers_t* headers = emscripten_fetch_get_response_headers(fetch))
+        // https://www.beuc.net/python-emscripten/python/artifact/deb78b352ce0bdb2
+        if (int headersLength = emscripten_fetch_get_response_headers_length(fetch))
         {
-            int headersCount = emscripten_fetch_get_response_headers_length(headers);
-            for (int i = 0; i < headersCount; i++)
+            ea::vector<char> headersString(headersLength);
+            emscripten_fetch_get_response_headers(fetch, headersString.data() , headersLength + 1);
+            
+            char** unpackedHeaders = emscripten_fetch_unpack_response_headers(headersString.data());
+            int i = 0;
+            while (unpackedHeaders[i] != nullptr)
             {
-                const char* key = emscripten_fetch_response_headers_get_name(headers, i);
-                const char* value = emscripten_fetch_response_headers_get_value(headers, i);
-                responseHeaders_[key] = value;
+                ea::string key = unpackedHeaders[i];
+                ++i;
+                ea::string value = unpackedHeaders[i];
+                request->responseHeaders_[key] = value;
             }
+
+            emscripten_fetch_free_unpacked_response_headers(unpackedHeaders);
         }
 
         emscripten_fetch_close(fetch);
