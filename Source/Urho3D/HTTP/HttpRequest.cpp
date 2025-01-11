@@ -110,7 +110,7 @@ HttpRequest::HttpRequest(
         // https://www.beuc.net/python-emscripten/python/artifact/deb78b352ce0bdb2
         if (int headersLength = emscripten_fetch_get_response_headers_length(fetch))
         {
-            ea::vector<char> headersString(headersLength);
+            ea::vector<char> headersString(headersLength + 1);
             emscripten_fetch_get_response_headers(fetch, headersString.data() , headersLength + 1);
             
             char** unpackedHeaders = emscripten_fetch_unpack_response_headers(headersString.data());
