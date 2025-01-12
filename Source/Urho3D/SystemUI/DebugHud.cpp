@@ -145,7 +145,20 @@ void DebugHud::RenderNetworkUI(float left_offset)
 {
     const auto* network = GetSubsystem<Network>();
     const auto connectionsToClients = network->GetClientConnections();
+    const auto connectionsToServer = network->GetServerConnections();
     unsigned serverConnectionCount = connectionsToClients.size();
+
+    if (!connectionsToClients.empty())
+    {
+        ui::Text("[SC: %d]", connectionsToClients.size());
+        ui::SetCursorPosX(left_offset);
+    }
+
+    if (!connectionsToServer.empty())
+    {
+        ui::Text("[CC: %d]", connectionsToServer.size());
+        ui::SetCursorPosX(left_offset);
+    }
 
     if (network->IsServerRunning())
     {

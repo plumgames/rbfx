@@ -124,6 +124,7 @@ public:
     /// Return the connection to the server. Null if not connected.
     /// @property
     Connection* GetServerConnection(unsigned connectionIndex = 0) const;
+    ea::vector<SharedPtr<Connection>> GetServerConnections() const;
     /// Return all client connections.
     /// @property
     ea::vector<SharedPtr<Connection>> GetClientConnections() const;

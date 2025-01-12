@@ -498,6 +498,14 @@ ea::vector<SharedPtr<Connection>> Network::GetClientConnections() const
     return connections;
 }
 
+ea::vector<SharedPtr<Connection>> Network::GetServerConnections() const
+{
+    ea::vector<SharedPtr<Connection>> connections;
+    for (auto& [_, connection] : connectionsToServer_)
+        connections.push_back(connection);
+    return connections;
+}
+
 bool Network::IsServerRunning() const
 {
     return transportServer_ != nullptr && transportServer_->IsReady();
