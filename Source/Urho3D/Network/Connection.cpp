@@ -70,15 +70,15 @@ PackageUpload::PackageUpload() :
 {
 }
 
-Connection::Connection(Context* context, NetworkConnection* connection)
+Connection::Connection(Context* context, NetworkConnection* transportConnection)
     : AbstractConnection(context)
-    , transportConnection_(connection)
+    , transportConnection_(transportConnection)
 {
     SetPacketSizeLimit(packetMessageLimit_);
 
-    if (connection)
+    if (transportConnection_)
     {
-        connection->onMessage_ = [this](ea::string_view msg)
+        transportConnection_->onMessage_ = [this](ea::string_view msg)
         {
             MutexLock lock(packetQueueLock_);
             VectorBuffer encoded(msg.data(), msg.size());
@@ -116,6 +116,7 @@ Connection::~Connection()
     // Reset scene (remove possible owner references), as this connection is about to be destroyed
     SetScene(nullptr);
     Disconnect();
+    transportConnection_ = nullptr;
 }
 
 void Connection::Initialize()
@@ -263,8 +264,15 @@ void Connection::SetLogStatistics(bool enable)
 
 void Connection::Disconnect()
 {
-    if (transportConnection_)
-        transportConnection_->Disconnect();
+    onRelayMessage_ = nullptr;
+
+    if (!transportConnection_)
+    {
+        return;
+    }
+
+    transportConnection_->Disconnect();
+    transportConnection_->onMessage_ = nullptr;
 }
 
 void Connection::SendRemoteEvents()

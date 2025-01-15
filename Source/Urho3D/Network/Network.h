@@ -37,6 +37,7 @@ class HttpRequest;
 class MemoryBuffer;
 class Scene;
 class NetworkServer;
+class NetworkConnection;
 
 /// %Network subsystem. Manages client-server communications using the UDP protocol.
 class URHO3D_API Network : public Object
@@ -150,7 +151,7 @@ public:
     void OnClientConnected(Connection* connection);
     void OnClientDisconnected(Connection* connection);
     void OnConnectedToServer(Connection* connection);
-    void OnDisconnectedFromServer(Connection* connection);
+    void OnDisconnectedFromServer(Connection* connection, NetworkConnection* transportConnection);
     /// @}
 
     SharedPtr<NetworkServer> GetServerTransport() const;

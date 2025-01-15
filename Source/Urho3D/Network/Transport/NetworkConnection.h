@@ -45,6 +45,7 @@ public:
     };
 
     explicit NetworkConnection(Context* context) : Object(context) { }
+    virtual ~NetworkConnection() override {}
     /// Returns true, if connection initialization has started. Connection may still be unusable at the time this method returns.
     virtual bool Connect(const URL& url) = 0;
     /// Initializes a disconnection. Connection is no longer usable when this method returns, even though it may still remain connected for a short while.

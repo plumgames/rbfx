@@ -21,7 +21,7 @@ class URHO3D_API WebSocketClient : public Object
 
 public:
     WebSocketClient(Context* context);
-    ~WebSocketClient() override;
+    virtual ~WebSocketClient() override;
 
     void Open(const ea::string& url);
     void Close();

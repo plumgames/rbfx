@@ -188,13 +188,13 @@ bool Network::Connect(const URL& url, Scene* scene, const VariantMap& identity, 
                 OnConnectedToServer(connectionToServer);
             });
         };
-        transportConnection->onDisconnected_ = transportConnection->onError_ = [this, queue, connectionToServer]()
+        transportConnection->onDisconnected_ = transportConnection->onError_ = [this, queue, connectionToServer, transportConnection]()
         {
             if (!queue)
                 return;
-            queue->CallFromMainThread([this, connectionToServer](int)
+            queue->CallFromMainThread([this, connectionToServer, transportConnection](int)
             {
-                OnDisconnectedFromServer(connectionToServer);
+                OnDisconnectedFromServer(connectionToServer, transportConnection);
             });
         };
 
@@ -251,8 +251,12 @@ void Network::OnConnectedToServer(Connection* connection)
     SendEvent(E_SERVERCONNECTED);
 }
 
-void Network::OnDisconnectedFromServer(Connection* connection)
+void Network::OnDisconnectedFromServer(Connection* connection, NetworkConnection* transportConnection)
 {
+    transportConnection->onConnected_ = nullptr;
+    transportConnection->onDisconnected_ = nullptr;
+    transportConnection->onError_ = nullptr;
+
     // Differentiate between failed connection, and disconnection
     auto connectionItr = connectionsToServer_.find(connection->GetIndex());
     auto connectionToServer = connectionItr != connectionsToServer_.end() ? connectionItr->second : nullptr;
@@ -321,6 +325,7 @@ void Network::StopServer()
     {
         pair.second->Disconnect();
     }
+    copy.clear();
     clientConnections_.clear();
 
     if (!IsServerRunning())
@@ -328,6 +333,8 @@ void Network::StopServer()
 
     URHO3D_PROFILE("StopServer");
     transportServer_->Stop();
+    transportServer_->onConnected_ = nullptr;
+    transportServer_->onDisconnected_ = nullptr;
     transportServer_ = nullptr;
 
     URHO3D_LOGINFO("Stopped server");

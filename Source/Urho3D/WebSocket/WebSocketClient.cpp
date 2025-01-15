@@ -12,6 +12,8 @@ namespace Urho3D
 WebSocketClient::WebSocketClient(Context* context)
     : BaseClassName(context)
 {
+    URHO3D_LOGDEBUG("WebSocketClient::Ctor");
+
     workQueue_ = GetSubsystem<WorkQueue>();
 
     WeakPtr<WebSocketClient> self(this);
@@ -86,6 +88,14 @@ WebSocketClient::WebSocketClient(Context* context)
 
 WebSocketClient::~WebSocketClient()
 {
+    URHO3D_LOGDEBUG("WebSocketClient::Dtor");
+
+    ws_->onOpen([](){});
+    ws_->onClosed([](){});
+    ws_->onError([](std::string error){});
+    ws_->onMessage([](binary msg){}, [](std::string msg){});
+    ws_->onBufferedAmountLow([]() { });
+    ws_ = nullptr;
 }
 
 void WebSocketClient::Open(const ea::string& url)

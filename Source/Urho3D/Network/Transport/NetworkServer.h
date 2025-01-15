@@ -35,6 +35,7 @@ class URHO3D_API NetworkServer : public Object
     URHO3D_OBJECT(NetworkServer, Object);
 public:
     explicit NetworkServer(Context* context) : Object(context) { }
+    virtual ~NetworkServer() override {}
     virtual bool Listen(const URL& url) = 0;
     virtual void Stop() = 0;
     virtual bool IsReady() { return true; }
