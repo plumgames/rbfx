@@ -288,13 +288,20 @@ void HttpRequest::ThreadFunction()
     // Initiate the connection. This may block due to DNS query
     mg_connection* connection = nullptr;
 
+    ea::string pathAndQuery = url_.path_;
+    if (!url_.query_.empty())
+    {
+        pathAndQuery += "?" + url_.query_;
+    }
+
     if (postData_.empty())
     {
         connection = mg_download(url_.host_.c_str(), url_.port_, url_.scheme_.comparei("https") >= 0 ? 1 : 0, errorBuffer, sizeof(errorBuffer),
             "%s %s HTTP/1.0\r\n"
             "Host: %s\r\n"
             "%s"
-            "\r\n", verb_.c_str(), url_.path_.c_str(), url_.host_.c_str(), headersStr.c_str());
+            "\r\n",
+            verb_.c_str(), pathAndQuery.c_str(), url_.host_.c_str(), headersStr.c_str());
     }
     else
     {
@@ -304,7 +311,7 @@ void HttpRequest::ThreadFunction()
             "%s"
             "Content-Length: %d\r\n"
             "\r\n"
-            "%s", verb_.c_str(), url_.path_.c_str(), url_.host_.c_str(), headersStr.c_str(), postData_.length(), postData_.c_str());
+            "%s", verb_.c_str(), pathAndQuery.c_str(), url_.host_.c_str(), headersStr.c_str(), postData_.length(), postData_.c_str());
     }
 
     {
