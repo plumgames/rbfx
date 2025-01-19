@@ -75,7 +75,7 @@ public:
     /// Return true if parsing json string into JSONValue succeeds.
     static bool ParseJSON(const ea::string& json, JSONValue& value, bool reportError = true);
 
-private:
+//public:
     /// JSON root value.
     JSONValue root_;
 };
