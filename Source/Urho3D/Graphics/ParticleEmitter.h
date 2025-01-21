@@ -124,6 +124,10 @@ public:
     /// Return billboards attribute. Returns billboard amount only if particles are not to be serialized.
     VariantVector GetParticleBillboardsAttr() const;
 
+    void SetEmittingPaused(bool paused) { emittingPaused_ = paused; }
+
+    /// Return whether has active particles.
+    bool CheckActiveParticles() const;
 protected:
     /// Handle scene being assigned.
     void OnSceneSet(Scene* scene) override;
@@ -132,8 +136,6 @@ protected:
     bool EmitNewParticle();
     /// Return a free particle index.
     unsigned GetFreeParticle() const;
-    /// Return whether has active particles.
-    bool CheckActiveParticles() const;
 
 private:
     /// Handle scene post-update event.
@@ -155,6 +157,7 @@ private:
     unsigned lastUpdateFrameNumber_;
     /// Currently emitting flag.
     bool emitting_;
+    bool emittingPaused_;
     /// Need update flag.
     bool needUpdate_;
     /// Serialize particles flag.

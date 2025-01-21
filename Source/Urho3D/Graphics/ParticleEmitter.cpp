@@ -50,6 +50,7 @@ ParticleEmitter::ParticleEmitter(Context* context) :
     lastTimeStep_(0.0f),
     lastUpdateFrameNumber_(M_MAX_UNSIGNED),
     emitting_(true),
+    emittingPaused_(false),
     needUpdate_(false),
     serializeParticles_(true),
     sendFinishedEvent_(true),
@@ -453,6 +454,11 @@ void ParticleEmitter::OnSceneSet(Scene* scene)
 
 bool ParticleEmitter::EmitNewParticle()
 {
+    if (emittingPaused_)
+    {
+        return false;
+    }
+
     unsigned index = GetFreeParticle();
     if (index == M_MAX_UNSIGNED)
         return false;
