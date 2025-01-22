@@ -102,7 +102,7 @@ URHO3D_NETWORK_SETTING(InputBufferingTweakB, float, 1.0f);
 URHO3D_NETWORK_SETTING(InputBufferingMin, unsigned, 0);
 URHO3D_NETWORK_SETTING(InputBufferingMax, unsigned, 8);
 /// Interval in seconds between NetworkObject becoming unneeded for client and replication stopped.
-URHO3D_NETWORK_SETTING(RelevanceTimeout, float, 5.0f);
+URHO3D_NETWORK_SETTING(RelevanceTimeout, float, 0.0f);
 /// Duration in seconds of value tracking on server. Used for lag compensation.
 URHO3D_NETWORK_SETTING(ServerTracingDuration, float, 5.0f);
 

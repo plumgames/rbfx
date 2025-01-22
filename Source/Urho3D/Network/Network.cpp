@@ -365,6 +365,8 @@ void Network::BroadcastRemoteEvent(StringHash eventType, bool inOrder, const Var
 
 void Network::BroadcastRemoteEvent(Scene* scene, StringHash eventType, bool inOrder, const VariantMap& eventData)
 {
+    SendEvent(eventType, eventData);
+
     for (auto& pair : clientConnections_)
     {
         if (pair.second->GetScene() == scene)
