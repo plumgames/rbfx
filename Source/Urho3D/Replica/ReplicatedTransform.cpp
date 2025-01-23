@@ -40,6 +40,12 @@ const StringVector replicatedRotationModeNames = {
     //"Y"
 };
 
+const StringVector replicatedPositionModeNames = {
+    "None",
+    "XYZ",
+    "XZ",
+};
+
 }
 
 ReplicatedTransform::ReplicatedTransform(Context* context)
@@ -65,7 +71,7 @@ void ReplicatedTransform::RegisterObject(Context* context)
     URHO3D_ATTRIBUTE("Movement Threshold", float, movementThreshold_, DefaultMovementThreshold, AM_DEFAULT);
     URHO3D_ATTRIBUTE("Snap Threshold", float, snapThreshold_, DefaultSnapThreshold, AM_DEFAULT);
 
-    URHO3D_ATTRIBUTE("Synchronize Position", bool, synchronizePosition_, DefaultSynchronizePosition, AM_DEFAULT);
+    URHO3D_ENUM_ATTRIBUTE("Synchronize Position", synchronizePosition_, replicatedPositionModeNames, DefaultSynchronizePosition, AM_DEFAULT);
     URHO3D_ENUM_ATTRIBUTE("Synchronize Rotation", synchronizeRotation_, replicatedRotationModeNames, DefaultSynchronizeRotation, AM_DEFAULT);
     URHO3D_ATTRIBUTE("Extrapolate Position", bool, extrapolatePosition_, DefaultExtrapolatePosition, AM_DEFAULT);
     URHO3D_ATTRIBUTE("Extrapolate Rotation", bool, extrapolateRotation_, DefaultExtrapolateRotation, AM_DEFAULT);
@@ -100,10 +106,11 @@ void ReplicatedTransform::InitializeOnServer()
 void ReplicatedTransform::WriteSnapshot(NetworkFrame frame, Serializer& dest)
 {
     ea::bitset<32> flags;
-    flags[0] = synchronizePosition_;
-    flags[1] = synchronizeRotation_ != ReplicatedRotationMode::None;
-    flags[2] = extrapolatePosition_;
-    flags[3] = extrapolateRotation_;
+    flags[0] = synchronizePosition_ == ReplicatedPositionMode::XYZ;
+    flags[1] = synchronizePosition_ == ReplicatedPositionMode::XZ;
+    flags[2] = synchronizeRotation_ != ReplicatedRotationMode::None;
+    flags[3] = extrapolatePosition_;
+    flags[4] = extrapolateRotation_;
     dest.WriteVLE(flags.to_uint32());
 }
 
@@ -112,10 +119,10 @@ void ReplicatedTransform::InitializeFromSnapshot(NetworkFrame frame, Deserialize
     InitializeCommon();
 
     ea::bitset<32> flags = src.ReadVLE();
-    synchronizePosition_ = flags[0];
-    synchronizeRotation_ = flags[1] ? ReplicatedRotationMode::XYZ : ReplicatedRotationMode::None;
-    extrapolatePosition_ = flags[2];
-    extrapolateRotation_ = flags[3];
+    synchronizePosition_ = flags[0] ? ReplicatedPositionMode::XYZ : (flags[1] ? ReplicatedPositionMode::XZ : ReplicatedPositionMode::None);
+    synchronizeRotation_ = flags[2] ? ReplicatedRotationMode::XYZ : ReplicatedRotationMode::None;
+    extrapolatePosition_ = flags[3];
+    extrapolateRotation_ = flags[4];
 
     const auto replicationManager = GetNetworkObject()->GetReplicationManager();
     const unsigned updateFrequency = replicationManager->GetUpdateFrequency();
@@ -185,7 +192,7 @@ void ReplicatedTransform::InterpolateState(float replicaTimeStep, float inputTim
     if (!replicateOwner_ && GetNetworkObject()->IsOwnedByThisClient())
         return;
 
-    if (!positionTrackOnly_ && synchronizePosition_)
+    if (!positionTrackOnly_ && synchronizePosition_ != ReplicatedPositionMode::None)
     {
         if (auto newPosition = client_.positionSampler_.UpdateAndSample(positionTrace_, replicaTime, replicaTimeStep))
             node_->SetWorldPosition(*newPosition);
@@ -205,24 +212,56 @@ bool ReplicatedTransform::PrepareUnreliableDelta(NetworkFrame frame)
 
 void ReplicatedTransform::WriteUnreliableDelta(NetworkFrame frame, Serializer& dest)
 {
-    if (synchronizePosition_)
+    if (synchronizePosition_ != ReplicatedPositionMode::None)
     {
         if (packPosition_)
         {
-            dest.WritePackedVector3(server_.position_, packPositionMaxAbsValue_);
+            switch(synchronizePosition_)
+            {
+            case ReplicatedPositionMode::XYZ:
+                dest.WritePackedVector3(server_.position_, packPositionMaxAbsValue_);
+                break;
+            case ReplicatedPositionMode::XZ:
+                dest.WritePackedVector2(Vector2(server_.position_.x_, server_.position_.z_), packPositionMaxAbsValue_);
+                break;
+            }
         }
         else
         {
-            dest.WriteVector3(server_.position_);
+            switch (synchronizePosition_)
+            {
+            case ReplicatedPositionMode::XYZ:
+                dest.WriteVector3(server_.position_);
+                break;
+            case ReplicatedPositionMode::XZ:
+                dest.WriteVector2(Vector2(server_.position_.x_, server_.position_.z_));
+                break;
+            }
         }
 
         if (packVelocity_)
         {
-            dest.WritePackedVector3(server_.velocity_, packVelocityMaxAbsValue_);
+            switch (synchronizePosition_)
+            {
+            case ReplicatedPositionMode::XYZ:
+                dest.WritePackedVector3(server_.velocity_, packVelocityMaxAbsValue_);
+                break;
+            case ReplicatedPositionMode::XZ:
+                dest.WritePackedVector2(Vector2(server_.velocity_.x_, server_.velocity_.z_), packVelocityMaxAbsValue_);
+                break;
+            }
         }
         else
         {
-            dest.WriteVector3(server_.velocity_);
+            switch (synchronizePosition_)
+            {
+            case ReplicatedPositionMode::XYZ:
+                dest.WriteVector3(server_.velocity_);
+                break;
+            case ReplicatedPositionMode::XZ:
+                dest.WriteVector2(Vector2(server_.velocity_.x_, server_.velocity_.z_));
+                break;
+            }
         }
     }
 
@@ -250,10 +289,27 @@ void ReplicatedTransform::WriteUnreliableDelta(NetworkFrame frame, Serializer& d
 
 void ReplicatedTransform::ReadUnreliableDelta(NetworkFrame frame, Deserializer& src)
 {
-    if (synchronizePosition_)
+    if (synchronizePosition_ != ReplicatedPositionMode::None)
     {
-        const Vector3 position = packPosition_ ? src.ReadPackedVector3(packPositionMaxAbsValue_) : src.ReadVector3();
-        const Vector3 velocity = packVelocity_ ? src.ReadPackedVector3(packVelocityMaxAbsValue_) : src.ReadVector3();
+        Vector3 position;
+        Vector3 velocity;
+
+        switch (synchronizePosition_)
+        {
+        case ReplicatedPositionMode::XYZ:
+            position = packPosition_ ? src.ReadPackedVector3(packPositionMaxAbsValue_) : src.ReadVector3();
+            velocity = packVelocity_ ? src.ReadPackedVector3(packVelocityMaxAbsValue_) : src.ReadVector3();
+            break;
+        case ReplicatedPositionMode::XZ:
+            auto xzPos = packPosition_ ? src.ReadPackedVector2(packPositionMaxAbsValue_) : src.ReadVector2();
+            auto xzVel = packVelocity_ ? src.ReadPackedVector2(packVelocityMaxAbsValue_) : src.ReadVector2();
+            position.x_ = xzPos.x_;
+            position.z_ = xzPos.y_;
+            position.y_ = GetNode()->GetPosition().y_;
+            velocity.x_ = xzVel.x_;
+            velocity.z_ = xzVel.y_;
+            break;
+        }
 
         positionTrace_.Set(frame, {position, velocity});
     }

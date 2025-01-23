@@ -46,6 +46,13 @@ enum class ReplicatedRotationMode
     //Y,
 };
 
+enum class ReplicatedPositionMode
+{
+    None,
+    XYZ,
+    XZ,
+};
+
 /// Behavior that replicates transform of the node.
 class URHO3D_API ReplicatedTransform : public NetworkBehavior
 {
@@ -56,7 +63,7 @@ public:
     static constexpr float DefaultSmoothingConstant = 15.0f;
     static constexpr float DefaultMovementThreshold = 0.001f;
     static constexpr float DefaultSnapThreshold = 5.0f;
-    static constexpr bool DefaultSynchronizePosition = true;
+    static constexpr ReplicatedPositionMode DefaultSynchronizePosition = ReplicatedPositionMode::XYZ;
     static constexpr ReplicatedRotationMode DefaultSynchronizeRotation = ReplicatedRotationMode::XYZ;
     static constexpr bool DefaultExtrapolatePosition = true;
     static constexpr bool DefaultExtrapolateRotation = false;
@@ -91,8 +98,8 @@ public:
     void SetSnapThreshold(float value) { snapThreshold_ = value; }
     float GetSnapThreshold() const { return snapThreshold_; }
 
-    void SetSynchronizePosition(bool value) { synchronizePosition_ = value; }
-    bool GetSynchronizePosition() const { return synchronizePosition_; }
+    void SetSynchronizePosition(ReplicatedPositionMode value) { synchronizePosition_ = value; }
+    ReplicatedPositionMode GetSynchronizePosition() const { return synchronizePosition_; }
     void SetSynchronizeRotation(ReplicatedRotationMode value) { synchronizeRotation_ = value; }
     ReplicatedRotationMode GetSynchronizeRotation() const { return synchronizeRotation_; }
     void SetExtrapolatePosition(bool value) { extrapolatePosition_ = value; }
@@ -141,7 +148,7 @@ private:
 
     /// Attributes matching on the client and the server.
     /// @{
-    bool synchronizePosition_{DefaultSynchronizePosition};
+    ReplicatedPositionMode synchronizePosition_{DefaultSynchronizePosition};
     ReplicatedRotationMode synchronizeRotation_{DefaultSynchronizeRotation};
     bool extrapolatePosition_{DefaultExtrapolatePosition};
     bool extrapolateRotation_{DefaultExtrapolateRotation};

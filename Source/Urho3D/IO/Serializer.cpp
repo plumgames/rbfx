@@ -120,6 +120,16 @@ bool Serializer::WriteVector2(const Vector2& value)
     return Write(value.Data(), sizeof value) == sizeof value;
 }
 
+bool Serializer::WritePackedVector2(const Vector2& value, float maxAbsCoord)
+{
+    short coords[2];
+    float v = 32767.0f / maxAbsCoord;
+
+    coords[0] = (short)Round(Clamp(value.x_, -maxAbsCoord, maxAbsCoord) * v);
+    coords[1] = (short)Round(Clamp(value.y_, -maxAbsCoord, maxAbsCoord) * v);
+    return Write(&coords[0], sizeof coords) == sizeof coords;
+}
+
 bool Serializer::WriteVector3(const Vector3& value)
 {
     return Write(value.Data(), sizeof value) == sizeof value;

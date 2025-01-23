@@ -102,6 +102,8 @@ public:
     Rect ReadRect();
     /// Read a Vector2.
     Vector2 ReadVector2();
+    /// Read a Vector2 packed into 2 x 16 bits with the specified maximum absolute range.
+    Vector2 ReadPackedVector2(float maxAbsCoord);
     /// Read a Vector3.
     Vector3 ReadVector3();
     /// Read a Vector3 packed into 3 x 16 bits with the specified maximum absolute range.

@@ -88,6 +88,8 @@ public:
     bool WriteRect(const Rect& value);
     /// Write a Vector2.
     bool WriteVector2(const Vector2& value);
+    /// Write a Vector2 packed into 2 x 16 bits with the specified maximum absolute range.
+    bool WritePackedVector2(const Vector2& value, float maxAbsCoord);
     /// Write a Vector3.
     bool WriteVector3(const Vector3& value);
     /// Write a Vector3 packed into 3 x 16 bits with the specified maximum absolute range.

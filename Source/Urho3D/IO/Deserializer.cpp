@@ -173,6 +173,15 @@ Vector2 Deserializer::ReadVector2()
     return Vector2(data);
 }
 
+Vector2 Deserializer::ReadPackedVector2(float maxAbsCoord)
+{
+    float invV = maxAbsCoord / 32767.0f;
+    short coords[2];
+    Read(coords, sizeof coords);
+    Vector2 ret(coords[0] * invV, coords[1] * invV);
+    return ret;
+}
+
 Vector3 Deserializer::ReadVector3()
 {
     float data[3];
