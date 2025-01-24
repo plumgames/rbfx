@@ -69,7 +69,7 @@ void WebRTCConnection::Disconnect()
 {
     if (peer_)
     {
-        AddRef();    // Ensure this object is alive until all callbacks are done executing.
+        selfHolder_ = this; // Ensure this object is alive until all callbacks are done executing.
         state_ = State::Disconnecting;
 #ifndef URHO3D_PLATFORM_WEB
         peer_->resetCallbacks();
@@ -129,6 +129,9 @@ void WebRTCConnection::OnWebRTCConnected(int index)
     if (onConnected_)
         onConnected_();
 
+    if (server_)
+        server_->onConnected_(this);
+
     // Signaling server connection is no longer needed.
     websocket_->close();
     websocket_ = nullptr;
@@ -171,7 +174,7 @@ void WebRTCConnection::OnWebRTCDisconnected(int index)
     }
     peer_ = nullptr;
     server_ = nullptr;
-    ReleaseRef();
+    selfHolder_ = nullptr;
 }
 
 void WebRTCConnection::InitializeFromSocket(WebRTCServer* server, std::shared_ptr<rtc::WebSocket> websocket)

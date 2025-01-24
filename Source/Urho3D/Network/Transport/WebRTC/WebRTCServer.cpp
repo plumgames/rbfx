@@ -65,7 +65,6 @@ bool WebRTCServer::Listen(const URL& url)
         SharedPtr<WebRTCConnection> connection = MakeShared<WebRTCConnection>(context_);
         connection->InitializeFromSocket(this, ws);
         connections_.push_back(connection);
-        onConnected_(connection);
     });
     return true;
 #else
