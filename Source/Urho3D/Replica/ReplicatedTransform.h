@@ -58,7 +58,7 @@ class URHO3D_API ReplicatedTransform : public NetworkBehavior
     URHO3D_OBJECT(ReplicatedTransform, NetworkBehavior);
 
 public:
-    static constexpr unsigned DefaultNumUploadAttempts = 8;
+    static constexpr unsigned DefaultNumUploadAttempts = 1;
     static constexpr float DefaultSmoothingConstant = 15.0f;
     static constexpr float DefaultMovementThreshold = 0.001f;
     static constexpr float DefaultSnapThreshold = 5.0f;
@@ -129,10 +129,13 @@ public:
     ea::optional<NetworkFrame> GetLatestFrame() const;
     /// @}
 
+    void TeleportedOnServer();
+
 private:
     void InitializeCommon();
-    void OnServerFrameBegin();
     void OnServerFrameEnd(NetworkFrame frame);
+    void ResetClientTraces();
+    void ResetClientSamplers();
 
     /// Attributes independent on the client and the server.
     /// @{
@@ -178,12 +181,17 @@ private:
         bool movedDuringFrame_{};
         Vector3 latestSentPosition_;
         Quaternion latestSentRotation_;
+
+        uint8_t teleportId_{};
+        uint8_t previousTeleportId_{};
     } server_;
 
     struct ClientData
     {
         NetworkValueSampler<PositionAndVelocity> positionSampler_;
         NetworkValueSampler<RotationAndVelocity> rotationSampler_;
+
+        uint8_t teleportId_{};
     } client_;
 };
 

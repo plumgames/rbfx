@@ -123,12 +123,7 @@ void ReplicatedTransform::InitializeFromSnapshot(NetworkFrame frame, Deserialize
     extrapolatePosition_ = flags[3];
     extrapolateRotation_ = flags[4];
 
-    const auto replicationManager = GetNetworkObject()->GetReplicationManager();
-    const unsigned updateFrequency = replicationManager->GetUpdateFrequency();
-    const float extrapolationInSeconds = replicationManager->GetSetting(NetworkSettings::ExtrapolationLimit).GetFloat();
-    const unsigned extrapolationInFrames = CeilToInt(extrapolationInSeconds * updateFrequency);
-    client_.positionSampler_.Setup(extrapolatePosition_ ? extrapolationInFrames : 0, smoothingConstant_, snapThreshold_);
-    client_.rotationSampler_.Setup(extrapolateRotation_ ? extrapolationInFrames : 0, smoothingConstant_, M_LARGE_VALUE);
+    ResetClientSamplers();
 }
 
 void ReplicatedTransform::UpdateTransformOnServer()
@@ -138,11 +133,7 @@ void ReplicatedTransform::UpdateTransformOnServer()
 
 void ReplicatedTransform::InitializeCommon()
 {
-    const auto replicationManager = GetNetworkObject()->GetReplicationManager();
-    const unsigned traceDuration = replicationManager->GetTraceDurationInFrames();
-
-    positionTrace_.Resize(traceDuration);
-    rotationTrace_.Resize(traceDuration);
+    ResetClientTraces();
 }
 
 void ReplicatedTransform::OnServerFrameEnd(NetworkFrame frame)
@@ -211,6 +202,8 @@ bool ReplicatedTransform::PrepareUnreliableDelta(NetworkFrame frame)
 
 void ReplicatedTransform::WriteUnreliableDelta(NetworkFrame frame, Serializer& dest)
 {
+    dest.WriteUByte(server_.teleportId_);
+
     if (synchronizePosition_ != ReplicatedPositionMode::None)
     {
         if (packPosition_)
@@ -288,6 +281,15 @@ void ReplicatedTransform::WriteUnreliableDelta(NetworkFrame frame, Serializer& d
 
 void ReplicatedTransform::ReadUnreliableDelta(NetworkFrame frame, Deserializer& src)
 {
+    const auto serverTeleportId = src.ReadUByte();
+    const bool teleported = serverTeleportId != client_.teleportId_;
+    if (teleported)
+    {
+        ResetClientTraces();
+        ResetClientSamplers();
+    }
+    client_.teleportId_ = serverTeleportId;
+
     if (synchronizePosition_ != ReplicatedPositionMode::None)
     {
         Vector3 position;
@@ -310,16 +312,47 @@ void ReplicatedTransform::ReadUnreliableDelta(NetworkFrame frame, Deserializer& 
             break;
         }
 
+        if (teleported)
+        {
+            velocity = Vector3::ZERO;
+        }
+
         positionTrace_.Set(frame, {position, velocity});
     }
 
     if (synchronizeRotation_ == ReplicatedRotationMode::XYZ)
     {
         const Quaternion rotation = packRotation_ ? src.ReadPackedQuaternion() : src.ReadQuaternion();
-        const Vector3 angularVelocity = packAngularVelocity_ ? src.ReadPackedVector3(packAngularVelocityMaxAbsValue_) : src.ReadVector3();
+        Vector3 angularVelocity = packAngularVelocity_ ? src.ReadPackedVector3(packAngularVelocityMaxAbsValue_) : src.ReadVector3();
+
+        if (teleported)
+        {
+            angularVelocity = Vector3::ZERO;
+        }
 
         rotationTrace_.Set(frame, {rotation, angularVelocity});
     }
+}
+
+void ReplicatedTransform::ResetClientTraces()
+{
+    const auto replicationManager = GetNetworkObject()->GetReplicationManager();
+    const unsigned traceDuration = replicationManager->GetTraceDurationInFrames();
+    positionTrace_.Resize(traceDuration);
+    rotationTrace_.Resize(traceDuration);
+}
+
+void ReplicatedTransform::ResetClientSamplers()
+{
+    const auto replicationManager = GetNetworkObject()->GetReplicationManager();
+    const unsigned updateFrequency = replicationManager->GetUpdateFrequency();
+    const float extrapolationInSeconds = replicationManager->GetSetting(NetworkSettings::ExtrapolationLimit).GetFloat();
+    const unsigned extrapolationInFrames = CeilToInt(extrapolationInSeconds * updateFrequency);
+    client_.positionSampler_ = {};
+    client_.positionSampler_.Setup(
+        extrapolatePosition_ ? extrapolationInFrames : 0, smoothingConstant_, snapThreshold_);
+    client_.rotationSampler_ = {};
+    client_.rotationSampler_.Setup(extrapolateRotation_ ? extrapolationInFrames : 0, smoothingConstant_, M_LARGE_VALUE);
 }
 
 PositionAndVelocity ReplicatedTransform::SampleTemporalPosition(const NetworkTime& time) const
@@ -345,6 +378,11 @@ ea::optional<RotationAndVelocity> ReplicatedTransform::GetTemporalRotation(Netwo
 ea::optional<NetworkFrame> ReplicatedTransform::GetLatestFrame() const
 {
     return positionTrace_.IsInitialized() ? ea::make_optional(positionTrace_.GetLastFrame()) : ea::nullopt;
+}
+
+void ReplicatedTransform::TeleportedOnServer()
+{
+    ++server_.teleportId_;
 }
 
 }
