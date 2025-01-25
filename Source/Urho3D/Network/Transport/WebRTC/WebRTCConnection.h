@@ -67,7 +67,7 @@ protected:
     static const unsigned short maxDataSize_ = UINT16_MAX;
     VectorBuffer buffer_;
     bool websocketWasOpened_ = false;
-    SharedPtr<DataChannelConnection> selfHolder_;
+    SharedPtr<WebRTCConnection> selfHolder_;
 };
 
 }   // namespace Urho3D
