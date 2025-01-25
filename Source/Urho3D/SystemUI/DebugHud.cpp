@@ -253,10 +253,12 @@ void DebugHud::RenderUI(DebugHudModeFlags mode)
     auto graphics = GetSubsystem<Graphics>();
     auto renderDevice = GetSubsystem<RenderDevice>();
 
-    ui::PushStyleColor(ImGuiCol_Text, ImVec4(0, 0, 0, 1.00f));
+    ui::PushStyleColor(ImGuiCol_Text, ImVec4(1, 1, 1, 1.00f));
 
     if (mode & DEBUGHUD_SHOW_STATS)
     {
+        ui::SetCursorPosY(100);
+
         const FrameStatistics& stats = renderer->GetFrameStats();
 
         if (fpsTimer_.GetMSec(false) > FPS_UPDATE_INTERVAL_MS)
