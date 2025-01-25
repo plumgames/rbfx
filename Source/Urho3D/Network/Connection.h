@@ -323,7 +323,7 @@ private:
     VectorBuffer sendDataBuffer_;
 
     SharedPtr<WorkQueue> worKQueue_;
-    SharedPtr<NetworkConnection> transportConnection_;
+    SharedPtr<NetworkConnection> connection_;
     Mutex packetQueueLock_;
     ea::vector<VectorBuffer> incomingPackets_;
     ea::vector<char> compressedPacketBuffer_;

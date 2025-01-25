@@ -105,7 +105,7 @@ void Network::OnClientConnected(Connection* connection)
     connection->Initialize();
     connection->SetIsClient(true);
     connection->SetConnectPending(true);
-    clientConnections_.emplace(connection->transportConnection_, SharedPtr<Connection>(connection));
+    clientConnections_.emplace(connection->connection_, SharedPtr<Connection>(connection));
     URHO3D_LOGINFO("Client {} connected", connection->ToString());
 
     using namespace ClientConnected;
@@ -157,7 +157,7 @@ void Network::OnClientDisconnected(Connection* connection)
     eventData[P_CONNECTION] = connection;
     connection->SendEvent(E_CLIENTDISCONNECTED, eventData);
 
-    clientConnections_.erase(connection->transportConnection_);
+    clientConnections_.erase(connection->connection_);
 }
 
 bool Network::Connect(const URL& url, Scene* scene, const VariantMap& identity, unsigned connectionIndex)

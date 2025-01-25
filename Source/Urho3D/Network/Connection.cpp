@@ -54,16 +54,16 @@ PackageUpload::PackageUpload() :
 {
 }
 
-Connection::Connection(Context* context, NetworkConnection* transportConnection)
+Connection::Connection(Context* context, NetworkConnection* connection)
     : AbstractConnection(context)
-    , transportConnection_(transportConnection)
+    , connection_(connection)
 {
     compressedPacketBuffer_.resize(GetMaxPacketSize());
     decompressedPacketBuffer_.resize(GetMaxPacketSize() * 10);
 
-    if (transportConnection_)
+    if (connection_)
     {
-        transportConnection_->onMessage_ = [this](ea::string_view msg)
+        connection_->onMessage_ = [this](ea::string_view msg)
         {
             MutexLock lock(packetQueueLock_);
             VectorBuffer encoded(msg.data(), msg.size());
@@ -101,7 +101,7 @@ Connection::~Connection()
     // Reset scene (remove possible owner references), as this connection is about to be destroyed
     SetScene(nullptr);
     Disconnect();
-    transportConnection_ = nullptr;
+    connection_ = nullptr;
 }
 
 void Connection::Initialize()
@@ -236,13 +236,13 @@ void Connection::Disconnect()
 {
     onRelayMessage_ = nullptr;
 
-    if (!transportConnection_)
+    if (!connection_)
     {
         return;
     }
 
-    transportConnection_->Disconnect();
-    transportConnection_->onMessage_ = nullptr;
+    connection_->Disconnect();
+    connection_->onMessage_ = nullptr;
 }
 
 void Connection::SendRemoteEvents()
@@ -311,7 +311,7 @@ void Connection::SendData(PacketTargetType targetType, PacketTypeFlags type, con
 {
     URHO3D_PROFILE_FUNCTION();
 
-    if (!transportConnection_)
+    if (!connection_)
     {
         return;
     }
@@ -344,11 +344,11 @@ void Connection::SendData(PacketTargetType targetType, PacketTypeFlags type, con
 void Connection::SendDataRaw(PacketTypeFlags type, const VectorBuffer& buffer)
 {
     URHO3D_PROFILE_FUNCTION();
-    if (!transportConnection_)
+    if (!connection_)
     {
         return;
     }
-    transportConnection_->SendMessage({(const char*)buffer.GetData(), buffer.GetSize()}, type);
+    connection_->SendMessage({(const char*)buffer.GetData(), buffer.GetSize()}, type);
 }
 
 void Connection::SendBuffer(PacketTypeFlags type, VectorBuffer& buffer)
@@ -356,7 +356,7 @@ void Connection::SendBuffer(PacketTypeFlags type, VectorBuffer& buffer)
     if (buffer.GetSize() < 1)
         return;
 
-    if (transportConnection_)
+    if (connection_)
     {
         packetCounterOutgoing_.AddSample(1);
         bytesCounterOutgoing_.AddSample(buffer.GetSize());
@@ -768,7 +768,7 @@ Scene* Connection::GetScene() const
 
 bool Connection::IsConnected() const
 {
-    return transportConnection_->GetState() == NetworkConnection::State::Connected;
+    return connection_->GetState() == NetworkConnection::State::Connected;
 }
 
 unsigned long long Connection::GetBytesInPerSec() const
@@ -1091,15 +1091,15 @@ void Connection::ProcessUnknownMessage(int msgID, MemoryBuffer& msg)
 
 ea::string Connection::GetAddress() const
 {
-    if (transportConnection_)
-        return transportConnection_->GetAddress();
+    if (connection_)
+        return connection_->GetAddress();
     return "";
 }
 
 unsigned short Connection::GetPort() const
 {
-    if (transportConnection_)
-        return transportConnection_->GetPort();
+    if (connection_)
+        return connection_->GetPort();
     return 0;
 }
 
