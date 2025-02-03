@@ -130,7 +130,7 @@ public:
     bool CheckActiveParticles() const;
 protected:
     /// Handle scene being assigned.
-    void OnSceneSet(Scene* scene) override;
+    void OnSceneSet(Scene* previousScene, Scene* scene) override;
 
     /// Create a new particle. Return true if there was room.
     bool EmitNewParticle();

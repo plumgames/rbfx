@@ -360,7 +360,7 @@ void Drawable::OnNodeSet(Node* previousNode, Node* currentNode)
         node_->AddListener(this);
 }
 
-void Drawable::OnSceneSet(Scene* scene)
+void Drawable::OnSceneSet(Scene* previousScene, Scene* scene)
 {
     if (scene)
         AddToOctree();

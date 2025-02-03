@@ -56,6 +56,7 @@ public:
     bool Connect(const URL&) override;
     void Disconnect() override;
     void SendMessage(ea::string_view data, PacketTypeFlags) override;
+    unsigned GetMaxMessageSize() const override { return 1024; }
 
     void OnConnected();
     void OnDisconnected();

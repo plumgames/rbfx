@@ -24,15 +24,19 @@ class URHO3D_API AbstractConnection : public Object, public IDFamily<AbstractCon
     URHO3D_OBJECT(AbstractConnection, Object);
 
 public:
-    AbstractConnection(Context* context) : Object(context) {}
+    AbstractConnection(Context* context);
+
+    void SetLogAllMessages(bool enabled) { logAllMessages_ = enabled; }
+    bool IsLogAllMessages() const { return logAllMessages_; }
 
     /// Connection limits.
     /// @{
-    void SetMaxPacketSize(unsigned limit) { maxPacketSize_ = limit; }
-    unsigned GetMaxPacketSize() const { return maxPacketSize_; }
-    unsigned GetMaxMessageSize() const { return maxPacketSize_ - NetworkMessageHeaderSize; }
+    unsigned GetMaxPacketSize() const;
+    unsigned GetMaxMessageSize() const;
     /// @}
 
+    /// Set maximum size of network packet. Connection transport may override this value.
+    virtual void SetMaxPacketSize(unsigned limit);
     /// Send message to the other end of the connection.
     virtual void SendMessageInternal(NetworkMessageId messageId, const unsigned char* data, unsigned numBytes, PacketTypeFlags packetType = PacketType::ReliableOrdered) = 0;
     /// Return debug connection string for logging.
@@ -58,11 +62,12 @@ public:
     void SendMessage(NetworkMessageId messageId, const VectorBuffer& msg,
         PacketTypeFlags packetType = PacketType::ReliableOrdered, ea::string_view debugInfo = {});
 
-    void LogReceivedMessage(NetworkMessageId messageId, ea::string_view debugInfo) const;
+    void LogMessagePayload(NetworkMessageId messageId, ea::string_view debugInfo) const;
 
-    template <class T> void LogReceivedMessage(NetworkMessageId messageId, const T& message) const
+    template <class T> void LogMessagePayload(NetworkMessageId messageId, const T& message) const
     {
-        LogReceivedMessage(messageId, ea::string_view{message.ToString()});
+        if (GetMessageLogLevel(messageId) != LOG_NONE)
+            LogMessagePayload(messageId, ea::string_view{message.ToString()});
     }
 
     LogLevel GetMessageLogLevel(NetworkMessageId messageId) const;
@@ -78,7 +83,8 @@ protected:
     VectorBuffer msg_;
 
 private:
-    unsigned maxPacketSize_{DefaultMaxPacketSize};
+    unsigned maxPacketSize_{};
+    bool logAllMessages_{};
 
     ByteVector incomingMessageBuffer_;
     ea::string debugInfoBuffer_;

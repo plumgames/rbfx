@@ -48,7 +48,7 @@ public:
 
 protected:
     void OnSetEnabled() override;
-    void OnSceneSet(Scene* scene) override;
+    void OnSceneSet(Scene* previousScene, Scene* scene) override;
 
 private:
     void Bind(Scene* scene);

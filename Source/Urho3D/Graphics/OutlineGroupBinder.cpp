@@ -132,7 +132,7 @@ void OutlineGroupBinder::OnSetEnabled()
     }
 }
 
-void OutlineGroupBinder::OnSceneSet(Scene* scene)
+void OutlineGroupBinder::OnSceneSet(Scene* previousScene, Scene* scene)
 {
     Bind(scene);
 }

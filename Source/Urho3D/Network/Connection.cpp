@@ -17,6 +17,7 @@
 #include "Urho3D/IO/PackageFile.h"
 #include "Urho3D/IO/VirtualFileSystem.h"
 #include "Urho3D/Network/ClockSynchronizer.h"
+#include "Urho3D/Network/Connection.h"
 #include "Urho3D/Network/MessageUtils.h"
 #include "Urho3D/Network/Network.h"
 #include "Urho3D/Network/NetworkEvents.h"
@@ -39,7 +40,24 @@
 namespace Urho3D
 {
 
+namespace
+{
+
 static const int STATS_INTERVAL_MSEC = 2000;
+/// Size of package file fragment header.
+static constexpr unsigned PackageFragmentHeaderSize = 8;
+/// Package file fragment size.
+static constexpr unsigned PACKAGE_FRAGMENT_SIZE =
+    MaxNetworkPacketSize - PackageFragmentHeaderSize - NetworkMessageHeaderSize;
+
+unsigned CalculateMaxPacketSize(unsigned requestedLimit, unsigned transportLimit)
+{
+    const unsigned effectiveRequestedLimit = requestedLimit != 0 ? requestedLimit : M_MAX_UNSIGNED;
+    const unsigned effectiveTransportLimit = transportLimit != 0 ? transportLimit : MaxNetworkPacketSize;
+    return ea::min(effectiveTransportLimit, effectiveRequestedLimit);
+}
+
+} // namespace
 
 PackageDownload::PackageDownload() :
     totalFragments_(0),
@@ -58,9 +76,6 @@ Connection::Connection(Context* context, NetworkConnection* connection)
     : AbstractConnection(context)
     , connection_(connection)
 {
-    compressedPacketBuffer_.resize(GetMaxPacketSize());
-    decompressedPacketBuffer_.resize(GetMaxPacketSize() * 10);
-
     if (connection_)
     {
         connection_->onMessage_ = [this](ea::string_view msg)
@@ -110,6 +125,13 @@ void Connection::Initialize()
     auto network = GetSubsystem<Network>();
     clock_ = ea::make_unique<ClockSynchronizer>(network->GetPingIntervalMs(), network->GetMaxPingIntervalMs(),
         network->GetClockBufferSize(), network->GetPingBufferSize());
+
+    // Re-set the limit to apply transport limitations.
+    const unsigned requestedMaxPacketSize = GetMaxPacketSize();
+    SetMaxPacketSize(requestedMaxPacketSize);
+
+    compressedPacketBuffer_.resize(GetMaxPacketSize());
+    decompressedPacketBuffer_.resize(GetMaxPacketSize() * 10);
 }
 
 void Connection::RegisterObject(Context* context)
@@ -139,6 +161,12 @@ Connection::Payload Connection::Pack(const unsigned char* dataOriginal, unsigned
     URHO3D_ASSERT((payload.data_ == nullptr && payload.numBytes_ == 0) || (payload.data_ != nullptr && payload.numBytes_ > 0));
 
     return payload;
+}
+
+void Connection::SetMaxPacketSize(unsigned limit)
+{
+    const unsigned transportLimit = connection_->GetMaxMessageSize();
+    BaseClassName::SetMaxPacketSize(CalculateMaxPacketSize(limit, transportLimit));
 }
 
 void Connection::SendMessageInternal(NetworkMessageId messageId, const unsigned char* dataOriginal, unsigned numBytesOriginal, PacketTypeFlags packetType)
@@ -390,11 +418,10 @@ void Connection::SendAllBuffers()
 
 bool Connection::ProcessMessage(MemoryBuffer& buffer)
 {
-    int msgID;
     packetCounterIncoming_.AddSample(1);
     bytesCounterIncoming_.AddSample(buffer.GetSize());
 
-    if (buffer.GetSize() < sizeof(msgID))
+    if (buffer.GetSize() < NetworkMessageHeaderSize)
     {
         URHO3D_LOGERROR("Invalid network message size {}: too small.", buffer.GetSize());
         return false;
@@ -405,7 +432,7 @@ bool Connection::ProcessMessage(MemoryBuffer& buffer)
     while (!buffer.IsEof())
     {
         const bool compressed = buffer.ReadVLE() > 0;
-        msgID = buffer.ReadUShort();
+        const auto msgID = static_cast<NetworkMessageId>(buffer.ReadUShort());
         const unsigned int packetSizeOriginal = buffer.ReadUShort();
 
         unsigned int packetSize = packetSizeOriginal;
@@ -420,14 +447,15 @@ bool Connection::ProcessMessage(MemoryBuffer& buffer)
             compressedBytesIn += packetSizeDecompressed - packetSizeOriginal;
         }
 
+        const LogLevel logLevel = GetMessageLogLevel(msgID);
+        if (logLevel != LOG_NONE)
+        {
+            Log::GetLogger().Write(
+                logLevel, "{}: Message #{} ({} bytes) received", ToString(), msgID, packetSize);
+        }
+
         MemoryBuffer msg(packetBuffer, packetSize);
         buffer.Seek(buffer.GetPosition() + packetSizeOriginal);
-        /*
-        Log::GetLogger().Write(GetMessageLogLevel((NetworkMessageId)msgID), "{}: Message #{} ({} bytes) received",
-            ToString(),
-            static_cast<unsigned>(msgID),
-            packetSize);
-            */
 
         switch (msgID)
         {
@@ -496,6 +524,9 @@ void Connection::ProcessLoadScene(int msgID, MemoryBuffer& msg)
         URHO3D_LOGERROR("Can not handle LoadScene message without an assigned scene");
         return;
     }
+
+    // We need to reload the scene
+    sceneLoaded_ = false;
 
     // Store the scene file name we need to eventually load
     sceneFileName_ = msg.ReadString();
