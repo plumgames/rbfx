@@ -167,6 +167,11 @@ ReplicationManager::~ReplicationManager() = default;
 void ReplicationManager::RegisterObject(Context* context)
 {
     context->AddFactoryReflection<ReplicationManager>(Category_Subsystem);
+
+    // clang-format off
+    URHO3D_ATTRIBUTE("Is Fixed Update Server", bool, attributes_.isFixedUpdateServer_, Attributes{}.isFixedUpdateServer_, AM_DEFAULT);
+    URHO3D_ATTRIBUTE("Allow Zero Updates On Server", bool, attributes_.allowZeroUpdatesOnServer_, Attributes{}.allowZeroUpdatesOnServer_, AM_DEFAULT);
+    // clang-format on
 }
 
 void ReplicationManager::OnSceneSet(Scene* previousScene, Scene* scene)
@@ -199,9 +204,19 @@ void ReplicationManager::OnComponentAdded(TrackedComponentBase* baseComponent)
     if (IsStandalone())
     {
         auto networkObject = static_cast<NetworkObject*>(baseComponent);
-        networkObject->SetNetworkMode(NetworkObjectMode::Standalone);
-        networkObject->InitializeStandalone();
+        standalone_.recentlyAddedObjects_.insert(networkObject->GetNetworkId());
     }
+}
+
+void ReplicationManager::OnComponentRemoved(TrackedComponentBase* baseComponent)
+{
+    if (IsStandalone())
+    {
+        auto networkObject = static_cast<NetworkObject*>(baseComponent);
+        standalone_.recentlyAddedObjects_.erase(networkObject->GetNetworkId());
+    }
+
+    BaseClassName::OnComponentRemoved(baseComponent);
 }
 
 void ReplicationManager::OnSceneUpdate(float timeStep)
@@ -211,6 +226,8 @@ void ReplicationManager::OnSceneUpdate(float timeStep)
     case ReplicationManagerMode::Standalone:
     {
         URHO3D_ASSERT(!server_ && !client_);
+
+        InitializeObjectsStandalone();
 
         Scene* scene = GetScene();
         VariantMap& eventData = scene->GetEventDataMap();
@@ -246,6 +263,23 @@ void ReplicationManager::OnSceneUpdate(float timeStep)
     }
 }
 
+void ReplicationManager::InitializeObjectsStandalone()
+{
+    for (const NetworkId networkId : standalone_.recentlyAddedObjects_)
+    {
+        NetworkObject* networkObject = GetNetworkObject(networkId);
+        if (!networkObject)
+        {
+            URHO3D_ASSERTLOG(0, "Cannot find recently added NetworkObject");
+            continue;
+        }
+
+        networkObject->SetNetworkMode(NetworkObjectMode::Standalone);
+        networkObject->InitializeStandalone();
+    }
+    standalone_.recentlyAddedObjects_.clear();
+}
+
 void ReplicationManager::Stop()
 {
     if (client_)
@@ -259,6 +293,8 @@ void ReplicationManager::Stop()
         URHO3D_LOGINFO("Stopped server for scene replication");
         server_ = nullptr;
     }
+
+    standalone_ = {};
 
     mode_ = ReplicationManagerMode::Standalone;
 }

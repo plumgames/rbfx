@@ -48,6 +48,7 @@ class AbstractConnection;
 class Network;
 class NetworkObject;
 class NetworkObjectRegistry;
+class ReplicationManager;
 class Scene;
 struct NetworkSetting;
 
@@ -247,14 +248,14 @@ private:
 
     const WeakPtr<Network> network_;
     const WeakPtr<Scene> scene_;
-    const WeakPtr<NetworkObjectRegistry> objectRegistry_;
+    const WeakPtr<ReplicationManager> replicationManager_;
 
     VariantMap settings_;
 
     const unsigned updateFrequency_{};
     NetworkFrame currentFrame_{};
 
-    PhysicsTickSynchronizer physicsSync_;
+    SharedPtr<SceneUpdateSynchronizer> updateSync_;
 
     SharedPtr<SharedReplicationState> sharedState_;
     ea::unordered_map<AbstractConnection*, SharedPtr<ClientReplicationState>> connections_;
