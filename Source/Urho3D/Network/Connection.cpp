@@ -447,12 +447,14 @@ bool Connection::ProcessMessage(MemoryBuffer& buffer)
             compressedBytesIn += packetSizeDecompressed - packetSizeOriginal;
         }
 
+#ifdef URHO3D_LOGGING
         const LogLevel logLevel = GetMessageLogLevel(msgID);
         if (logLevel != LOG_NONE)
         {
             Log::GetLogger().Write(
                 logLevel, "{}: Message #{} ({} bytes) received", ToString(), msgID, packetSize);
         }
+#endif
 
         MemoryBuffer msg(packetBuffer, packetSize);
         buffer.Seek(buffer.GetPosition() + packetSizeOriginal);

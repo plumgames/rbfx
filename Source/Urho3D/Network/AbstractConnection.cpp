@@ -41,6 +41,7 @@ void AbstractConnection::SendMessage(
 
     SendMessageInternal(messageId, payload.data(), payload.size(), packetType);
 
+#ifdef URHO3D_LOGGING
     const LogLevel logLevel = GetMessageLogLevel(messageId);
     if (logLevel != LOG_NONE)
     {
@@ -48,6 +49,7 @@ void AbstractConnection::SendMessage(
             static_cast<unsigned>(messageId), payload.size(), (packetType & PacketType::Reliable) ? ", reliable" : "",
             (packetType & PacketType::Ordered) ? ", ordered" : "", debugInfo.empty() ? "" : ": ", debugInfo);
     }
+#endif
 }
 
 void AbstractConnection::SendMessage(
@@ -58,12 +60,14 @@ void AbstractConnection::SendMessage(
 
 void AbstractConnection::LogMessagePayload(NetworkMessageId messageId, ea::string_view debugInfo) const
 {
+#ifdef URHO3D_LOGGING
     const LogLevel logLevel = GetMessageLogLevel(messageId);
     if (logLevel != LOG_NONE)
     {
         Log::GetLogger().Write(
             logLevel, "{}: Message #{} payload: {}", ToString(), static_cast<unsigned>(messageId), debugInfo);
     }
+#endif
 }
 
 LogLevel AbstractConnection::GetMessageLogLevel(NetworkMessageId messageId) const
