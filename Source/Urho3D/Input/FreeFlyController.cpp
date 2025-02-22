@@ -127,7 +127,7 @@ FreeFlyController::~FreeFlyController() = default;
 
 void FreeFlyController::RegisterObject(Context* context)
 {
-    context->AddFactoryReflection<FreeFlyController>();
+    context->AddFactoryReflection<FreeFlyController>(Category_Logic);
 
     URHO3D_ATTRIBUTE("Speed", float, speed_, 20.0f, AM_DEFAULT);
     URHO3D_ATTRIBUTE("Accelerated Speed", float, acceleratedSpeed_, 100.0f, AM_DEFAULT);
