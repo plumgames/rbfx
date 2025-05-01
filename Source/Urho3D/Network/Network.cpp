@@ -689,10 +689,10 @@ void RegisterNetworkLibrary(Context* context)
 
     NetworkBehavior::RegisterObject(context);
     ReplicatedTransform::RegisterObject(context);
-    ReplicatedParent::RegisterObject(context);
-    FilteredByOwner::RegisterObject(context);
     FilteredByDistance::RegisterObject(context);
 #ifdef URHO3D_NETWORK_BEHAVIOR_ALL
+    ReplicatedParent::RegisterObject(context);
+    FilteredByOwner::RegisterObject(context);
     ReplicatedAnimation::RegisterObject(context);
     TrackedAnimatedModel::RegisterObject(context);
 #ifdef URHO3D_PHYSICS
