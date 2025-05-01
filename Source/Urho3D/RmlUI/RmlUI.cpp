@@ -426,7 +426,7 @@ RmlUI::RmlUI(Context* context, const char* name)
     rmlContext_->SetOwnerSubsystem(this);
 
     if (auto* ui = GetSubsystem<RmlUI>())
-        ui->siblingSubsystems_.push_back(WeakPtr(this));
+        ui->siblingSubsystems_.push_back(WeakPtr<RmlUI>(this));
 
     Input* input = context_->GetSubsystem<Input>();
     URHO3D_ASSERT(input);
@@ -452,7 +452,7 @@ RmlUI::RmlUI(Context* context, const char* name)
 RmlUI::~RmlUI()
 {
     if (auto* ui = GetSubsystem<RmlUI>())
-        ui->siblingSubsystems_.erase_first(WeakPtr(this));
+        ui->siblingSubsystems_.erase_first(WeakPtr<RmlUI>(this));
 
     if (rmlContext_ != nullptr)
     {

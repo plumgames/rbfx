@@ -617,8 +617,8 @@ template <class T, class ... Args> SharedPtrT<T> MakeShared(Args && ... args)
 }
 
 #ifndef SWIG
-template <class T> SharedPtr(T* ptr) -> SharedPtr<T, ea::conditional_t<Detail::IsRefCountedType<T>, T, RefCounted>>;
-template <class T> WeakPtr(T* ptr) -> WeakPtr<T, ea::conditional_t<Detail::IsRefCountedType<T>, T, RefCounted>>;
+//template <class T> SharedPtr(T* ptr) -> SharedPtr<T, ea::conditional_t<Detail::IsRefCountedType<T>, T, RefCounted>>;
+//template <class T> WeakPtr(T* ptr) -> WeakPtr<T, ea::conditional_t<Detail::IsRefCountedType<T>, T, RefCounted>>;
 #endif
 
 }

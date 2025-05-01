@@ -312,7 +312,7 @@ bool RmlRenderer::LoadTexture(Rml::TextureHandle& textureOut, Rml::Vector2i& siz
         sizeOut.y = texture->GetHeight();
         texture->AddRef();
     }
-    auto cachedTexture = new CachedRmlTexture{ nullptr, SharedPtr(texture) };
+    auto cachedTexture = new CachedRmlTexture{ nullptr, SharedPtr<Texture2D>(texture) };
     textureOut = WrapTextureHandle(cachedTexture);
     return true;
 }

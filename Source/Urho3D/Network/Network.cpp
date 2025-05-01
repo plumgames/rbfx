@@ -309,7 +309,7 @@ bool Network::StartServer(const URL& url, unsigned int maxConnections)
         SharedPtr<NetworkConnection> conn(connection);
         queue->CallFromMainThread([this, conn](int)
         {
-            auto it = clientConnections_.find(WeakPtr(conn.Get()));
+            auto it = clientConnections_.find(WeakPtr<NetworkConnection>(conn.Get()));
             if (it != clientConnections_.end())
                 OnClientDisconnected(it->second);
         });

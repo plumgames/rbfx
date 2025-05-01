@@ -98,7 +98,7 @@ void OutlineGroupBinder::Bind(Scene* scene)
             if (component->IsInstanceOf(Drawable::GetTypeStatic()))
             {
                 auto drawable = static_cast<Drawable*>(component.GetPointer());
-                drawables_.push_back(WeakPtr(drawable));
+                drawables_.push_back(WeakPtr<Drawable>(drawable));
             }
         }
     }
