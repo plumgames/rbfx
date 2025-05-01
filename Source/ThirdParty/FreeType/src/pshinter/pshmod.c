@@ -1,25 +1,26 @@
-/****************************************************************************
- *
- * pshmod.c
- *
- *   FreeType PostScript hinter module implementation (body).
- *
- * Copyright (C) 2001-2024 by
- * David Turner, Robert Wilhelm, and Werner Lemberg.
- *
- * This file is part of the FreeType project, and may only be used,
- * modified, and distributed under the terms of the FreeType project
- * license, LICENSE.TXT.  By continuing to use, modify, or distribute
- * this file you indicate that you have read the license and
- * understand and accept it fully.
- *
- */
+/***************************************************************************/
+/*                                                                         */
+/*  pshmod.c                                                               */
+/*                                                                         */
+/*    FreeType PostScript hinter module implementation (body).             */
+/*                                                                         */
+/*  Copyright 2001-2017 by                                                 */
+/*  David Turner, Robert Wilhelm, and Werner Lemberg.                      */
+/*                                                                         */
+/*  This file is part of the FreeType project, and may only be used,       */
+/*  modified, and distributed under the terms of the FreeType project      */
+/*  license, LICENSE.TXT.  By continuing to use, modify, or distribute     */
+/*  this file you indicate that you have read the license and              */
+/*  understand and accept it fully.                                        */
+/*                                                                         */
+/***************************************************************************/
 
 
-#include <freetype/internal/ftobjs.h>
+#include <ft2build.h>
+#include FT_INTERNAL_OBJECTS_H
 #include "pshrec.h"
 #include "pshalgo.h"
-#include "pshmod.h"
+#include "pshpic.h"
 
 
   /* the Postscript Hinter module structure */
@@ -37,11 +38,8 @@
 
   /* finalize module */
   FT_CALLBACK_DEF( void )
-  ps_hinter_done( FT_Module  module_ )    /* PS_Hinter_Module */
+  ps_hinter_done( PS_Hinter_Module  module )
   {
-    PS_Hinter_Module  module = (PS_Hinter_Module)module_;
-
-
     module->t1_funcs.hints = NULL;
     module->t2_funcs.hints = NULL;
 
@@ -51,10 +49,8 @@
 
   /* initialize module, create hints recorder and the interface */
   FT_CALLBACK_DEF( FT_Error )
-  ps_hinter_init( FT_Module  module_ )    /* PS_Hinter_Module */
+  ps_hinter_init( PS_Hinter_Module  module )
   {
-    PS_Hinter_Module  module = (PS_Hinter_Module)module_;
-
     FT_Memory  memory = module->root.memory;
     void*      ph     = &module->ps_hints;
 
@@ -115,7 +111,7 @@
     0x10000L,
     0x20000L,
 
-    &pshinter_interface,        /* module-specific interface */
+    &PSHINTER_INTERFACE_GET,              /* module-specific interface */
 
     (FT_Module_Constructor)ps_hinter_init,  /* module_init   */
     (FT_Module_Destructor) ps_hinter_done,  /* module_done   */

@@ -26,12 +26,13 @@ set (SOURCE_FILES
     src/base/ftbase.c
     src/base/ftbbox.c
     src/base/ftbitmap.c
-    src/base/ftdebug.c
+    src/base/ftfntfmt.c
     src/base/ftfstype.c
     src/base/ftgasp.c
     src/base/ftglyph.c
     src/base/ftgxval.c
     src/base/ftinit.c
+    src/base/ftlcdfil.c
     src/base/ftmm.c
     src/base/ftotval.c
     src/base/ftpatent.c

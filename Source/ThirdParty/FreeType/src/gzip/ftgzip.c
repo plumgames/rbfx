@@ -1,33 +1,34 @@
-/****************************************************************************
- *
- * ftgzip.c
- *
- *   FreeType support for .gz compressed files.
- *
- * This optional component relies on zlib.  It should mainly be used to
- * parse compressed PCF fonts, as found with many X11 server
- * distributions.
- *
- * Copyright (C) 2002-2024 by
- * David Turner, Robert Wilhelm, and Werner Lemberg.
- *
- * This file is part of the FreeType project, and may only be used,
- * modified, and distributed under the terms of the FreeType project
- * license, LICENSE.TXT.  By continuing to use, modify, or distribute
- * this file you indicate that you have read the license and
- * understand and accept it fully.
- *
- */
+/***************************************************************************/
+/*                                                                         */
+/*  ftgzip.c                                                               */
+/*                                                                         */
+/*    FreeType support for .gz compressed files.                           */
+/*                                                                         */
+/*  This optional component relies on zlib.  It should mainly be used to   */
+/*  parse compressed PCF fonts, as found with many X11 server              */
+/*  distributions.                                                         */
+/*                                                                         */
+/*  Copyright 2002-2016 by                                                 */
+/*  David Turner, Robert Wilhelm, and Werner Lemberg.                      */
+/*                                                                         */
+/*  This file is part of the FreeType project, and may only be used,       */
+/*  modified, and distributed under the terms of the FreeType project      */
+/*  license, LICENSE.TXT.  By continuing to use, modify, or distribute     */
+/*  this file you indicate that you have read the license and              */
+/*  understand and accept it fully.                                        */
+/*                                                                         */
+/***************************************************************************/
 
 
-#include <freetype/internal/ftmemory.h>
-#include <freetype/internal/ftstream.h>
-#include <freetype/internal/ftdebug.h>
-#include <freetype/ftgzip.h>
+#include <ft2build.h>
+#include FT_INTERNAL_MEMORY_H
+#include FT_INTERNAL_STREAM_H
+#include FT_INTERNAL_DEBUG_H
+#include FT_GZIP_H
 #include FT_CONFIG_STANDARD_LIBRARY_H
 
 
-#include <freetype/ftmoderr.h>
+#include FT_MODULE_ERRORS_H
 
 #undef FTERRORS_H_
 
@@ -35,10 +36,14 @@
 #define FT_ERR_PREFIX  Gzip_Err_
 #define FT_ERR_BASE    FT_Mod_Err_Gzip
 
-#include <freetype/fterrors.h>
+#include FT_ERRORS_H
 
 
 #ifdef FT_CONFIG_OPTION_USE_ZLIB
+
+#ifdef FT_CONFIG_OPTION_PIC
+#error "gzip code does not support PIC yet"
+#endif
 
 #ifdef FT_CONFIG_OPTION_SYSTEM_ZLIB
 
@@ -69,14 +74,10 @@
   /*                                                                   */
   /* so that configuration with `FT_CONFIG_OPTION_SYSTEM_ZLIB' might   */
   /* include the wrong `zconf.h' file, leading to errors.              */
+#include "zlib.h"
 
-#define ZEXPORT
-  /* prevent zlib functions from being visible outside their object files */
-#define ZEXTERN  static
-
-#define HAVE_MEMCPY  1
-#define Z_SOLO       1
-#define Z_FREETYPE   1
+#undef  SLOW
+#define SLOW  1  /* we can't use asm-optimized sources here! */
 
 #if defined( _MSC_VER )      /* Visual C++ (and Intel C++)   */
   /* We disable the warning `conversion from XXX to YYY,     */
@@ -87,25 +88,24 @@
 #pragma warning( disable : 4244 )
 #endif /* _MSC_VER */
 
-#if defined( __GNUC__ )
-#pragma GCC diagnostic push
-#ifndef __cplusplus
-#pragma GCC diagnostic ignored "-Wstrict-prototypes"
-#endif
-#pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
-#pragma GCC diagnostic ignored "-Wredundant-decls"
-#endif
+  /* Urgh.  `inflate_mask' must not be declared twice -- C++ doesn't like
+     this.  We temporarily disable it and load all necessary header files. */
+#define NO_INFLATE_MASK
+#include "zutil.h"
+#include "inftrees.h"
+#include "infblock.h"
+#include "infcodes.h"
+#include "infutil.h"
+#undef  NO_INFLATE_MASK
 
+  /* infutil.c must be included before infcodes.c */
 #include "zutil.c"
-#include "inffast.c"
-#include "inflate.c"
 #include "inftrees.c"
+#include "infutil.c"
+#include "infcodes.c"
+#include "infblock.c"
+#include "inflate.c"
 #include "adler32.c"
-#include "crc32.c"
-
-#if defined( __GNUC__ )
-#pragma GCC diagnostic pop
-#endif
 
 #if defined( _MSC_VER )
 #pragma warning( pop )
@@ -126,31 +126,47 @@
      'malloc/free' */
 
   static voidpf
-  ft_gzip_alloc( voidpf  opaque,
-                 uInt    items,
-                 uInt    size )
+  ft_gzip_alloc( FT_Memory  memory,
+                 uInt       items,
+                 uInt       size )
   {
-    FT_Memory   memory = (FT_Memory)opaque;
-    FT_ULong    sz     = (FT_ULong)size * items;
+    FT_ULong    sz = (FT_ULong)size * items;
     FT_Error    error;
-    FT_Pointer  p      = NULL;
+    FT_Pointer  p  = NULL;
 
 
-    /* allocate and zero out */
-    FT_MEM_ALLOC( p, sz );
+    (void)FT_ALLOC( p, sz );
     return p;
   }
 
 
   static void
-  ft_gzip_free( voidpf  opaque,
-                voidpf  address )
+  ft_gzip_free( FT_Memory  memory,
+                voidpf     address )
   {
-    FT_Memory  memory = (FT_Memory)opaque;
-
-
     FT_MEM_FREE( address );
   }
+
+
+#if !defined( FT_CONFIG_OPTION_SYSTEM_ZLIB ) && !defined( USE_ZLIB_ZCALLOC )
+
+  local voidpf
+  zcalloc ( voidpf    opaque,
+            unsigned  items,
+            unsigned  size )
+  {
+    return ft_gzip_alloc( (FT_Memory)opaque, items, size );
+  }
+
+  local void
+  zcfree( voidpf  opaque,
+          voidpf  ptr )
+  {
+    ft_gzip_free( (FT_Memory)opaque, ptr );
+  }
+
+#endif /* !SYSTEM_ZLIB && !USE_ZLIB_ZCALLOC */
+
 
 /***************************************************************************/
 /***************************************************************************/
@@ -293,8 +309,8 @@
     }
 
     /* initialize zlib -- there is no zlib header in the compressed stream */
-    zstream->zalloc = ft_gzip_alloc;
-    zstream->zfree  = ft_gzip_free;
+    zstream->zalloc = (alloc_func)ft_gzip_alloc;
+    zstream->zfree  = (free_func) ft_gzip_free;
     zstream->opaque = stream->memory;
 
     zstream->avail_in = 0;
@@ -451,13 +467,12 @@
                             FT_ULong     count )
   {
     FT_Error  error = FT_Err_Ok;
+    FT_ULong  delta;
 
 
     for (;;)
     {
-      FT_ULong  delta = (FT_ULong)( zip->limit - zip->cursor );
-
-
+      delta = (FT_ULong)( zip->limit - zip->cursor );
       if ( delta >= count )
         delta = count;
 
@@ -622,8 +637,8 @@
     memory = source->memory;
 
     /*
-     * check the header right now; this prevents allocating un-necessary
-     * objects when we don't need them
+     *  check the header right now; this prevents allocating un-necessary
+     *  objects when we don't need them
      */
     error = ft_gzip_check_header( source );
     if ( error )
@@ -645,12 +660,12 @@
     }
 
     /*
-     * We use the following trick to try to dramatically improve the
-     * performance while dealing with small files.  If the original stream
-     * size is less than a certain threshold, we try to load the whole font
-     * file into memory.  This saves us from using the 32KB buffer needed
-     * to inflate the file, plus the two 4KB intermediate input/output
-     * buffers used in the `FT_GZipFile' structure.
+     *  We use the following trick to try to dramatically improve the
+     *  performance while dealing with small files.  If the original stream
+     *  size is less than a certain threshold, we try to load the whole font
+     *  file into memory.  This saves us from using the 32KB buffer needed
+     *  to inflate the file, plus the two 4KB intermediate input/output
+     *  buffers used in the `FT_GZipFile' structure.
      */
     {
       FT_ULong  zip_size = ft_gzip_get_uncompressed_size( source );
@@ -661,7 +676,7 @@
         FT_Byte*  zip_buff = NULL;
 
 
-        if ( !FT_QALLOC( zip_buff, zip_size ) )
+        if ( !FT_ALLOC( zip_buff, zip_size ) )
         {
           FT_ULong  count;
 
@@ -720,7 +735,7 @@
 
     /* check for `input' delayed to `inflate' */
 
-    if ( !memory || !output_len || !output )
+    if ( !memory || ! output_len || !output )
       return FT_THROW( Invalid_Argument );
 
     /* this function is modeled after zlib's `uncompress' function */
@@ -731,12 +746,11 @@
     stream.next_out  = output;
     stream.avail_out = (uInt)*output_len;
 
-    stream.zalloc = ft_gzip_alloc;
-    stream.zfree  = ft_gzip_free;
+    stream.zalloc = (alloc_func)ft_gzip_alloc;
+    stream.zfree  = (free_func) ft_gzip_free;
     stream.opaque = memory;
 
-    err = inflateInit2( &stream, MAX_WBITS|32 );
-
+    err = inflateInit2( &stream, MAX_WBITS );
     if ( err != Z_OK )
       return FT_THROW( Invalid_Argument );
 
@@ -761,9 +775,6 @@
       return FT_THROW( Array_Too_Large );
 
     if ( err == Z_DATA_ERROR )
-      return FT_THROW( Invalid_Table );
-
-    if ( err == Z_NEED_DICT )
       return FT_THROW( Invalid_Table );
 
     return FT_Err_Ok;

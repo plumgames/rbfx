@@ -1,30 +1,30 @@
-/****************************************************************************
- *
- * pfrgload.c
- *
- *   FreeType PFR glyph loader (body).
- *
- * Copyright (C) 2002-2024 by
- * David Turner, Robert Wilhelm, and Werner Lemberg.
- *
- * This file is part of the FreeType project, and may only be used,
- * modified, and distributed under the terms of the FreeType project
- * license, LICENSE.TXT.  By continuing to use, modify, or distribute
- * this file you indicate that you have read the license and
- * understand and accept it fully.
- *
- */
+/***************************************************************************/
+/*                                                                         */
+/*  pfrgload.c                                                             */
+/*                                                                         */
+/*    FreeType PFR glyph loader (body).                                    */
+/*                                                                         */
+/*  Copyright 2002-2017 by                                                 */
+/*  David Turner, Robert Wilhelm, and Werner Lemberg.                      */
+/*                                                                         */
+/*  This file is part of the FreeType project, and may only be used,       */
+/*  modified, and distributed under the terms of the FreeType project      */
+/*  license, LICENSE.TXT.  By continuing to use, modify, or distribute     */
+/*  this file you indicate that you have read the license and              */
+/*  understand and accept it fully.                                        */
+/*                                                                         */
+/***************************************************************************/
 
 
 #include "pfrgload.h"
 #include "pfrsbit.h"
 #include "pfrload.h"            /* for macro definitions */
-#include <freetype/internal/ftdebug.h>
+#include FT_INTERNAL_DEBUG_H
 
 #include "pfrerror.h"
 
 #undef  FT_COMPONENT
-#define FT_COMPONENT  pfr
+#define FT_COMPONENT  trace_pfr
 
 
   /*************************************************************************/
@@ -42,7 +42,8 @@
   {
     FT_ZERO( glyph );
 
-    glyph->loader = loader;
+    glyph->loader     = loader;
+    glyph->path_begun = 0;
 
     FT_GlyphLoader_Rewind( loader );
   }
@@ -108,7 +109,7 @@
 
     /* don't add empty contours */
     if ( last >= first )
-      outline->contours[outline->n_contours++] = (FT_UShort)last;
+      outline->contours[outline->n_contours++] = (short)last;
 
     glyph->path_begun = 0;
   }
@@ -178,8 +179,8 @@
     error = FT_GLYPHLOADER_CHECK_POINTS( loader, 3, 0 );
     if ( !error )
     {
-      FT_Vector*  vec = outline->points + outline->n_points;
-      FT_Byte*    tag = outline->tags   + outline->n_points;
+      FT_Vector*  vec = outline->points         + outline->n_points;
+      FT_Byte*    tag = (FT_Byte*)outline->tags + outline->n_points;
 
 
       vec[0] = *control1;
@@ -189,7 +190,7 @@
       tag[1] = FT_CURVE_TAG_CUBIC;
       tag[2] = FT_CURVE_TAG_ON;
 
-      outline->n_points += 3;
+      outline->n_points = (FT_Short)( outline->n_points + 3 );
     }
 
   Exit:
@@ -358,9 +359,9 @@
         FT_UInt  format, format_low, args_format = 0, args_count, n;
 
 
-        /****************************************************************
-         * read instruction
-         */
+        /***************************************************************/
+        /*  read instruction                                           */
+        /*                                                             */
         PFR_CHECK( 1 );
         format     = PFR_NEXT_BYTE( p );
         format_low = format & 15;
@@ -408,7 +409,7 @@
           break;
 
         case 6:                            /* horizontal to vertical curve */
-          FT_TRACE6(( "- hv curve" ));
+          FT_TRACE6(( "- hv curve " ));
           args_format = 0xB8E;
           args_count  = 3;
           break;
@@ -425,9 +426,9 @@
           args_format = format_low;
         }
 
-        /************************************************************
-         * now read arguments
-         */
+        /***********************************************************/
+        /*  now read arguments                                     */
+        /*                                                         */
         cur = pos;
         for ( n = 0; n < args_count; n++ )
         {
@@ -450,7 +451,7 @@
           case 1:                           /* 16-bit absolute value */
             PFR_CHECK( 2 );
             cur->x = PFR_NEXT_SHORT( p );
-            FT_TRACE7(( " x.%ld", cur->x ));
+            FT_TRACE7(( " x.%d", cur->x ));
             break;
 
           case 2:                           /* 8-bit delta */
@@ -480,7 +481,7 @@
           case 1:                           /* 16-bit absolute value */
             PFR_CHECK( 2 );
             cur->y = PFR_NEXT_SHORT( p );
-            FT_TRACE7(( " y.%ld", cur->y ));
+            FT_TRACE7(( " y.%d", cur->y ));
             break;
 
           case 2:                           /* 8-bit delta */
@@ -512,9 +513,9 @@
 
         FT_TRACE7(( "\n" ));
 
-        /************************************************************
-         * finally, execute instruction
-         */
+        /***********************************************************/
+        /*  finally, execute instruction                           */
+        /*                                                         */
         switch ( format >> 4 )
         {
         case 0:                                       /* end glyph => EXIT */
@@ -560,7 +561,8 @@
                            FT_Byte*   limit )
   {
     FT_Error        error  = FT_Err_Ok;
-    FT_Memory       memory = glyph->loader->memory;
+    FT_GlyphLoader  loader = glyph->loader;
+    FT_Memory       memory = loader->memory;
     PFR_SubGlyph    subglyph;
     FT_UInt         flags, i, count, org_count;
     FT_Int          x_pos, y_pos;
@@ -754,10 +756,8 @@
 
       count = glyph->num_subs - old_count;
 
-      FT_TRACE4(( "compound glyph with %d element%s (offset %lu):\n",
-                  count,
-                  count == 1 ? "" : "s",
-                  offset ));
+      FT_TRACE4(( "compound glyph with %d elements (offset %lu):\n",
+                  count, offset ));
 
       /* now, load each individual glyph */
       for ( n = 0; n < count; n++ )
@@ -810,9 +810,7 @@
         /* proceed to next sub-glyph */
       }
 
-      FT_TRACE4(( "end compound glyph with %d element%s\n",
-                  count,
-                  count == 1 ? "" : "s" ));
+      FT_TRACE4(( "end compound glyph with %d elements\n", count ));
     }
     else
     {
