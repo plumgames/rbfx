@@ -31,7 +31,7 @@ macro (define_engine_source_files)
     endif ()
     foreach (path ${DEFINE_SRC_FILES_UNPARSED_ARGUMENTS})
         # Get header files
-        file (${_action} _files RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} ${path}/*.h)
+        file (${_action} _files RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} ${path}/*.h ${path}/*.inl)
         list (REMOVE_ITEM _files Urho3D.h)
         list (APPEND HEADER_FILES ${_files})
         # Install them
@@ -425,7 +425,7 @@ endif ()
 if (BUILD_SHARED_LIBS)
     target_compile_definitions(Urho3D
         PRIVATE -DURHO3D_EXPORTS=1 -DAL_EXPORTS=1 -DBOX2D_EXPORTS=1 -DCIVETWEB_DLL_EXPORTS=1 -DEASTL_EXPORTS=1
-            -DEASTDC_EXPORTS=1 -DURHO3D_EXPORTS=1 -DFMT_LIB_EXPORT=1 -DGLEW_BUILD=1 -DIMGUI_EXPORTS=1
+            -DEASTDC_EXPORTS=1 -DEAASSERT_EXPORTS=1 -DURHO3D_EXPORTS=1 -DFMT_LIB_EXPORT=1 -DGLEW_BUILD=1 -DIMGUI_EXPORTS=1
             -DLZ4_DLL_EXPORT=1 -DNFD_EXPORTS=1 -DPUGIXML_EXPORTS=1 -DSDL_EXPORTS=1 -DRmlCore_EXPORTS=1
             -DRmlDebugger_EXPORTS=1 -DGLSLANG_EXPORTING=1 -DTRACY_EXPORTS=1
     )
@@ -580,6 +580,7 @@ install(TARGETS Urho3D
 if (URHO3D_MONOLITHIC_HEADER)
     # Generate include header with all engine headers
     list (REMOVE_ITEM HEADER_FILES Urho3D.h DebugNew.h Precompiled.h WindowsSupport.h Core/Main.h Core/PE.h)
+    list (FILTER HEADER_FILES EXCLUDE REGEX ".*\.inl$")
     string (REPLACE ";" ">\n#include <Urho3D/" HEADER_FILES "${HEADER_FILES}")
     set (HEADER_FILES "#include <Urho3D/${HEADER_FILES}>")
     configure_file (${CMAKE_CURRENT_SOURCE_DIR}/Urho3DAll.h.in ${CMAKE_CURRENT_BINARY_DIR}/Urho3DAll.h @ONLY)

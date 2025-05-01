@@ -48,9 +48,11 @@
 #include "../Network/Transport/NetworkConnection.h"
 #include "../Replica/BehaviorNetworkObject.h"
 #include "../Replica/FilteredByDistance.h"
+#include "../Replica/FilteredByOwner.h"
 #include "../Replica/NetworkObject.h"
 #include "../Replica/PredictedKinematicController.h"
 #include "../Replica/ReplicatedAnimation.h"
+#include "../Replica/ReplicatedParent.h"
 #include "../Replica/ReplicatedTransform.h"
 #include "../Replica/ReplicationManager.h"
 #include "../Replica/StaticNetworkObject.h"
@@ -686,8 +688,10 @@ void RegisterNetworkLibrary(Context* context)
     BehaviorNetworkObject::RegisterObject(context);
 
     NetworkBehavior::RegisterObject(context);
-    FilteredByDistance::RegisterObject(context);
     ReplicatedTransform::RegisterObject(context);
+    ReplicatedParent::RegisterObject(context);
+    FilteredByOwner::RegisterObject(context);
+    FilteredByDistance::RegisterObject(context);
 #ifdef URHO3D_NETWORK_BEHAVIOR_ALL
     ReplicatedAnimation::RegisterObject(context);
     TrackedAnimatedModel::RegisterObject(context);

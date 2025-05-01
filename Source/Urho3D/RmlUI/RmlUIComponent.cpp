@@ -260,7 +260,7 @@ void RmlUIComponent::OpenInternal()
 
     SetPosition(position_);
     SetSize(size_);
-    document_->Show();
+    document_->Show(modal_ ? Rml::ModalFlag::Modal : Rml::ModalFlag::None, Rml::FocusFlag::None);
     OnDocumentPostLoad();
 }
 
@@ -416,6 +416,60 @@ RmlUI* RmlUIComponent::GetUI() const
     if (canvasComponent_ != nullptr)
         return canvasComponent_->GetUI();
     return GetSubsystem<RmlUI>();
+}
+
+void RmlUIComponent::SetEmSize(float sizePx)
+{
+    if (!document_)
+    {
+        return;
+    }
+
+    document_->SetProperty(Rml::PropertyId::FontSize, Rml::Property(sizePx, Rml::Unit::PX));
+}
+
+float RmlUIComponent::GetEmSize() const
+{
+    if (!document_)
+    {
+        return 0.0f;
+    }
+
+    return document_->ResolveLength(document_->GetProperty(Rml::PropertyId::FontSize)->GetNumericValue());
+}
+
+bool RmlUIComponent::IsModal() const
+{
+    return modal_;
+}
+
+void RmlUIComponent::SetModal(bool modal)
+{
+    if (modal_ == modal)
+        return;
+
+    modal_ = modal;
+    if (!document_)
+        return;
+
+    if (document_->IsVisible())
+    {
+        const Rml::Element* oldFocusedElement = document_->GetContext()->GetFocusElement();
+        const Rml::FocusFlag focus = oldFocusedElement && oldFocusedElement->GetOwnerDocument() == document_
+            ? Rml::FocusFlag::Document
+            : Rml::FocusFlag::Auto;
+
+        document_->Hide();
+        document_->Show(modal ? Rml::ModalFlag::Modal : Rml::ModalFlag::None, focus);
+    }
+}
+
+void RmlUIComponent::Focus(bool focusVisible)
+{
+    if (document_)
+    {
+        document_->Focus(focusVisible);
+    }
 }
 
 void RmlUIComponent::SetDocument(Rml::ElementDocument* document)

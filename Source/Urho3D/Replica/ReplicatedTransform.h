@@ -192,6 +192,8 @@ private:
         NetworkValueSampler<RotationAndVelocity> rotationSampler_;
 
         uint8_t teleportId_{};
+        bool previousPositionInvalid_{};
+        bool previousRotationInvalid_{};
     } client_;
 };
 
