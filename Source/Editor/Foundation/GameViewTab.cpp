@@ -280,6 +280,7 @@ void GameViewTab::RenderContent()
     if (contentSize.x_ == 0 || contentSize.y_ == 0)
         return;
 
+    Graphics::gameViewSize_ = contentSize;
     backbuffer_->SetTextureSize(contentSize);
     backbuffer_->Update();
 

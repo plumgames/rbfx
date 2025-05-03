@@ -285,6 +285,7 @@ public:
     const GraphicsSettings& GetSettings() const { return settings_; }
     /// @}
 
+    static IntVector2 gameViewSize_;
 private:
     /// Create the application window icon.
     void CreateWindowIcon();

@@ -108,6 +108,7 @@ WindowMode ToWindowMode(bool fullscreen, bool borderless)
 }
 
 unsigned Graphics::maxBonesHWSkinned = 0;
+IntVector2 Graphics::gameViewSize_ = IntVector2::ZERO;
 
 Graphics::Graphics(Context* context)
     : Object(context)
