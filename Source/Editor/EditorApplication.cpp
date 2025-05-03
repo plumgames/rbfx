@@ -80,6 +80,8 @@ EditorApplication::EditorApplication(Context* context)
     : Application(context)
     , editorPluginManager_(MakeShared<EditorPluginManager>(context_))
 {
+    Graphics::editor_ = true;
+
     editorPluginManager_->AddPlugin("Assets.ModelImporter", &Assets_ModelImporter);
 
     editorPluginManager_->AddPlugin("Foundation.StandardFileTypes", &Foundation_StandardFileTypes);
@@ -347,7 +349,10 @@ void EditorApplication::Render()
     const float toolbarHeight = hasToolbar
         ? Widgets::GetSmallButtonSize() + 2 * (toolbarWindowPadding + 0)//g.Style.FramePadding.y)
         : 0.0f;
-    const float toolbarEffectiveHeight = toolbarHeight + 1;
+    float toolbarEffectiveHeight = toolbarHeight + 1;
+#ifdef __APPLE__
+    toolbarEffectiveHeight += 52;
+#endif
 
     ImGuiWindowFlags flags = ImGuiWindowFlags_MenuBar;
     flags |= ImGuiWindowFlags_NoDocking;

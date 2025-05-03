@@ -285,7 +285,9 @@ public:
     const GraphicsSettings& GetSettings() const { return settings_; }
     /// @}
 
-    static IntVector2 gameViewSize_;
+    static bool editor_;
+    static WeakPtr<RenderSurface> editorSurface_;
+    static bool IsEditor() { return editor_; }
 private:
     /// Create the application window icon.
     void CreateWindowIcon();

@@ -187,6 +187,7 @@ private:
 #if URHO3D_RMLUI
             rmlUI_->SetRenderTarget(backbufferSurface_);
 #endif
+            Graphics::editorSurface_ = backbufferSurface_;
         }
     }
 
@@ -280,7 +281,6 @@ void GameViewTab::RenderContent()
     if (contentSize.x_ == 0 || contentSize.y_ == 0)
         return;
 
-    Graphics::gameViewSize_ = contentSize;
     backbuffer_->SetTextureSize(contentSize);
     backbuffer_->Update();
 
