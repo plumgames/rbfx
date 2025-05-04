@@ -40,6 +40,7 @@ namespace Urho3D
 
 extern const char* faceCameraModeNames[];
 static const unsigned MAX_PARTICLES_IN_FRAME = 100;
+static const float TEXTURE_FRAME_TIME_LIFETIME_MODE = -1.0f;
 
 extern const char* autoRemoveModeNames[];
 
@@ -254,10 +255,14 @@ void ParticleEmitter::Update(const FrameInfo& frame)
             const ea::vector<TextureFrame>& textureFrames_ = effect_->GetTextureFrames();
             if (textureFrames_.size() && texIndex < textureFrames_.size() - 1)
             {
-                if (particle.timer_ >= textureFrames_[texIndex + 1].time_)
+                const auto& texFrame = textureFrames_[texIndex + 1];
+                if (texFrame.time_ != TEXTURE_FRAME_TIME_LIFETIME_MODE)
                 {
-                    billboard.uv_ = textureFrames_[texIndex + 1].uv_;
-                    ++texIndex;
+                    if (normalizedTime >= texFrame.time_)
+                    {
+                        billboard.uv_ = texFrame.uv_;
+                        ++texIndex;
+                    }
                 }
             }
         }
@@ -536,7 +541,28 @@ bool ParticleEmitter::EmitNewParticle()
     particle.scale_ = 1.0f;
     particle.rotationSpeed_ = effect_->GetRandomRotationSpeed();
     particle.colorIndex_ = 0;
-    particle.texIndex_ = 0;
+
+    const ea::vector<TextureFrame>& textureFrames_ = effect_->GetTextureFrames();
+    if (textureFrames_.size() > 0)
+    {
+        const auto& texFrame = textureFrames_[0];
+        if (texFrame.time_ == TEXTURE_FRAME_TIME_LIFETIME_MODE)
+        {
+            ++particle.texIndex_;
+            if (particle.texIndex_ > textureFrames_.size() - 1)
+            {
+                particle.texIndex_ = 0;
+            }
+        }
+        else
+        {
+            particle.texIndex_ = 0;
+        }
+    }
+    else
+    {
+        particle.texIndex_ = 0;
+    }
 
     if (faceCameraMode_ == FC_DIRECTION)
     {
@@ -553,8 +579,7 @@ bool ParticleEmitter::EmitNewParticle()
 
     billboard.position_ = startPos;
     billboard.size_ = particles_[index].size_;
-    const ea::vector<TextureFrame>& textureFrames_ = effect_->GetTextureFrames();
-    billboard.uv_ = textureFrames_.size() ? textureFrames_[0].uv_ : Rect::POSITIVE;
+    billboard.uv_ = textureFrames_.size() ? textureFrames_[particle.texIndex_].uv_ : Rect::POSITIVE;
     const float t = effect_->GetRandomRotationActiveTime() ? periodTimer_ / effect_->GetActiveTime() : Random(1.0f); 
     billboard.rotation_ = effect_->GetRandomRotation(t);
     const ea::vector<ColorFrame>& colorFrames_ = effect_->GetColorFrames();
@@ -595,7 +620,7 @@ void ParticleEmitter::HandleScenePostUpdate(StringHash eventType, VariantMap& ev
     // Store scene's timestep and use it instead of global timestep, as time scale may be other than 1
     using namespace ScenePostUpdate;
 
-    lastTimeStep_ = eventData[P_TIMESTEP].GetFloat();
+    lastTimeStep_ = eventData[P_TIMESTEP].GetFloat() * (effect_ ? effect_->GetTimerMul() : 1.0f);
 
     // If no invisible update, check that the billboardset is in view (framenumber has changed)
     if ((effect_ && effect_->GetUpdateInvisible()) || viewFrameNumber_ != lastUpdateFrameNumber_)

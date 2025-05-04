@@ -239,6 +239,8 @@ public:
     /// @property
     void SetFaceCameraMode(FaceCameraMode mode);
 
+    void SetTimerMul(float timerMul);
+
     /// Add a color frame sorted in the correct position based on time.
     void AddColorTime(const Color& color, float time);
     /// Add a color frame sorted in the correct position based on time.
@@ -395,6 +397,8 @@ public:
     /// @property
     float GetSizeMul() const { return sizeMul_; }
 
+    float GetTimerMul() const { return timerMul_; }
+
     ea::shared_ptr<VariantCurve> GetSizeCurve() const { return sizeCurve_; }
 
     /// Return all color animation frames.
@@ -517,6 +521,7 @@ private:
     ea::string loadMaterialName_;
     /// Particle rotation mode in relation to the camera.
     FaceCameraMode faceCameraMode_;
+    float timerMul_;
 };
 
 }

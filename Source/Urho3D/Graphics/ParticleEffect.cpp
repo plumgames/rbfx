@@ -91,7 +91,8 @@ ParticleEffect::ParticleEffect(Context* context) :
     sizeAdd_(0.0f),
     sizeMul_(1.0f),
     sizeCurve_(nullptr),
-    faceCameraMode_(FC_ROTATE_XYZ)
+    faceCameraMode_(FC_ROTATE_XYZ),
+    timerMul_(1.0f)
 {
 }
 
@@ -172,6 +173,7 @@ bool ParticleEffect::Load(const XMLElement& source)
     colorFrames_.clear();
     textureFrames_.clear();
     faceCameraMode_ = FC_ROTATE_XYZ;
+    timerMul_ = 1.0f;
 
     if (source.IsNull())
     {
@@ -348,6 +350,12 @@ bool ParticleEffect::Load(const XMLElement& source)
         }
 
         SetTextureFrames(animations);
+    }
+
+    if (source.HasChild("timer"))
+    {
+        XMLElement timerElem = source.GetChild("timer");
+        SetTimerMul(timerElem.GetFloat("mul"));
     }
 
     return true;
@@ -624,6 +632,11 @@ void ParticleEffect::SetSizeMul(float sizeMul)
     sizeMul_ = sizeMul;
 }
 
+void ParticleEffect::SetTimerMul(float timerMul)
+{
+    timerMul_ = timerMul;
+}
+
 void ParticleEffect::AddColorTime(const Color& color, const float time)
 {
     unsigned s = colorFrames_.size();
@@ -810,6 +823,7 @@ SharedPtr<ParticleEffect> ParticleEffect::Clone(const ea::string& cloneName) con
     ret->colorFrames_ = colorFrames_;
     ret->textureFrames_ = textureFrames_;
     ret->faceCameraMode_ = faceCameraMode_;
+    ret->timerMul_ = timerMul_;
     /// \todo Zero if source was created programmatically
     ret->SetMemoryUse(GetMemoryUse());
 
