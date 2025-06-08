@@ -253,6 +253,11 @@ Engine::Engine(Context* context) :
 {
     PopulateDefaultParameters();
 
+#ifdef URHO3D_PROFILING
+    if (GetParameter(EP_PROFILE).GetBool())
+        tracy::StartupProfiler();
+#endif
+
     // Register self as a subsystem
     context_->RegisterSubsystem(this);
 
@@ -332,7 +337,13 @@ Engine::Engine(Context* context) :
     SubscribeToEvent(E_ENDFRAME, URHO3D_HANDLER(Engine, HandleEndFrame));
 }
 
-Engine::~Engine() = default;
+Engine::~Engine()
+{
+#ifdef URHO3D_PROFILING
+    if (GetParameter(EP_PROFILE).GetBool())
+        tracy::ShutdownProfiler();
+#endif
+}
 
 bool Engine::Initialize(const StringVariantMap& applicationParameters, const StringVariantMap& commandLineParameters)
 {
@@ -1396,6 +1407,7 @@ void Engine::PopulateDefaultParameters()
     engineParameters_->DefineVariable(EP_PSO_CACHE, "conf://psocache.bin");
     engineParameters_->DefineVariable(EP_RENDER_BACKEND).SetOptional<int>();
     engineParameters_->DefineVariable(EP_XR, defaultXR);
+    engineParameters_->DefineVariable(EP_PROFILE, false);
 }
 
 void Engine::HandleExitRequested(StringHash eventType, VariantMap& eventData)
